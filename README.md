@@ -4,4 +4,4 @@ Team Members - 1) Andrew Hegewald
 			   3) Qifan Chang
 			   4) Rochak Chandra
 			   
-Senior Design Project - Scripting Keys
+Senior Design Project - ScriptingKeys
