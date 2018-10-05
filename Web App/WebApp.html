@@ -1,0 +1,246 @@
+<HTML>
+<Head>
+
+<Title>Scripted Keys WebApp</Title>
+	<!-- This is a comment, I know its dumb -->
+	<link rel=StyleSheet type="text/css" href="WebApp_css.css">
+	<script src="WebApp_js.js" type="text/javascript"></script>
+	
+</Head>
+
+<Body onload="initialize()">
+
+<img id="keyboard_image" src="img/AH_wk1.jpg" width="700px" height="300px"></img>
+<div id="rebind_center">
+	<input type="checkbox" id="SHIFT_box" value="SHIFT" onclick="update_placeholders();update_values();"> SHIFT
+	<input type="checkbox" id="CTRL_box" value="CTRL" onclick="update_placeholders();update_values();"> CTRL
+	<input type="checkbox" id="FN_box" value="FN" onclick="update_placeholders();update_values();"> FN
+	<input type="checkbox" id="ALT_box" value="ALT" onclick="update_placeholders();update_values();"> ALT<br>
+	<button id="Reset_All" onclick="reset_all()">Reset All Bindings</button>
+	<button id="Reset_Page" onclick="reset_page()">Reset Current Listing</button>
+	<button id="Reset_Macros" onclick="reset_macros()">Reset Macros</button>
+	<button id="Download" onclick="download()">Save Changes</button>
+	<table>
+		<tr>
+			<th>Key</th>
+			<th>Unmodified Binding</th>
+			<th>Key</th>
+			<th>Unmodified Binding</th>
+			<th>Key</th>
+			<th>Unmodified Binding</th>
+			<th>Key</th>
+			<th>Unmodified Binding</th>
+			<th>Key</th>
+			<th>Unmodified Binding</th>
+		</tr>
+		<tr>
+			<th>'ESC'</th>
+			<th><textarea id="key0" rows='1' cols='30' placeholder="'ESC'" oninput="update_placeholders();update_values();">ESC</textarea></th>
+			<th>'TAB'</th>
+			<th><textarea id="key14" rows='1' cols='30' placeholder="'TAB'" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'CAPS'</th>
+			<th><textarea id="key28" rows='1' cols='30' placeholder="'CAPS'" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'L_Shift'</th>
+			<th><textarea id="key41" rows='1' cols='30' placeholder="'L_Shift'" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'L_Ctrl'</th>
+			<th><textarea id="key53" rows='1' cols='30' placeholder="'L_Ctrl'" oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>1</th>
+			<th><textarea id="key1" rows='1' cols='30' placeholder="1" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>Q</th>
+			<th><textarea id="key15" rows='1' cols='30' placeholder="q" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>A</th>
+			<th><textarea id="key29" rows='1' cols='30' placeholder="a" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>Z</th>
+			<th><textarea id="key42" rows='1' cols='30' placeholder="z" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'L_WIN'</th>
+			<th><textarea id="key54" rows='1' cols='30' placeholder="'L_WIN'" oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>2</th>
+			<th><textarea id="key2" rows='1' cols='30' placeholder="2" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>W</th>
+			<th><textarea id="key16" rows='1' cols='30' placeholder="w" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>S</th>
+			<th><textarea id="key30" rows='1' cols='30' placeholder="s" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>X</th>
+			<th><textarea id="key43" rows='1' cols='30' placeholder="x" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'L_ALT'</th>
+			<th><textarea id="key55" rows='1' cols='30' placeholder="'L_ALT'" oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>3</th>
+			<th><textarea id="key3" rows='1' cols='30' placeholder="3" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>E</th>
+			<th><textarea id="key17" rows='1' cols='30' placeholder="e" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>D</th>
+			<th><textarea id="key31" rows='1' cols='30' placeholder="d" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>C</th>
+			<th><textarea id="key44" rows='1' cols='30' placeholder="c" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'SPACE'</th>
+			<th><textarea id="key56" rows='1' cols='30' placeholder="'SPACE'" oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>4</th>
+			<th><textarea id="key4" rows='1' cols='30' placeholder="4" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>R</th>
+			<th><textarea id="key18" rows='1' cols='30' placeholder="r" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>F</th>
+			<th><textarea id="key32" rows='1' cols='30' placeholder="f" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>V</th>
+			<th><textarea id="key45" rows='1' cols='30' placeholder="v" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'R_ALT'</th>
+			<th><textarea id="key57" rows='1' cols='30' placeholder="'R_ALT'" oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>5</th>
+			<th><textarea id="key5" rows='1' cols='30' placeholder="5" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>T</th>
+			<th><textarea id="key19" rows='1' cols='30' placeholder="t" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>G</th>
+			<th><textarea id="key33" rows='1' cols='30' placeholder="g" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>B</th>
+			<th><textarea id="key46" rows='1' cols='30' placeholder="b" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'R_WIN'</th>
+			<th><textarea id="key58" rows='1' cols='30' placeholder="'R_WIN'" oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>6</th>
+			<th><textarea id="key6" rows='1' cols='30' placeholder="6" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>Y</th>
+			<th><textarea id="key20" rows='1' cols='30' placeholder="y" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>H</th>
+			<th><textarea id="key34" rows='1' cols='30' placeholder="h" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>N</th>
+			<th><textarea id="key47" rows='1' cols='30' placeholder="n" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'FN'</th>
+			<th><textarea id="key59" rows='1' cols='30' placeholder="'FN'" oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>7</th>
+			<th><textarea id="key7" rows='1' cols='30' placeholder="7" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>U</th>
+			<th><textarea id="key21" rows='1' cols='30' placeholder="u" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>J</th>
+			<th><textarea id="key35" rows='1' cols='30' placeholder="j" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>M</th>
+			<th><textarea id="key48" rows='1' cols='30' placeholder="m" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'R_CTRL'</th>
+			<th><textarea id="key60" rows='1' cols='30' placeholder="'R_CTRL'" oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>8</th>
+			<th><textarea id="key8" rows='1' cols='30' placeholder="8" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>I</th>
+			<th><textarea id="key22" rows='1' cols='30' placeholder="i" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>K</th>
+			<th><textarea id="key36" rows='1' cols='30' placeholder="k" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>,</th>
+			<th><textarea id="key49" rows='1' cols='30' placeholder="," oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>9</th>
+			<th><textarea id="key9" rows='1' cols='30' placeholder="9" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>O</th>
+			<th><textarea id="key23" rows='1' cols='30' placeholder="o" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>L</th>
+			<th><textarea id="key37" rows='1' cols='30' placeholder="l" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>.</th>
+			<th><textarea id="key50" rows='1' cols='30' placeholder="." oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>0</th>
+			<th><textarea id="key10" rows='1' cols='30' placeholder="0" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>P</th>
+			<th><textarea id="key24" rows='1' cols='30' placeholder="p" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>;</th>
+			<th><textarea id="key38" rows='1' cols='30' placeholder=";" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>/</th>
+			<th><textarea id="key51" rows='1' cols='30' placeholder="/" oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>-</th>
+			<th><textarea id="key11" rows='1' cols='30' placeholder="-" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>[</th>
+			<th><textarea id="key25" rows='1' cols='30' placeholder="[" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'</th>
+			<th><textarea id="key39" rows='1' cols='30' placeholder="'" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'R_SHIFT'</th>
+			<th><textarea id="key52" rows='1' cols='30' placeholder="'R_SHIFT'" oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>=</th>
+			<th><textarea id="key12" rows='1' cols='30' placeholder="=" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>]</th>
+			<th><textarea id="key26" rows='1' cols='30' placeholder="]" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>'ENTER'</th>
+			<th><textarea id="key40" rows='1' cols='30' placeholder="'ENTER'" oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+		<tr>
+			<th>'BACKSPACE'</th>
+			<th><textarea id="key13" rows='1' cols='30' placeholder="'Backspace'" oninput="update_placeholders();update_values();"></textarea></th>
+			<th>\</th>
+			<th><textarea id="key27" rows='1' cols='30' placeholder="\" oninput="update_placeholders();update_values();"></textarea></th>
+		</tr>
+	</table>
+</div>
+<br><br>
+<div id="macro_center">
+	<table>
+		<tr>
+			<th>Macro #</th>
+			<th>Macro Actions</th>
+		</tr>
+		<tr>
+			<th>Macro #1</th>
+			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+		</tr>
+		<tr>
+			<th>Macro #2</th>
+			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+		</tr>
+		<tr>
+			<th>Macro #3</th>
+			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+		</tr>
+		<tr>
+			<th>Macro #4</th>
+			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+		</tr>
+		<tr>
+			<th>Macro #5</th>
+			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+		</tr>
+		<tr>
+			<th>Macro #6</th>
+			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+		</tr>
+		<tr>
+			<th>Macro #7</th>
+			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+		</tr>
+		<tr>
+			<th>Macro #8</th>
+			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+		</tr>
+		<tr>
+			<th>Macro #9</th>
+			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+		</tr>
+		<tr>
+			<th>Macro #10</th>
+			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+		</tr>
+		<tr>
+			<th>Macro #11</th>
+			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+		</tr>
+		<tr>
+			<th>Macro #12</th>
+			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+		</tr>
+	</table>
+</div>
+</Body>
+</HTML>

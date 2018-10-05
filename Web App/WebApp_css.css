@@ -1,0 +1,35 @@
+body {
+	background-color: white;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+#SHIFT_box {
+
+}
+
+#CTRL_box {
+
+}
+
+#FN_box {
+
+}
+
+#ALT_box {
+
+}
