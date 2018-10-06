@@ -270,7 +270,7 @@ function download() {
     
     for (var i = 0; i < 16; i++)
     {
-	var array_frame = {name: decode_index_to_name(i), data: get_var("value_Array")[i]};
+	var array_frame = {name: decode_index_to_name(i), bindings: get_var("value_Array")[i]};
 	
 	for (var j = 0; j < 61; j++)
 	{
