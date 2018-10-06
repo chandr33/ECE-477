@@ -58,8 +58,22 @@ function initialize() {
     for(var i = 0; i < 16; i++) {
 	var page = [];
 	for(var j = 0; j < 61; j++) {
-	    document.getElementById("key" + j).value = get_placeholder_table(get_placeholder_index(i))[j];
-		page.push(document.getElementById("key" + j).value);
+	    var checklist_names = decode_index_to_name(i);
+	    var field_value = "";
+	    if (checklist_names == "Default" || checklist_names == "SHIFT")
+	    {
+		field_value = get_placeholder_table(get_placeholder_index(i))[j];
+	    }
+	    else
+	    {
+		field_value = checklist_names + " + " + get_placeholder_table(i)[j];
+	    }
+
+	    if (i == 0) //page starts in default
+	    {
+		document.getElementById("key" + j).value = field_value;
+	    }
+	    page.push(field_value);
 	}
 	value_Array.push(page);
     }
@@ -169,42 +183,36 @@ function get_placeholder_table(index) //return placeholder table from placeholde
 function decode_index_to_name(index) //decode index (0 to 15) into a readable name
 {
     var ret_string = "";
-    if (Math.floor(index / 8)) //shift
+    if ((index >> 1) & 1) //fn
     {
-	ret_string = ret_string + "Shift";
+	ret_string = ret_string + "FN";
     }
-
-    index = index % 8;
     
-    if (Math.floor(index / 4)) //ctrl
+    if ((index >> 2) & 1) //ctrl
     {
 	if (ret_string != "")
 	{
 	    ret_string = ret_string + " + ";
 	}
-	ret_string = ret_string + "Ctrl";
+	ret_string = ret_string + "CTRL";
     }
 
-    index = index % 4;
-
-    if (Math.floor(index / 2)) //fn
+    if (index & 1) //alt
     {
 	if (ret_string != "")
 	{
 	    ret_string = ret_string + " + ";
 	}
-	ret_string = ret_string + "Fn";
+	ret_string = ret_string + "ALT";
     }
 
-    index = index % 2;
-
-    if (Math.floor(index / 1)) //Alt
+    if ((index >> 3) & 1) //shift
     {
 	if (ret_string != "")
 	{
 	    ret_string = ret_string + " + ";
 	}
-	ret_string = ret_string + "Alt";
+	ret_string = ret_string + "SHIFT";
     }
 
     if (ret_string == "") //default
