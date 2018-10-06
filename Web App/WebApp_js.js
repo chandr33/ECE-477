@@ -277,7 +277,7 @@ function download() {
 	}
 	temp_value_array.push(array_frame);
     }
-    download_file(JSON.stringify(temp_value_array), "test.txt", "/text/plain");
+    download_file(JSON.stringify(temp_value_array), "test.txt", "/application/json");
 }
 
 function download_file (data, filename, type) { //source: https://stackoverflow.com/questions/13405129/javascript-create-and-save-file
