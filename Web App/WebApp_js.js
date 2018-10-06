@@ -70,7 +70,7 @@ function initialize() {
     sessionStorage.array_page = 0;
 }
 
-function get_checklist_index()
+function get_checklist_index() //checks marked checkboxs and returns an integer from 0 to 15. this corresponds to a stored table, retrieved from get_placeholder_index
 {
     var alt = document.getElementById("ALT_box").checked;
     var fn = document.getElementById("FN_box").checked;
@@ -78,6 +78,19 @@ function get_checklist_index()
     var ctrl = document.getElementById("CTRL_box").checked;
 
     return alt * 1 + fn * 2 + ctrl * 4 + shift * 8;
+}
+
+function get_placeholder_index(chk_number) //converts chk_number (an index from 0 to 15) into its corresponding placeholder table index (from 0 to 3)
+{
+    if(chk_number == 10) { //fn && shift && !ctrl && !alt
+	return 1;
+    } else if (chk_number == 2) { //fn
+	return 2;
+    } else if(chk_number == 8 || chk_number == 10) { //shift && !ctrl && !alt
+	return 3;
+    } else {
+	return 4;
+    }
 }
 
 function store_var(storing_variable, id_string) { //Function to store arrays and objects in sessionStorage
@@ -96,7 +109,8 @@ function get_var(id_string) { //Retrieves objects stored in sessionStorage
 
 function reset_all() {
     if(confirm("Are you sure you want to reset all key bindings?")) {
-	var value_Array = [];
+	initialize();
+	/*var value_Array = [];
 	for(var i = 0; i < 16; i++) {
 	    var page = [];
 	    for(var j = 0; j < 61; j++) {
@@ -108,18 +122,24 @@ function reset_all() {
 	    document.getElementById("key"+i).value = "";
 	}
 	
-	store_var(value_Array, "value_Array");
+	store_var(value_Array, "value_Array");*/
     }
     
 }
 
 function reset_page() {
     if(confirm("Are you sure you want to reset the current listings?")) {
-	initialize();
+	var value_Array = get_var("value_Array");
+	var array_page = get_checklist_index();
+	value_Array[array_page] = get_placeholder_table(get_placeholder_index(array_page));
+	for(var i = 0; i < 61; i++) {
+	    document.getElementById("key"+i).value = value_Array[array_page][i];
+	}
+	store_var(value_Array);
 	/*var value_Array = get_var("value_Array");
 	var array_page = Number(sessionStorage.array_page);
 	for(var i = 0; i < 61; i++) {
-	    value_Array[array_page][i] = "";
+	    value_Array[array_page][i] = ;
 	    document.getElementById("key"+i).value = value_Array[array_page][i];
 	}
 	store_var(value_Array, "value_Array");*/
@@ -132,14 +152,14 @@ function reset_macros() {
     }
 }
 
-function get_placeholder_table(index)
+function get_placeholder_table(index) //return placeholder table from placeholder index (called from get_placeholder_index(int))
 {
     
-    if(index == 10) { //fn && shift && !ctrl && !alt
+    if(index == 1) { //fn && shift && !ctrl && !alt
 	return get_var("fn_shift_placeholders");
     } else if (index == 2) { //fn
 	return get_var("fn_placeholders");
-    } else if(index == 8 || index == 10) { //shift && !ctrl && !alt
+    } else if(index == 3) { //shift && !ctrl && !alt
 	return get_var("shift_placeholders");
     } else {
 	return get_var("default_placeholders");
