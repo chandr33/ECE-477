@@ -21,7 +21,7 @@ function initialize() {
 	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", //0-13
 	"TAB", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\",			//14-27
 	"CAPS", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "ENTER",			//28-40
-	"L_Shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
+	"L_SHIFT", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
 	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN", "R_CTRL"	//53-60
     ];
     
@@ -29,7 +29,7 @@ function initialize() {
 	"ESC", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "BACKSPACE",
 	"TAB", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "{", "}", "|",
 	"CAPS", "A", "S", "D", "F", "G", "H", "J", "K", "L", ":", "\"", "ENTER",
-	"L_Shift", "Z", "X", "C", "V", "B", "N", "M", "<", ">", "?", "R_SHIFT",
+	"L_SHIFT", "Z", "X", "C", "V", "B", "N", "M", "<", ">", "?", "R_SHIFT",
 	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN", "R_CTRL"
     ];
     
@@ -37,7 +37,7 @@ function initialize() {
 	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", //0-13
 	"TAB", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\",			//14-27
 	"CAPS", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "ENTER",			//28-40
-	"L_Shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
+	"L_SHIFT", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
 	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN", "R_CTRL" //53-60
     ];
     
@@ -45,7 +45,7 @@ function initialize() {
 	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", //0-13
 	"TAB", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\",			//14-27
 	"CAPS", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "ENTER",			//28-40
-	"L_Shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
+	"L_SHIFT", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
 	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN", "R_CTRL" //53-60
     ];
 
@@ -58,7 +58,7 @@ function initialize() {
     for(var i = 0; i < 16; i++) {
 	var page = [];
 	for(var j = 0; j < 61; j++) {
-	    document.getElementById("key" + j).value = get_placeholder_table(i)[j];
+	    document.getElementById("key" + j).value = get_placeholder_table(get_placeholder_index(i))[j];
 		page.push(document.getElementById("key" + j).value);
 	}
 	value_Array.push(page);
@@ -218,19 +218,20 @@ function decode_index_to_name(index) //decode index (0 to 15) into a readable na
 function update_placeholders () {
     
     var checklist = get_checklist_index();
+    var placeholder_index = get_placeholder_index(checklist);
     for(var i = 0; i < 61; i++) {
-	var curr_placeholder = get_placeholder_table(i);
-	if(i == 1) { //alt
-	    curr_placeholder = "'ALT' + " + curr_placeholder;
+	var curr_placeholder = get_placeholder_table(placeholder_index);
+	if(checklist & 1) { //alt
+	    curr_placeholder[i] = "ALT + " + curr_placeholder[i];
 	}
-	if((i & 2) && (i & 1 || i & 4)) { //shift && (alt || ctrl)
-	    curr_placeholder = "'SHIFT' + " + curr_placeholder;
+	if((checklist & 8) && (checklist & 1 || checklist & 4)) { //shift && (alt || ctrl)
+	    curr_placeholder[i] = "SHIFT + " + curr_placeholder[i];
 	}
-	if(i & 4) { //ctrl
-	    curr_placeholder = "'CTRL' + " + curr_placeholder;
+	if(checklist & 4) { //ctrl
+	    curr_placeholder[i] = "CTRL + " + curr_placeholder[i];
 	}
 	
-	document.getElementById("key"+i).placeholder = curr_placeholder;
+	document.getElementById("key"+i).placeholder = curr_placeholder[i];
     }
 }
 
@@ -244,10 +245,6 @@ function update_values () {
     }
     
     //Load in new values
-    var alt = document.getElementById("ALT_box").checked;  //Least significant
-    var fn = document.getElementById("FN_box").checked;		
-    var shift = document.getElementById("SHIFT_box").checked;
-    var ctrl = document.getElementById("CTRL_box").checked; //Most significant
     
     array_page = get_checklist_index();
     
