@@ -18,7 +18,7 @@
 
 function initialize() {
     var default_placeholders = [
-	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "'BACKSPACE", //0-13
+	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", //0-13
 	"TAB", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\",			//14-27
 	"CAPS", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "ENTER",			//28-40
 	"L_Shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
@@ -166,6 +166,55 @@ function get_placeholder_table(index) //return placeholder table from placeholde
     }
 }
 
+function decode_index_to_name(index) //decode index (0 to 15) into a readable name
+{
+    var ret_string = "";
+    if (Math.floor(index / 8)) //shift
+    {
+	ret_string = ret_string + "Shift";
+    }
+
+    index = index % 8;
+    
+    if (Math.floor(index / 4)) //ctrl
+    {
+	if (ret_string != "")
+	{
+	    ret_string = ret_string + " + ";
+	}
+	ret_string = ret_string + "Ctrl";
+    }
+
+    index = index % 4;
+
+    if (Math.floor(index / 2)) //fn
+    {
+	if (ret_string != "")
+	{
+	    ret_string = ret_string + " + ";
+	}
+	ret_string = ret_string + "Fn";
+    }
+
+    index = index % 2;
+
+    if (Math.floor(index / 1)) //Alt
+    {
+	if (ret_string != "")
+	{
+	    ret_string = ret_string + " + ";
+	}
+	ret_string = ret_string + "Alt";
+    }
+
+    if (ret_string == "") //default
+    {
+	ret_string = "Default"
+    }
+
+    return ret_string;
+}
+
 function update_placeholders () {
     
     var checklist = get_checklist_index();
@@ -216,7 +265,7 @@ function download() {
     
     for (var i = 0; i < 16; i++)
     {
-	var array_frame = {name: "test"+i, data: get_var("value_Array")[i]};
+	var array_frame = {name: decode_index_to_name(i), data: get_var("value_Array")[i]};
 	
 	for (var j = 0; j < 61; j++)
 	{
