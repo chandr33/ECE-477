@@ -56,32 +56,38 @@ function initialize() {
 
     var value_Array = []; //data storage for textareas
     for(var i = 0; i < 16; i++) {
-	var page = {name: convert_index_to_readable_name(i), page_data: []}; //specific page of website
-	for(var j = 0; j < 61; j++) {
-	    var checklist_names = convert_index_to_readable_name(i);
-	    var field_value = {valid: true, str_data: ""}; //entry within page
-		
-	    if (checklist_names == "Default" || checklist_names == "SHIFT")
-	    {
-		field_value.str_data = get_placeholder_table(get_placeholder_index(i))[j];
-	    }
-	    else
-	    {
-		field_value.str_data = checklist_names + " + " + get_placeholder_table(get_placeholder_index(i))[j];
-	    }
-
-	    if (i == 0) //page starts in default
-	    {
-		document.getElementById("key" + j).value = field_value.str_data;
-	    }
-	    page.page_data.push(field_value);
-	}
-	value_Array.push(page);
+		var page = setPageValue(i);
+		value_Array.push(page);
     }
     
     store_var(value_Array, "value_Array");
     
     sessionStorage.array_page = 0;
+}
+
+function setPageValue(index)
+{
+	var page = {name: convert_index_to_readable_name(index), page_data: []}; //specific page of website
+	for(var j = 0; j < 61; j++) {
+	    var checklist_names = convert_index_to_readable_name(index);
+	    var field_value = {valid: true, str_data: ""}; //entry within page
+		
+	    if (checklist_names == "Default" || checklist_names == "SHIFT")
+	    {
+		field_value.str_data = get_placeholder_table(get_placeholder_index(index))[j];
+	    }
+	    else
+	    {
+		field_value.str_data = checklist_names + " + " + get_placeholder_table(get_placeholder_index(index))[j];
+	    }
+
+	    if (index == 0) //page starts in default
+	    {
+		document.getElementById("key" + j).value = field_value.str_data;
+	    }
+	    page.page_data.push(field_value);
+	}	
+	return page;
 }
 
 function get_checklist_index() //checks marked checkboxs and returns an integer from 0 to 15. this corresponds to a stored table, retrieved from get_placeholder_index
@@ -154,11 +160,28 @@ function reset_page() {
     if(confirm("Are you sure you want to reset the current listings?")) {
 	var value_Array = get_var("value_Array");
 	var array_page = get_checklist_index();
-	value_Array[array_page] = get_placeholder_table(get_placeholder_index(array_page));
+	value_Array[array_page] = setPageValue(array_page);
 	for(var i = 0; i < 61; i++) {
-	    document.getElementById("key"+i).value = value_Array[array_page][i];
+	    document.getElementById("key"+i).value = value_Array[array_page].page_data[i].str_data;
 	}
 	store_var(value_Array);
+	
+	var box = document.getElementById("ALT_box");
+	box.value = ((array_page & 1) == 0) ? true : false;
+	store_var(box, "ALT_box");
+	
+	box = document.getElementById("FN_box");
+	box.value = ((array_page & 2) == 0) ? true : false;
+	store_var(box, "FN_box");
+	
+	box = document.getElementById("CTRL_box");
+	box.value = ((array_page & 4) == 0) ? true : false;
+	store_var(box, "CTRL_box");
+	
+	box = document.getElementById("SHIFT_box");
+	box.value = ((array_page & 8) == 0) ? true : false;
+	store_var(box, "SHIFT_box");
+	
 	/*var value_Array = get_var("value_Array");
 	var array_page = Number(sessionStorage.array_page);
 	for(var i = 0; i < 61; i++) {
