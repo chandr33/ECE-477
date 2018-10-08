@@ -33,47 +33,48 @@ function initialize() {
 	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN_KEY", "R_CTRL"
     ];
     
-    var fn_placeholders = [
+    /*var fn_placeholders = [
 	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", //0-13
 	"TAB", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\",			//14-27
 	"CAPS", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "ENTER",			//28-40
 	"L_SHIFT", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
 	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN_KEY", "R_CTRL" //53-60
-    ];
+    ];*/
     
-    var fn_shift_placeholders = [
+    /*var fn_shift_placeholders = [
 	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", //0-13
 	"TAB", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\",			//14-27
 	"CAPS", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "ENTER",			//28-40
 	"L_SHIFT", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
 	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN_KEY", "R_CTRL" //53-60
-    ];
+    ];*/
 
     store_var(default_placeholders, "default_placeholders");
     store_var(shift_placeholders, "shift_placeholders");
-    store_var(fn_placeholders, "fn_placeholders");
-    store_var(fn_shift_placeholders, "fn_shift_placeholders");
+    //store_var(fn_placeholders, "fn_placeholders");
+    //store_var(fn_shift_placeholders, "fn_shift_placeholders");
 
-    var value_Array = [];
+    var value_Array = []; //data storage for textareas
     for(var i = 0; i < 16; i++) {
-	var page = [];
+	var page = {name: convert_index_to_readable_name(i), page_data: []}; //specific page of website
 	for(var j = 0; j < 61; j++) {
-	    var checklist_names = decode_index_to_name(i);
-	    var field_value = "";
+	    var checklist_names = convert_index_to_readable_name(i);
+	    var field_value = {valid: true, str_data: ""}; //entry within page
+		
 	    if (checklist_names == "Default" || checklist_names == "SHIFT")
 	    {
-		field_value = get_placeholder_table(get_placeholder_index(i))[j];
+		field_value.str_data = get_placeholder_table(get_placeholder_index(i))[j];
 	    }
 	    else
 	    {
-		field_value = checklist_names + " + " + get_placeholder_table(get_placeholder_index(i))[j];
+		field_value.str_data = checklist_names + " + " + get_placeholder_table(get_placeholder_index(i))[j];
 	    }
 
 	    if (i == 0) //page starts in default
 	    {
-		document.getElementById("key" + j).value = field_value;
+		document.getElementById("key" + j).value = field_value.str_data;
 	    }
-	    page.push(field_value);
+	    page.page_data.push(field_value);
 	}
 	value_Array.push(page);
     }
@@ -93,16 +94,25 @@ function get_checklist_index() //checks marked checkboxs and returns an integer 
     return alt * 1 + fn * 2 + ctrl * 4 + shift * 8;
 }
 
+function retrieve_page_by_name(name)
+{
+	var index = convert_readable_name_to_index(name);
+	
+	var value_Array = get_var("value_Array");
+	
+	return value_Array[index];
+}
+
 function get_placeholder_index(chk_number) //converts chk_number (an index from 0 to 15) into its corresponding placeholder table index (from 0 to 3)
 {
     if(chk_number == 10) { //fn && shift && !ctrl && !alt
-	return 1;
+	return 0;
     } else if (chk_number == 2) { //fn
-	return 2;
+	return 0;
     } else if(chk_number == 8 || chk_number == 10) { //shift && !ctrl && !alt
-	return 3;
+	return 1;
     } else {
-	return 4;
+	return 0;
     }
 }
 
@@ -168,18 +178,18 @@ function reset_macros() {
 function get_placeholder_table(index) //return placeholder table from placeholder index (called from get_placeholder_index(int))
 {
     
-    if(index == 1) { //fn && shift && !ctrl && !alt
-	return get_var("fn_shift_placeholders");
-    } else if (index == 2) { //fn
-	return get_var("fn_placeholders");
-    } else if(index == 3) { //shift && !ctrl && !alt
+    if(index == 0) { //fn && shift && !ctrl && !alt
+	return get_var("default_placeholders");
+    } else if (index == 1) { //fn
 	return get_var("shift_placeholders");
+    //} else if(index == 3) { //shift && !ctrl && !alt
+	//return get_var("shift_placeholders");
     } else {
 	return get_var("default_placeholders");
     }
 }
 
-function decode_index_to_name(index) //decode index (0 to 15) into a readable name
+function convert_index_to_readable_name(index) //decode index (0 to 15) into a readable name
 {
     var ret_string = "";
     if ((index >> 1) & 1) //fn
@@ -222,6 +232,44 @@ function decode_index_to_name(index) //decode index (0 to 15) into a readable na
     return ret_string;
 }
 
+function convert_readable_name_to_index(name)
+{
+	var ret_index = 0;
+	
+	//split string along +
+	var no_plus = name.split("+");
+	
+	//remove whitespace
+	var no_whitespace = /\S+/;
+	var converted_name = [];
+	for (var i = 0; i < no_plus.length(); i++)
+	{
+		converted_name[i] = no_whitespace.exec(no_plus[i]);
+	}
+	
+	if (converted_name.includes("FN"))
+	{
+		ret_index = ret_index | 2;
+	}
+	
+	if (converted_name.includes("SHIFT"))
+	{
+		ret_index = ret_index | 8;
+	}
+	
+	if(converted_name.includes("CTRL"))
+	{
+		ret_index = ret_index | 4;
+	}
+	
+	if(converted_name.includes("ALT"))
+	{
+		ret_index = ret_index | 1;
+	}
+	
+	return ret_index;
+}
+
 function update_placeholders () {
     
     var checklist = get_checklist_index();
@@ -246,17 +294,19 @@ function update_values () {
     //Store old values
     var value_Array = get_var("value_Array");
     var array_page = Number(sessionStorage.array_page);
+	//console.log(value_Array);
     
     for(var i = 0; i < 61; i++) {
-	value_Array[array_page][i] = document.getElementById("key"+i).value;
+	value_Array[array_page].page_data[i].str_data = document.getElementById("key"+i).value;
     }
     
     //Load in new values
     
     array_page = get_checklist_index();
+	var page = value_Array[array_page];
     
     for(var i = 0; i < 61; i++) {
-	document.getElementById("key"+i).value = value_Array[array_page][i];
+	document.getElementById("key"+i).value = page.page_data[i].str_data;
     }
     
     //Store Variables Again
@@ -275,7 +325,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
     var return_data = {valid: false, data: ""};
     
     //retrieve value from id
-    var user_input = data;
+    var user_input = data.str_data;
     var token_array = user_input.split("+");
     var no_space_patt = /\S+/;
 
@@ -399,12 +449,12 @@ function download() {
     
     for (var i = 0; i < 16; i++)
     {
-	var array_frame = {name: decode_index_to_name(i), bindings: []};
+	var array_frame = {name: convert_index_to_readable_name(i), bindings: []};
 	console.log("key"+i+" is currently being validated");
 	
 	for (var j = 0; j < 61; j++)
 	{
-	    var validation_data = validate_keybind_syntax(get_var("value_Array")[i][j]); //check if valid
+	    var validation_data = validate_keybind_syntax(get_var("value_Array")[i].page_data[j]); //check if valid
 	    if (validation_data.valid == false)
 	    {
 		//TODO: CONVEY TO USER THAT ERROR OCCURS ON ANOTHER PAGE. FOR NOW, ONLY ALERT IF ON SAME PAGE, CANCEL DOWNLOAD.
