@@ -22,15 +22,15 @@ function initialize() {
 	"TAB", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\",			//14-27
 	"CAPS", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "ENTER",			//28-40
 	"L_SHIFT", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
-	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN", "R_CTRL"	//53-60
+	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN_KEY", "R_CTRL"	//53-60
     ];
     
     var shift_placeholders = [
-	"ESC", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "BACKSPACE",
+	"ESC", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "PLUS", "BACKSPACE",
 	"TAB", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "{", "}", "|",
 	"CAPS", "A", "S", "D", "F", "G", "H", "J", "K", "L", ":", "\"", "ENTER",
 	"L_SHIFT", "Z", "X", "C", "V", "B", "N", "M", "<", ">", "?", "R_SHIFT",
-	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN", "R_CTRL"
+	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN_KEY", "R_CTRL"
     ];
     
     var fn_placeholders = [
@@ -38,7 +38,7 @@ function initialize() {
 	"TAB", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\",			//14-27
 	"CAPS", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "ENTER",			//28-40
 	"L_SHIFT", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
-	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN", "R_CTRL" //53-60
+	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN_KEY", "R_CTRL" //53-60
     ];
     
     var fn_shift_placeholders = [
@@ -46,7 +46,7 @@ function initialize() {
 	"TAB", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\",			//14-27
 	"CAPS", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "ENTER",			//28-40
 	"L_SHIFT", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
-	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN", "R_CTRL" //53-60
+	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN_KEY", "R_CTRL" //53-60
     ];
 
     store_var(default_placeholders, "default_placeholders");
@@ -66,7 +66,7 @@ function initialize() {
 	    }
 	    else
 	    {
-		field_value = checklist_names + " + " + get_placeholder_table(i)[j];
+		field_value = checklist_names + " + " + get_placeholder_table(get_placeholder_index(i))[j];
 	    }
 
 	    if (i == 0) //page starts in default
@@ -78,7 +78,6 @@ function initialize() {
 	value_Array.push(page);
     }
     
-
     store_var(value_Array, "value_Array");
     
     sessionStorage.array_page = 0;
@@ -265,24 +264,184 @@ function update_values () {
     store_var(value_Array, "value_Array");
 }
 
+function validate_keybind_syntax(data) //give name of textfield object. returns object with 2 fields: valid and data.
+{
+    var keywords = [ "BACKSPACE", "ESC", "CAPS", "L_SHIFT", "L_CTRL", "L_WIN",
+		     "L_ALT", "SPACE", "R_ALT", "R_WIN", "R_CTRL", "FN_KEY", "R_SHIFT", "ENTER"
+		   ];
+
+    var shift_found = false;
+    var key_found = false; //used to verify key is at end of entry
+    var return_data = {valid: false, data: ""};
+    
+    //retrieve value from id
+    var user_input = data;
+    var token_array = user_input.split("+");
+    var no_space_patt = /\S+/;
+
+    for (var i = 0; i < token_array.length; i++) //loop until user_input is completely scanned
+    {
+	if (key_found) //key must be at end of token_array
+	{
+	    console.log("Validate fxn return due to key_found");
+	    return_data.valid = false;
+	    return return_data;
+	}
+	
+	var token = no_space_patt.exec(token_array[i]); //remove whitespace
+	if (token != null) //not null. entry from token_array was all whitespace. throw error.
+	{
+	    token = token[0]; //token is returned as an array
+	    if (!keywords.includes(token.toUpperCase())) //token is not a keyword
+	    {
+		var shift_position = get_var("shift_placeholders").indexOf(token); //used to detect if shifted value was used
+		if (shift_position != -1) //entry exists in shift table
+		{
+		    if (shift_found == false) //shift keyword was not found. add to entry
+		    {
+			if (return_data.data == "") //nothing exists yet, don't add "+"
+			{
+			    return_data.data = "SHIFT+" + get_var("default_placeholders")[shift_position];
+			}
+			else
+			{
+			    return_data.data = return_data.data + "+SHIFT+" + get_var("default_placeholders")[shift_position];
+			}
+		    }
+		    else
+		    {
+			if (return_data.data == "")
+			{
+			    return_data.data = "SHIFT+" + get_var("default_placeholders")[shift_position];
+			}
+			else
+			{
+			    return_data.data = return_data.data + "+SHIFT+" + get_var("default_placeholders")[shift_position];
+			}
+		    }
+		    key_found = true;
+		} //if (shift_position != -1) //entry exists in shift table
+		else if (get_var("default_placeholders").includes(token)) //entry exists in default table
+		{
+		    if (return_data.data == "")
+		    {
+			return_data.data = token;
+		    }
+		    else
+		    {
+			return_data.data = "+" + token;
+		    }
+		    key_found = true;
+		}
+		else if(token.toUpperCase() == "SHIFT") //shift keyword detected. set flag
+		{
+		    if (return_data.data == "")
+		    {
+			return_data.data = "SHIFT";
+		    }
+		    else
+		    {
+			return_data.data = return_data.data + "+SHIFT";
+		    }
+		    shift_found = true;
+		}
+		else if(token.toUpperCase() == "CTRL" || token.toUpperCase() == "FN" || token.toUpperCase() == "ALT")
+		{
+		    if (return_data.data == "")
+		    {
+			return_data.data = token.toUpperCase();
+		    }
+		    else
+		    {
+			return_data.data = "+" + token.toUpperCase();
+		    }
+		}
+		else //not recognized. throw error
+		{
+		    console.log("Validate fxn returned due to not recognizing input: " + token);
+		    return_data.valid = false;
+		    return return_data;
+		}
+	    }
+	    else //token is a keyword that is in both shift and default tables. counts as a key.
+	    {
+		if (return_data.data == "")
+		{
+		    return_data.data = token.toUpperCase();
+		}
+		else
+		{
+		    return_data.data = "+" + token.toUpperCase();
+		}
+		key_found = true;
+	    }
+	    
+	}
+	else
+	{
+	    console.log("Validate fxn returned due to only whitespace being detected in token");
+	    console.log("return_data.data: " + return_data.data);
+	    console.log("input data: " + data);
+	    console.log("token_array: " + token_array);
+	    return_data.valid = false;
+	    return return_data;
+	}
+    }
+    console.log("Validate fxn reached end of execution, is valid");
+    return_data.valid = true;
+    return return_data;
+}
+
 function download() {
     var temp_value_array = Array();
+    var validation = true;
+    var invalid_data_dump = []; //used for debugging validate fxn.
     
     for (var i = 0; i < 16; i++)
     {
-	var array_frame = {name: decode_index_to_name(i), bindings: get_var("value_Array")[i]};
+	var array_frame = {name: decode_index_to_name(i), bindings: []};
+	console.log("key"+i+" is currently being validated");
 	
 	for (var j = 0; j < 61; j++)
 	{
-	    
-	    if (array_frame.data[j] == "")
+	    var validation_data = validate_keybind_syntax(get_var("value_Array")[i][j]); //check if valid
+	    if (validation_data.valid == false)
 	    {
-		array_frame.data[j] = null;
+		//TODO: CONVEY TO USER THAT ERROR OCCURS ON ANOTHER PAGE. FOR NOW, ONLY ALERT IF ON SAME PAGE, CANCEL DOWNLOAD.
+		validation = false;
+		if (get_checklist_index() == i) //currently on same page as error
+		{
+		    document.getElementById("key"+j).style.border = "2px solid red";
+		}
+		invalid_data_dump.push(validation_data);
+	    }
+	    else if(document.getElementById("key"+j).style.border == "2px solid red") //keybind valid after previously invalid. reset it
+	    {
+		if (get_checklist_index() == i) //confirm valid textarea is for this page
+		{
+		    document.getElementById("key"+j).style.border = "";
+		}
+	    }
+	    if (validation_data.data == "")
+	    {
+		array_frame.bindings[j] = null;
+	    }
+	    else
+	    {
+		array_frame.bindings[j] = validation_data.data;
 	    }
 	}
 	temp_value_array.push(array_frame);
     }
-    download_file(JSON.stringify(temp_value_array), "test.txt", "/application/json");
+    if (validation)
+    {
+	download_file(JSON.stringify(temp_value_array), "test.txt", "/application/json");
+    }
+    else
+    {
+	console.log("Download failed! A textbox had invalid syntax.");
+	console.log(invalid_data_dump);
+    }
 }
 
 function download_file (data, filename, type) { //source: https://stackoverflow.com/questions/13405129/javascript-create-and-save-file
