@@ -24,7 +24,7 @@ function initialize() {
 	"L_SHIFT", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
 	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN_KEY", "R_CTRL"	//53-60
     ];
-    
+
     var shift_placeholders = [
 	"ESC", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "PLUS", "BACKSPACE",
 	"TAB", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "{", "}", "|",
@@ -32,7 +32,7 @@ function initialize() {
 	"L_SHIFT", "Z", "X", "C", "V", "B", "N", "M", "<", ">", "?", "R_SHIFT",
 	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN_KEY", "R_CTRL"
     ];
-    
+
     /*var fn_placeholders = [
 	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", //0-13
 	"TAB", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\",			//14-27
@@ -40,7 +40,7 @@ function initialize() {
 	"L_SHIFT", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "R_SHIFT",			//41-52
 	"L_CTRL", "L_WIN", "L_ALT", "SPACE", "R_ALT", "R_WIN", "FN_KEY", "R_CTRL" //53-60
     ];*/
-    
+
     /*var fn_shift_placeholders = [
 	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", //0-13
 	"TAB", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\",			//14-27
@@ -54,40 +54,11 @@ function initialize() {
     //store_var(fn_placeholders, "fn_placeholders");
     //store_var(fn_shift_placeholders, "fn_shift_placeholders");
 
-    var value_Array = []; //data storage for textareas
-    for(var i = 0; i < 16; i++) {
-		var page = setPageValue(i);
-		value_Array.push(page);
-    }
-    
+    var value_Array = new SiteData(); //data storage for textareas
+
     store_var(value_Array, "value_Array");
-    
+
     sessionStorage.array_page = 0;
-}
-
-function setPageValue(index)
-{
-	var page = {name: convert_index_to_readable_name(index), page_data: []}; //specific page of website
-	for(var j = 0; j < 61; j++) {
-	    var checklist_names = convert_index_to_readable_name(index);
-	    var field_value = {valid: true, str_data: ""}; //entry within page
-		
-	    if (checklist_names == "Default" || checklist_names == "SHIFT")
-	    {
-		field_value.str_data = get_placeholder_table(get_placeholder_index(index))[j];
-	    }
-	    else
-	    {
-		field_value.str_data = checklist_names + " + " + get_placeholder_table(get_placeholder_index(index))[j];
-	    }
-
-	    if (index == 0) //page starts in default
-	    {
-		document.getElementById("key" + j).value = field_value.str_data;
-	    }
-	    page.page_data.push(field_value);
-	}	
-	return page;
 }
 
 function get_checklist_index() //checks marked checkboxs and returns an integer from 0 to 15. this corresponds to a stored table, retrieved from get_placeholder_index
@@ -98,15 +69,6 @@ function get_checklist_index() //checks marked checkboxs and returns an integer 
     var ctrl = document.getElementById("CTRL_box").checked;
 
     return alt * 1 + fn * 2 + ctrl * 4 + shift * 8;
-}
-
-function retrieve_page_by_name(name)
-{
-	var index = convert_readable_name_to_index(name);
-	
-	var value_Array = get_var("value_Array");
-	
-	return value_Array[index];
 }
 
 function get_placeholder_index(chk_number) //converts chk_number (an index from 0 to 15) into its corresponding placeholder table index (from 0 to 3)
@@ -130,7 +92,11 @@ function store_var(storing_variable, id_string) { //Function to store arrays and
 function get_var(id_string) { //Retrieves objects stored in sessionStorage
     var storedData = sessionStorage.getItem(id_string);
     if (storedData) {
-	return JSON.parse(storedData);
+	return JSON.parse(storedData, function(key, value) { //from https://stackoverflow.com/questions/14027168/how-to-restore-original-object-type-from-json
+        return key === '' && value.hasOwnProperty('__type')
+        ? Types[value.__type].revive(value)
+        : this[key];
+    });
     } else {
 	return false;
     }
@@ -138,7 +104,8 @@ function get_var(id_string) { //Retrieves objects stored in sessionStorage
 
 function reset_all() {
     if(confirm("Are you sure you want to reset all key bindings?")) {
-	initialize();
+	var value_Array = new SiteData();
+	store_var(value_Array, "value_Array");
 	/*var value_Array = [];
 	for(var i = 0; i < 16; i++) {
 	    var page = [];
@@ -150,46 +117,31 @@ function reset_all() {
 	for(var i = 0; i < 61; i++) {
 	    document.getElementById("key"+i).value = "";
 	}
-	
+
 	store_var(value_Array, "value_Array");*/
     }
-    
+
 }
 
 function reset_page() {
-    if(confirm("Are you sure you want to reset the current listings?")) {
-	var value_Array = get_var("value_Array");
-	var array_page = get_checklist_index();
-	value_Array[array_page] = setPageValue(array_page);
-	for(var i = 0; i < 61; i++) {
-	    document.getElementById("key"+i).value = value_Array[array_page].page_data[i].str_data;
+    if(confirm("Are you sure you want to reset the current listings?"))
+	{
+		var value_Array = get_var("value_Array");
+		var array_page = get_checklist_index();
+		value_Array.updatePage(array_page, get_placeholder_table(get_placeholder_index(array_page)));
+		for(var i = 0; i < 61; i++)
+		{
+			document.getElementById("key"+i).value = value_Array.getPage(array_page).getData(i);
+
+		/*var value_Array = get_var("value_Array");
+		var array_page = Number(sessionStorage.array_page);
+		for(var i = 0; i < 61; i++) {
+			value_Array[array_page][i] = ;
+			document.getElementById("key"+i).value = value_Array[array_page][i];
+		}
+		store_var(value_Array, "value_Array");*/
+		}
 	}
-	store_var(value_Array);
-	
-	var box = document.getElementById("ALT_box");
-	box.value = ((array_page & 1) == 0) ? true : false;
-	store_var(box, "ALT_box");
-	
-	box = document.getElementById("FN_box");
-	box.value = ((array_page & 2) == 0) ? true : false;
-	store_var(box, "FN_box");
-	
-	box = document.getElementById("CTRL_box");
-	box.value = ((array_page & 4) == 0) ? true : false;
-	store_var(box, "CTRL_box");
-	
-	box = document.getElementById("SHIFT_box");
-	box.value = ((array_page & 8) == 0) ? true : false;
-	store_var(box, "SHIFT_box");
-	
-	/*var value_Array = get_var("value_Array");
-	var array_page = Number(sessionStorage.array_page);
-	for(var i = 0; i < 61; i++) {
-	    value_Array[array_page][i] = ;
-	    document.getElementById("key"+i).value = value_Array[array_page][i];
-	}
-	store_var(value_Array, "value_Array");*/
-    }
 }
 
 function reset_macros() {
@@ -200,7 +152,7 @@ function reset_macros() {
 
 function get_placeholder_table(index) //return placeholder table from placeholder index (called from get_placeholder_index(int))
 {
-    
+
     if(index == 0) { //fn && shift && !ctrl && !alt
 	return get_var("default_placeholders");
     } else if (index == 1) { //fn
@@ -219,7 +171,7 @@ function convert_index_to_readable_name(index) //decode index (0 to 15) into a r
     {
 	ret_string = ret_string + "FN";
     }
-    
+
     if ((index >> 2) & 1) //ctrl
     {
 	if (ret_string != "")
@@ -258,10 +210,10 @@ function convert_index_to_readable_name(index) //decode index (0 to 15) into a r
 function convert_readable_name_to_index(name)
 {
 	var ret_index = 0;
-	
+
 	//split string along +
 	var no_plus = name.split("+");
-	
+
 	//remove whitespace
 	var no_whitespace = /\S+/;
 	var converted_name = [];
@@ -269,32 +221,32 @@ function convert_readable_name_to_index(name)
 	{
 		converted_name[i] = no_whitespace.exec(no_plus[i]);
 	}
-	
+
 	if (converted_name.includes("FN"))
 	{
 		ret_index = ret_index | 2;
 	}
-	
+
 	if (converted_name.includes("SHIFT"))
 	{
 		ret_index = ret_index | 8;
 	}
-	
+
 	if(converted_name.includes("CTRL"))
 	{
 		ret_index = ret_index | 4;
 	}
-	
+
 	if(converted_name.includes("ALT"))
 	{
 		ret_index = ret_index | 1;
 	}
-	
+
 	return ret_index;
 }
 
 function update_placeholders () {
-    
+
     var checklist = get_checklist_index();
     var placeholder_index = get_placeholder_index(checklist);
     for(var i = 0; i < 61; i++) {
@@ -308,7 +260,7 @@ function update_placeholders () {
 	if(checklist & 4) { //ctrl
 	    curr_placeholder[i] = "CTRL + " + curr_placeholder[i];
 	}
-	
+
 	document.getElementById("key"+i).placeholder = curr_placeholder[i];
     }
 }
@@ -317,21 +269,24 @@ function update_values () {
     //Store old values
     var value_Array = get_var("value_Array");
     var array_page = Number(sessionStorage.array_page);
-	//console.log(value_Array);
-    
+	console.log(typeof(value_Array));
+	var page = value_Array.getPage(array_page);
+
     for(var i = 0; i < 61; i++) {
-	value_Array[array_page].page_data[i].str_data = document.getElementById("key"+i).value;
+		page.setData(document.getElementById("key"+i).value);
     }
-    
+
+	value_Array.updatePage(array_page, page);
+
     //Load in new values
-    
+
     array_page = get_checklist_index();
-	var page = value_Array[array_page];
-    
+	page = value_Array[array_page];
+
     for(var i = 0; i < 61; i++) {
 	document.getElementById("key"+i).value = page.page_data[i].str_data;
     }
-    
+
     //Store Variables Again
     sessionStorage.array_page = array_page;
     store_var(value_Array, "value_Array");
@@ -346,7 +301,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
     var shift_found = false;
     var key_found = false; //used to verify key is at end of entry
     var return_data = {valid: false, data: ""};
-    
+
     //retrieve value from id
     var user_input = data.str_data;
     var token_array = user_input.split("+");
@@ -360,7 +315,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 	    return_data.valid = false;
 	    return return_data;
 	}
-	
+
 	var token = no_space_patt.exec(token_array[i]); //remove whitespace
 	if (token != null) //not null. entry from token_array was all whitespace. throw error.
 	{
@@ -448,7 +403,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 		}
 		key_found = true;
 	    }
-	    
+
 	}
 	else
 	{
@@ -469,12 +424,12 @@ function download() {
     var temp_value_array = Array();
     var validation = true;
     var invalid_data_dump = []; //used for debugging validate fxn.
-    
+
     for (var i = 0; i < 16; i++)
     {
 	var array_frame = {name: convert_index_to_readable_name(i), bindings: []};
 	console.log("key"+i+" is currently being validated");
-	
+
 	for (var j = 0; j < 61; j++)
 	{
 	    var validation_data = validate_keybind_syntax(get_var("value_Array")[i].page_data[j]); //check if valid
