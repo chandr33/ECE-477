@@ -85,15 +85,19 @@ function get_placeholder_index(chk_number) //converts chk_number (an index from 
 }
 
 function store_var(storing_variable, id_string) { //Function to store arrays and objects in sessionStorage
-    sessionStorage.setItem(id_string, JSON.stringify(storing_variable));
-    return;
+    console.log(id_string);
+    sessionStorage.setItem(id_string, JSON.stringify(storing_variable, function(key, value) {
+        console.log("key: "+key);
+        console.log("value: "+value);
+        return value;
+    }));
 }
 
 function get_var(id_string) { //Retrieves objects stored in sessionStorage
     var storedData = sessionStorage.getItem(id_string);
     if (storedData) {
 	return JSON.parse(storedData, function(key, value) { //from https://stackoverflow.com/questions/14027168/how-to-restore-original-object-type-from-json
-        return key === '' && value.hasOwnProperty('__type')
+        return key === '' && value.hasOwnProperty("__type")
         ? Types[value.__type].revive(value)
         : this[key];
     });
@@ -268,9 +272,12 @@ function update_placeholders () {
 function update_values () {
     //Store old values
     var value_Array = get_var("value_Array");
+    console.log(value_Array);
     var array_page = Number(sessionStorage.array_page);
 	console.log(typeof(value_Array));
 	var page = value_Array.getPage(array_page);
+	console.log(typeof(page));
+	console.log(page);
 
     for(var i = 0; i < 61; i++) {
 		page.setData(document.getElementById("key"+i).value);
