@@ -87,8 +87,6 @@ function get_placeholder_index(chk_number) //converts chk_number (an index from 
 function store_var(storing_variable, id_string) { //Function to store arrays and objects in sessionStorage
     console.log(id_string);
     sessionStorage.setItem(id_string, JSON.stringify(storing_variable, function(key, value) {
-        console.log("key: "+key);
-        console.log("value: "+value);
         return value;
     }));
 }
@@ -274,10 +272,8 @@ function update_values () {
     var value_Array = get_var("value_Array");
     console.log(value_Array);
     var array_page = Number(sessionStorage.array_page);
-	console.log(typeof(value_Array));
+	console.log(value_Array);
 	var page = value_Array.getPage(array_page);
-	console.log(typeof(page));
-	console.log(page);
 
     for(var i = 0; i < 61; i++) {
 		page.setData(document.getElementById("key"+i).value);

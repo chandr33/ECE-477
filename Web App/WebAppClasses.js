@@ -57,7 +57,9 @@ class fieldEntry
 
 fieldEntry.revive = function(data)
 {
-	return fieldEntry(valid, str_data);
+    console.log("fieldEntry reviver data:");
+    console.log(data);
+	return new fieldEntry(data.valid, data.str_data);
 };
 
 Types.fieldEntry = fieldEntry;
@@ -99,7 +101,11 @@ class Page
         {
             this.valid = valid;
             this.name = name;
-            this.page_data = page_data;
+            this.page_data = new Array();
+            for (var i = 0; i < 61; i++)
+            {
+                this.page_data[i] = fieldEntry.revive(page_data[i]);
+            }
         }
 	}
 
@@ -117,7 +123,7 @@ class Page
 
 Page.revive = function(data)
 {
-	return new Page(valid, name, page_data);
+	return new Page(data.valid, data.name, data.page_data);
 }
 
 Types.Page = Page;
@@ -137,7 +143,12 @@ class SiteData //value_Array
         }
         else
         {
-            this.data = data;
+            this.data = new Array();
+            console.log("Data received by SiteData constructor: " + data);
+            for (var i = 0; i < 16; i++)
+            {
+                this.data[i] = Page.revive(data.data[i]);
+            }
         }
 	}
 
