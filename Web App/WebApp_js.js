@@ -85,7 +85,6 @@ function get_placeholder_index(chk_number) //converts chk_number (an index from 
 }
 
 function store_var(storing_variable, id_string) { //Function to store arrays and objects in sessionStorage
-    console.log(id_string);
     sessionStorage.setItem(id_string, JSON.stringify(storing_variable, function(key, value) {
         return value;
     }));
@@ -108,6 +107,16 @@ function reset_all() {
     if(confirm("Are you sure you want to reset all key bindings?")) {
 	var value_Array = new SiteData();
 	store_var(value_Array, "value_Array");
+	var array_page = Number(get_checklist_index());
+	
+	for(var i = 0; i < 61; i++)
+	{
+		var page = value_Array.getPage(array_page);
+		document.getElementById("key"+i).value = page.getData(i).str_data;
+	}
+	
+	console.log(get_checklist_index());
+	console.log(value_Array);
 	/*var value_Array = [];
 	for(var i = 0; i < 16; i++) {
 	    var page = [];
@@ -130,10 +139,12 @@ function reset_page() {
 	{
 		var value_Array = get_var("value_Array");
 		var array_page = get_checklist_index();
-		value_Array.updatePage(array_page, get_placeholder_table(get_placeholder_index(array_page)));
+		store_var(array_page, "array_page");
+		value_Array.updatePage(undefined, array_page, get_placeholder_table(get_placeholder_index(array_page)));
 		for(var i = 0; i < 61; i++)
 		{
-			document.getElementById("key"+i).value = value_Array.getPage(array_page).getData(i);
+			var page = value_Array.getPage(array_page);
+			document.getElementById("key"+i).value = page.getData(i).str_data;
 
 		/*var value_Array = get_var("value_Array");
 		var array_page = Number(sessionStorage.array_page);
@@ -270,13 +281,11 @@ function update_placeholders () {
 function update_values () {
     //Store old values
     var value_Array = get_var("value_Array");
-    console.log(value_Array);
     var array_page = Number(sessionStorage.array_page);
-	console.log(value_Array);
 	var page = value_Array.getPage(array_page);
 
     for(var i = 0; i < 61; i++) {
-		page.setData(document.getElementById("key"+i).value);
+		page.page_data[i].setData(document.getElementById("key"+i).value);
     }
 
 	value_Array.updatePage(array_page, page);
@@ -284,7 +293,7 @@ function update_values () {
     //Load in new values
 
     array_page = get_checklist_index();
-	page = value_Array[array_page];
+	page = value_Array.getPage(array_page);
 
     for(var i = 0; i < 61; i++) {
 	document.getElementById("key"+i).value = page.page_data[i].str_data;
@@ -435,7 +444,7 @@ function download() {
 
 	for (var j = 0; j < 61; j++)
 	{
-	    var validation_data = validate_keybind_syntax(get_var("value_Array")[i].page_data[j]); //check if valid
+	    var validation_data = validate_keybind_syntax(get_var("value_Array").getPage(i).page_data[j]); //check if valid
 	    if (validation_data.valid == false)
 	    {
 		//TODO: CONVEY TO USER THAT ERROR OCCURS ON ANOTHER PAGE. FOR NOW, ONLY ALERT IF ON SAME PAGE, CANCEL DOWNLOAD.

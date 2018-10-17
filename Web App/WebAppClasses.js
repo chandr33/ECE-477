@@ -57,8 +57,6 @@ class fieldEntry
 
 fieldEntry.revive = function(data)
 {
-    console.log("fieldEntry reviver data:");
-    console.log(data);
 	return new fieldEntry(data.valid, data.str_data);
 };
 
@@ -68,7 +66,7 @@ class Page
 {
 	constructor(valid, name, page_data)
 	{
-        if (name === undefined) //parameters: page_number
+        if (!(valid === undefined) && name === undefined && page_data === undefined ) //parameters: page_number
         {
             var page_number = valid;
 
@@ -97,6 +95,16 @@ class Page
                 this.page_data.push(field_value);
             }
         }
+		else if (valid === undefined && !(name === undefined) && !(page_data === undefined))
+		{
+			this.valid = true;
+			this.name = convert_index_to_readable_name(name);
+			this.page_data = new Array();
+            for (var i = 0; i < 61; i++)
+            {
+                this.page_data[i] = fieldEntry.revive(page_data[i]);
+            }
+		}
         else
         {
             this.valid = valid;
@@ -118,6 +126,11 @@ class Page
 			name: this.name,
 			page_data: this.page_data
 		};
+	}
+	
+	getData(i)
+	{
+		return this.page_data[i];
 	}
 }
 
@@ -144,7 +157,6 @@ class SiteData //value_Array
         else
         {
             this.data = new Array();
-            console.log("Data received by SiteData constructor: " + data);
             for (var i = 0; i < 16; i++)
             {
                 this.data[i] = Page.revive(data.data[i]);
@@ -186,7 +198,6 @@ class SiteData //value_Array
 
 SiteData.revive = function(data)
 {
-    console.log("SiteData revive function ran!");
 	return new SiteData(data);
 }
 
