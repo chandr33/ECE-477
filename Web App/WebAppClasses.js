@@ -80,7 +80,7 @@ class Page
 
                 if (checklist_names == "Default" || checklist_names == "SHIFT")
                 {
-                    field_value.setData(get_placeholder_table(get_placeholder_index(this.name))[j]);
+                    field_value.setData(get_placeholder_table(get_placeholder_index(page_number))[j]);
                 }
                 else
                 {

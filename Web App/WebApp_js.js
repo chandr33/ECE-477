@@ -321,111 +321,111 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 
     for (var i = 0; i < token_array.length; i++) //loop until user_input is completely scanned
     {
-	if (key_found) //key must be at end of token_array
-	{
-	    console.log("Validate fxn return due to key_found");
-	    return_data.valid = false;
-	    return return_data;
-	}
+		if (key_found) //key must be at end of token_array, so invalidate
+		{
+			console.log("Validate fxn return due to key_found");
+			return_data.valid = false;
+			return return_data;
+		}
 
-	var token = no_space_patt.exec(token_array[i]); //remove whitespace
-	if (token != null) //not null. entry from token_array was all whitespace. throw error.
-	{
-	    token = token[0]; //token is returned as an array
-	    if (!keywords.includes(token.toUpperCase())) //token is not a keyword
-	    {
-		var shift_position = get_var("shift_placeholders").indexOf(token); //used to detect if shifted value was used
-		if (shift_position != -1) //entry exists in shift table
+		var token = no_space_patt.exec(token_array[i]); //remove whitespace
+		if (token != null) //not null. entry from token_array was all whitespace. throw error.
 		{
-		    if (shift_found == false) //shift keyword was not found. add to entry
-		    {
-			if (return_data.data == "") //nothing exists yet, don't add "+"
+			token = token[0]; //token is returned as an array
+			if (!keywords.includes(token.toUpperCase())) //token is not a keyword
 			{
-			    return_data.data = "SHIFT+" + get_var("default_placeholders")[shift_position];
+				var shift_position = get_var("shift_placeholders").indexOf(token); //used to detect if shifted value was used
+				if (shift_position != -1) //entry exists in shift table
+				{
+					if (shift_found == false) //shift keyword was not found. add to entry
+					{
+						if (return_data.data == "") //nothing exists yet, don't add "+"
+						{
+							return_data.data = "SHIFT+" + get_var("default_placeholders")[shift_position];
+						}
+						else
+						{
+							return_data.data = return_data.data + "+SHIFT+" + get_var("default_placeholders")[shift_position];
+						}
+					}
+					else
+					{
+						if (return_data.data == "")
+						{
+							return_data.data = "SHIFT+" + get_var("default_placeholders")[shift_position];
+						}
+						else
+						{
+							return_data.data = return_data.data + "+SHIFT+" + get_var("default_placeholders")[shift_position];
+						}
+					}
+					key_found = true;
+				} //if (shift_position != -1) //entry exists in shift table
+				else if (get_var("default_placeholders").includes(token)) //entry exists in default table
+				{
+					if (return_data.data == "")
+					{
+						return_data.data = token;
+					}
+					else
+					{
+						return_data.data = return_data.data+"+" + token;
+					}
+					key_found = true;
+				}
+				else if(token.toUpperCase() == "SHIFT") //shift keyword detected. set flag
+				{
+					if (return_data.data == "")
+					{
+						return_data.data = "SHIFT";
+					}
+					else
+					{
+						return_data.data = return_data.data + "+SHIFT";
+					}
+					shift_found = true;
+				}
+				else if(token.toUpperCase() == "CTRL" || token.toUpperCase() == "FN" || token.toUpperCase() == "ALT")
+				{
+					if (return_data.data == "")
+					{
+						return_data.data = token.toUpperCase();
+					}
+					else
+					{
+						return_data.data = return_data.data+"+" + token.toUpperCase();
+					}
+				}
+				else //not recognized. throw error
+				{
+					console.log("Validate fxn returned due to not recognizing input: " + token);
+					return_data.valid = false;
+					return return_data;
+				}
 			}
-			else
+			else //token is a keyword that is in both shift and default tables. counts as a key.
 			{
-			    return_data.data = return_data.data + "+SHIFT+" + get_var("default_placeholders")[shift_position];
+				if (return_data.data == "")
+				{
+					return_data.data = token.toUpperCase();
+				}
+				else
+				{
+					return_data.data = return_data.data+"+" + token.toUpperCase();
+				}
+				key_found = true;
 			}
-		    }
-		    else
-		    {
-			if (return_data.data == "")
-			{
-			    return_data.data = "SHIFT+" + get_var("default_placeholders")[shift_position];
-			}
-			else
-			{
-			    return_data.data = return_data.data + "+SHIFT+" + get_var("default_placeholders")[shift_position];
-			}
-		    }
-		    key_found = true;
-		} //if (shift_position != -1) //entry exists in shift table
-		else if (get_var("default_placeholders").includes(token)) //entry exists in default table
-		{
-		    if (return_data.data == "")
-		    {
-			return_data.data = token;
-		    }
-		    else
-		    {
-			return_data.data = "+" + token;
-		    }
-		    key_found = true;
-		}
-		else if(token.toUpperCase() == "SHIFT") //shift keyword detected. set flag
-		{
-		    if (return_data.data == "")
-		    {
-			return_data.data = "SHIFT";
-		    }
-		    else
-		    {
-			return_data.data = return_data.data + "+SHIFT";
-		    }
-		    shift_found = true;
-		}
-		else if(token.toUpperCase() == "CTRL" || token.toUpperCase() == "FN" || token.toUpperCase() == "ALT")
-		{
-		    if (return_data.data == "")
-		    {
-			return_data.data = token.toUpperCase();
-		    }
-		    else
-		    {
-			return_data.data = "+" + token.toUpperCase();
-		    }
-		}
-		else //not recognized. throw error
-		{
-		    console.log("Validate fxn returned due to not recognizing input: " + token);
-		    return_data.valid = false;
-		    return return_data;
-		}
-	    }
-	    else //token is a keyword that is in both shift and default tables. counts as a key.
-	    {
-		if (return_data.data == "")
-		{
-		    return_data.data = token.toUpperCase();
+
 		}
 		else
 		{
-		    return_data.data = "+" + token.toUpperCase();
+			console.log("Validate fxn returned due to only whitespace being detected in token");
+			console.log("return_data.data: " + return_data.data);
+			console.log("input data: " + data);
+			console.log("token_array: " + token_array);
+			return_data.valid = false;
+			return return_data;
 		}
-		key_found = true;
-	    }
-
-	}
-	else
-	{
-	    console.log("Validate fxn returned due to only whitespace being detected in token");
-	    console.log("return_data.data: " + return_data.data);
-	    console.log("input data: " + data);
-	    console.log("token_array: " + token_array);
-	    return_data.valid = false;
-	    return return_data;
-	}
     }
     console.log("Validate fxn reached end of execution, is valid");
     return_data.valid = true;
@@ -441,6 +441,7 @@ function download() {
     {
 	var array_frame = {name: convert_index_to_readable_name(i), bindings: []};
 	console.log("key"+i+" is currently being validated");
+	console.log(get_var("value_Array").getPage(i));
 
 	for (var j = 0; j < 61; j++)
 	{
