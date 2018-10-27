@@ -1,6 +1,6 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/app_util_platform.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/app_util_platform.c \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/app_util_platform.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/app_util_platform.c \
+ ../../../../../../components/libraries/util/app_util_platform.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
  ../../../../../../modules/nrfx/mdk/nrf.h \
@@ -20,12 +20,12 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/app_util_platform.o: \
  ../../../../../../components/softdevice/s132/headers/nrf_error.h \
  ../../../../../../components/softdevice/s132/headers/nrf_error_soc.h \
  ../../../../../../components/softdevice/s132/headers/nrf_nvic.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/nrf_assert.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/app_error.h \
+ ../../../../../../components/libraries/util/nrf_assert.h \
+ ../../../../../../components/libraries/util/app_error.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdio.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/__crossworks.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/sdk_errors.h \
+ ../../../../../../components/libraries/util/sdk_errors.h \
  ../../../../../../components/softdevice/s132/headers/nrf_error.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/nordic_common.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/app_error_weak.h
+ ../../../../../../components/libraries/util/nordic_common.h \
+ ../../../../../../components/libraries/util/app_error_weak.h

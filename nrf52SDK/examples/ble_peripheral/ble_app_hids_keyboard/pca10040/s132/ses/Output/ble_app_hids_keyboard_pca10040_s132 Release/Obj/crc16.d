@@ -1,5 +1,5 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/crc16.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/crc16/crc16.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/crc16.c \
  ../../../../../../components/libraries/util/sdk_common.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
@@ -27,5 +27,5 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/crc16.o: \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
  ../../../../../../components/libraries/util/sdk_macros.h \
  ../../../../../../components/libraries/util/nrf_assert.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/crc16/crc16.h \
+ ../../../../../../components/libraries/crc16/crc16.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdlib.h

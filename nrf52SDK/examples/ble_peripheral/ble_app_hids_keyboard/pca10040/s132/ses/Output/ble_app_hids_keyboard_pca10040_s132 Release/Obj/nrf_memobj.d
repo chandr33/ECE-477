@@ -1,6 +1,6 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_memobj.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/memobj/nrf_memobj.c \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/memobj/nrf_memobj.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/nrf_memobj.c \
+ ../../../../../../components/libraries/memobj/nrf_memobj.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdlib.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/__crossworks.h \

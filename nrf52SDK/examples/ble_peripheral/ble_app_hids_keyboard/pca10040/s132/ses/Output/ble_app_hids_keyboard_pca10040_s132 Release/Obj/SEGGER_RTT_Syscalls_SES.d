@@ -1,8 +1,8 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/SEGGER_RTT_Syscalls_SES.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/external/segger_rtt/SEGGER_RTT_Syscalls_SES.c \
- ../config/sdk_config.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/external/segger_rtt/SEGGER_RTT.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/external/segger_rtt/SEGGER_RTT_Conf.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/SEGGER_RTT_Syscalls_SES.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/sdk_config.h \
+ ../../../../../../external/segger_rtt/SEGGER_RTT.h \
+ ../../../../../../external/segger_rtt/SEGGER_RTT_Conf.h \
  ../../../../../../components/libraries/util/nordic_common.h \
  ../../../../../../components/libraries/util/app_util_platform.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
@@ -33,6 +33,7 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/SEGGER_RTT_Syscalls_SES.
  ../../../../../../components/softdevice/s132/headers/nrf_error.h \
  ../../../../../../components/libraries/util/nordic_common.h \
  ../../../../../../components/libraries/util/app_error_weak.h \
+ ../config/sdk_config.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdarg.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/limits.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/__libc.h \

@@ -1,6 +1,6 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_drv_uart.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/integration/nrfx/legacy/nrf_drv_uart.c \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/integration/nrfx/legacy/nrf_drv_uart.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/nrf_drv_uart.c \
+ ../../../../../../integration/nrfx/legacy/nrf_drv_uart.h \
  ../../../../../../modules/nrfx/nrfx.h \
  ../../../../../../integration/nrfx/nrfx_config.h ../config/sdk_config.h \
  ../../../../../../modules/nrfx/drivers/nrfx_common.h \

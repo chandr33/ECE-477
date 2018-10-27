@@ -1,7 +1,7 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_fstorage.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/fstorage/nrf_fstorage.c \
- ../config/sdk_config.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/fstorage/nrf_fstorage.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/nrf_fstorage.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/sdk_config.h \
+ ../../../../../../components/libraries/fstorage/nrf_fstorage.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
  ../../../../../../components/libraries/util/sdk_errors.h \
@@ -27,6 +27,7 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_fstorage.o: \
  ../../../../../../components/libraries/log/nrf_log.h \
  ../../../../../../components/libraries/util/sdk_common.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/string.h \
+ ../config/sdk_config.h \
  ../../../../../../components/libraries/util/nordic_common.h \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
  ../../../../../../components/libraries/util/sdk_os.h \

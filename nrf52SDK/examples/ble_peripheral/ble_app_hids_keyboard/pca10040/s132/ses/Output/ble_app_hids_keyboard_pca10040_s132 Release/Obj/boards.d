@@ -1,6 +1,6 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/boards.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/boards/boards.c \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/boards/boards.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/boards.c \
+ ../../../../../../components/boards/boards.h \
  ../../../../../../modules/nrfx/hal/nrf_gpio.h \
  ../../../../../../modules/nrfx/nrfx.h \
  ../../../../../../integration/nrfx/nrfx_config.h ../config/sdk_config.h \
@@ -49,4 +49,4 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/boards.o: \
  ../../../../../../components/libraries/util/sdk_resources.h \
  ../../../../../../components/softdevice/s132/headers/nrf_sd_def.h \
  ../../../../../../modules/nrfx/drivers/nrfx_errors.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/boards/pca10040.h
+ ../../../../../../components/boards/pca10040.h

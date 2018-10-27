@@ -1,6 +1,6 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/ble_advdata.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/ble/common/ble_advdata.c \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/ble/common/ble_advdata.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/ble_advdata.c \
+ ../../../../../../components/ble/common/ble_advdata.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/string.h \
@@ -41,7 +41,7 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/ble_advdata.o: \
  ../../../../../../components/libraries/util/sdk_macros.h \
  ../../../../../../components/libraries/util/nrf_assert.h \
  ../../../../../../components/softdevice/s132/headers/ble_gap.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/ble/common/ble_srv_common.h \
+ ../../../../../../components/ble/common/ble_srv_common.h \
  ../../../../../../components/softdevice/s132/headers/ble_types.h \
  ../../../../../../components/libraries/util/app_util.h \
  ../../../../../../components/softdevice/s132/headers/ble_gatt.h

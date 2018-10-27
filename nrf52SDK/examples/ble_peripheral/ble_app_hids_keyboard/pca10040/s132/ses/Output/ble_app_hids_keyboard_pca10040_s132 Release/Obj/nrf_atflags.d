@@ -1,5 +1,5 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_atflags.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/atomic_flags/nrf_atflags.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/nrf_atflags.c \
  ../../../../../../modules/nrfx/mdk/nrf.h \
  ../../../../../../modules/nrfx/mdk/nrf52.h \
  ../../../../../../components/toolchain/cmsis/include/core_cm4.h \
@@ -28,4 +28,4 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_atflags.o: \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stddef.h \
  ../../../../../../components/libraries/util/sdk_macros.h \
  ../../../../../../components/libraries/util/nrf_assert.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/atomic_flags/nrf_atflags.h
+ ../../../../../../components/libraries/atomic_flags/nrf_atflags.h

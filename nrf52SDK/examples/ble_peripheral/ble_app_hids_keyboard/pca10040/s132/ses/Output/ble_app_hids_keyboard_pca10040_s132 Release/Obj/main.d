@@ -1,5 +1,5 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/main.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/examples/ble_peripheral/ble_app_hids_keyboard/main.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/main.c \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/string.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/__crossworks.h \
@@ -120,4 +120,5 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/main.o: \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdlib.h \
  ../../../../../../components/libraries/balloc/nrf_balloc.h \
  ../../../../../../components/libraries/log/nrf_log_default_backends.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/init_bleKeyboard.h \
  ../../../../../../components/libraries/delay/nrf_delay.h

@@ -1,7 +1,7 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_drv_clock.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/integration/nrfx/legacy/nrf_drv_clock.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/nrf_drv_clock.c \
  ../../../../../../components/libraries/util/nordic_common.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/integration/nrfx/legacy/nrf_drv_clock.h \
+ ../../../../../../integration/nrfx/legacy/nrf_drv_clock.h \
  ../../../../../../modules/nrfx/drivers/include/nrfx_clock.h \
  ../../../../../../modules/nrfx/nrfx.h \
  ../../../../../../integration/nrfx/nrfx_config.h ../config/sdk_config.h \

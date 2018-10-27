@@ -1,6 +1,6 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/ble_srv_common.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/ble/common/ble_srv_common.c \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/ble/common/ble_srv_common.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/ble_srv_common.c \
+ ../../../../../../components/ble/common/ble_srv_common.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
  ../../../../../../components/softdevice/s132/headers/ble_types.h \

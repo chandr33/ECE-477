@@ -1,6 +1,6 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_ringbuf.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/ringbuf/nrf_ringbuf.c \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/ringbuf/nrf_ringbuf.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/nrf_ringbuf.c \
+ ../../../../../../components/libraries/ringbuf/nrf_ringbuf.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  ../../../../../../components/libraries/atomic/nrf_atomic.h \
  ../../../../../../components/libraries/util/sdk_common.h \

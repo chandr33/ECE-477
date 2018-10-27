@@ -1,6 +1,6 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/app_error_weak.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/app_error_weak.c \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/app_error.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/app_error_weak.c \
+ ../../../../../../components/libraries/util/app_error.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdio.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/__crossworks.h \
@@ -17,18 +17,16 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/app_error_weak.o: \
  ../../../../../../modules/nrfx/mdk/nrf51_to_nrf52.h \
  ../../../../../../modules/nrfx/mdk/nrf52_name_change.h \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/sdk_errors.h \
+ ../../../../../../components/libraries/util/sdk_errors.h \
  ../../../../../../components/softdevice/s132/headers/nrf_error.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/nordic_common.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/app_error_weak.h \
+ ../../../../../../components/libraries/util/nordic_common.h \
+ ../../../../../../components/libraries/util/app_error_weak.h \
  ../../../../../../components/libraries/log/nrf_log.h \
  ../../../../../../components/libraries/util/sdk_common.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/string.h \
  ../config/sdk_config.h \
- ../../../../../../components/libraries/util/nordic_common.h \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
  ../../../../../../components/libraries/util/sdk_os.h \
- ../../../../../../components/libraries/util/sdk_errors.h \
  ../../../../../../components/libraries/util/app_util.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stddef.h \
  ../../../../../../components/libraries/util/sdk_macros.h \
@@ -55,7 +53,6 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/app_error_weak.o: \
  ../../../../../../components/softdevice/s132/headers/nrf_error_soc.h \
  ../../../../../../components/softdevice/s132/headers/nrf_nvic.h \
  ../../../../../../components/libraries/util/app_error.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/util/app_util_platform.h \
  ../../../../../../components/softdevice/s132/headers/nrf_sdm.h \
  ../../../../../../components/softdevice/s132/headers/nrf_error_sdm.h \
  ../../../../../../components/softdevice/s132/headers/nrf_soc.h

@@ -1,5 +1,5 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/pm_buffer.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/ble/peer_manager/pm_buffer.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/pm_buffer.c \
  ../../../../../../components/libraries/util/sdk_common.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
@@ -27,6 +27,6 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/pm_buffer.o: \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
  ../../../../../../components/libraries/util/sdk_macros.h \
  ../../../../../../components/libraries/util/nrf_assert.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/ble/peer_manager/pm_buffer.h \
+ ../../../../../../components/ble/peer_manager/pm_buffer.h \
  ../../../../../../components/libraries/util/sdk_errors.h \
  ../../../../../../components/libraries/atomic_flags/nrf_atflags.h

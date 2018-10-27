@@ -1,6 +1,6 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/ble_conn_state.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/ble/common/ble_conn_state.c \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/ble/common/ble_conn_state.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/ble_conn_state.c \
+ ../../../../../../components/ble/common/ble_conn_state.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  ../../../../../../components/softdevice/s132/headers/ble.h \

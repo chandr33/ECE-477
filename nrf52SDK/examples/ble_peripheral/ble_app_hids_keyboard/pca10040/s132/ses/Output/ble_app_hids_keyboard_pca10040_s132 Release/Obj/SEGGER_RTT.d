@@ -1,7 +1,7 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/SEGGER_RTT.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/external/segger_rtt/SEGGER_RTT.c \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/external/segger_rtt/SEGGER_RTT.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/external/segger_rtt/SEGGER_RTT_Conf.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/SEGGER_RTT.c \
+ ../../../../../../external/segger_rtt/SEGGER_RTT.h \
+ ../../../../../../external/segger_rtt/SEGGER_RTT_Conf.h \
  ../../../../../../components/libraries/util/nordic_common.h \
  ../../../../../../components/libraries/util/app_util_platform.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \

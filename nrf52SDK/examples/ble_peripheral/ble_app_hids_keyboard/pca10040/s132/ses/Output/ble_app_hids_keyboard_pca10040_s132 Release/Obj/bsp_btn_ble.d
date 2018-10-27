@@ -1,6 +1,6 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/bsp_btn_ble.o: \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/bsp/bsp_btn_ble.c \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/bsp/bsp_btn_ble.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/Segger\ Internal\ Files/bsp_btn_ble.c \
+ ../../../../../../components/libraries/bsp/bsp_btn_ble.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  ../../../../../../components/softdevice/s132/headers/ble.h \
  ../../../../../../components/softdevice/s132/headers/nrf_svc.h \
@@ -26,7 +26,7 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/bsp_btn_ble.o: \
  ../../../../../../modules/nrfx/mdk/nrf52_name_change.h \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
  ../../../../../../components/softdevice/s132/headers/ble_gatts.h \
- /Users/qchang/nRF5_SDK_15.2.0_9412b96/components/libraries/bsp/bsp.h \
+ ../../../../../../components/libraries/bsp/bsp.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
  ../../../../../../components/boards/boards.h \
  ../../../../../../modules/nrfx/hal/nrf_gpio.h \
@@ -66,4 +66,5 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/bsp_btn_ble.o: \
  ../../../../../../components/libraries/util/app_error.h \
  ../../../../../../components/softdevice/common/nrf_sdh_ble.h \
  ../../../../../../components/libraries/experimental_section_vars/nrf_section_iter.h \
- ../../../../../../components/libraries/experimental_section_vars/nrf_section.h
+ ../../../../../../components/libraries/experimental_section_vars/nrf_section.h \
+ ../../../../../../components/libraries/bsp/bsp.h
