@@ -57,6 +57,11 @@ function initialize() {
     var value_Array = new SiteData(); //data storage for textareas
 
     store_var(value_Array, "value_Array");
+	document.getElementById("SHIFT_box").checked = false;
+	document.getElementById("CTRL_box").checked = false;
+	document.getElementById("FN_box").checked = false;
+	document.getElementById("ALT_box").checked = false;
+	
 
     sessionStorage.array_page = 0;
 }
@@ -115,8 +120,6 @@ function reset_all() {
 		document.getElementById("key"+i).value = page.getData(i).str_data;
 	}
 	
-	console.log(get_checklist_index());
-	console.log(value_Array);
 	/*var value_Array = [];
 	for(var i = 0; i < 16; i++) {
 	    var page = [];
@@ -140,10 +143,11 @@ function reset_page() {
 		var value_Array = get_var("value_Array");
 		var array_page = get_checklist_index();
 		store_var(array_page, "array_page");
-		value_Array.updatePage(undefined, array_page, get_placeholder_table(get_placeholder_index(array_page)));
+		var placeholder_table = get_placeholder_table(get_placeholder_index(array_page));
+		var page = new Page(array_page);
 		for(var i = 0; i < 61; i++)
 		{
-			var page = value_Array.getPage(array_page);
+			
 			document.getElementById("key"+i).value = page.getData(i).str_data;
 
 		/*var value_Array = get_var("value_Array");
@@ -154,6 +158,8 @@ function reset_page() {
 		}
 		store_var(value_Array, "value_Array");*/
 		}
+		value_Array.updatePage(array_page, page);
+		store_var(value_Array, "value_Array");
 	}
 }
 
@@ -439,50 +445,52 @@ function download() {
 
     for (var i = 0; i < 16; i++)
     {
-	var array_frame = {name: convert_index_to_readable_name(i), bindings: []};
-	console.log("key"+i+" is currently being validated");
-	console.log(get_var("value_Array").getPage(i));
+		var array_frame = {name: convert_index_to_readable_name(i), bindings: []};
+		console.log("key"+i+" is currently being validated");
+		console.log(get_var("value_Array").getPage(i));
 
-	for (var j = 0; j < 61; j++)
-	{
-	    var validation_data = validate_keybind_syntax(get_var("value_Array").getPage(i).page_data[j]); //check if valid
-	    if (validation_data.valid == false)
-	    {
-		//TODO: CONVEY TO USER THAT ERROR OCCURS ON ANOTHER PAGE. FOR NOW, ONLY ALERT IF ON SAME PAGE, CANCEL DOWNLOAD.
-		validation = false;
-		if (get_checklist_index() == i) //currently on same page as error
+		for (var j = 0; j < 61; j++)
 		{
-		    document.getElementById("key"+j).style.border = "2px solid red";
+			var validation_data = validate_keybind_syntax(get_var("value_Array").getPage(i).page_data[j]); //check if valid
+			if (validation_data.valid == false)
+			{
+				//TODO: CONVEY TO USER THAT ERROR OCCURS ON ANOTHER PAGE. FOR NOW, ONLY ALERT IF ON SAME PAGE, CANCEL DOWNLOAD.
+				validation = false;
+			if (get_checklist_index() == i) //currently on same page as error
+			{
+				document.getElementById("key"+j).style.border = "2px solid red";
+			}
+				invalid_data_dump.push(validation_data);
+			}
+			else if(document.getElementById("key"+j).style.border == "2px solid red") //keybind valid after previously invalid. reset it
+			{
+			if (get_checklist_index() == i) //confirm valid textarea is for this page
+			{
+				document.getElementById("key"+j).style.border = "";
+			}
+			}
+			if (validation_data.data == "")
+			{
+				array_frame.bindings[j] = null;
+			}
+			else
+			{
+				array_frame.bindings[j] = validation_data.data;
+			}
 		}
-		invalid_data_dump.push(validation_data);
-	    }
-	    else if(document.getElementById("key"+j).style.border == "2px solid red") //keybind valid after previously invalid. reset it
-	    {
-		if (get_checklist_index() == i) //confirm valid textarea is for this page
+		//TODO: Add macros to temp_value_array
+		//var macro_array_frame = {name};
+		temp_value_array.push(array_frame);
+		}
+		if (validation)
 		{
-		    document.getElementById("key"+j).style.border = "";
+			download_file(JSON.stringify(temp_value_array), "test.txt", "/application/json");
 		}
-	    }
-	    if (validation_data.data == "")
-	    {
-		array_frame.bindings[j] = null;
-	    }
-	    else
-	    {
-		array_frame.bindings[j] = validation_data.data;
-	    }
-	}
-	temp_value_array.push(array_frame);
-    }
-    if (validation)
-    {
-	download_file(JSON.stringify(temp_value_array), "test.txt", "/application/json");
-    }
-    else
-    {
-	console.log("Download failed! A textbox had invalid syntax.");
-	console.log(invalid_data_dump);
-    }
+		else
+		{
+		console.log("Download failed! A textbox had invalid syntax.");
+		console.log(invalid_data_dump);
+		}
 }
 
 function download_file (data, filename, type) { //source: https://stackoverflow.com/questions/13405129/javascript-create-and-save-file

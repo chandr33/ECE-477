@@ -21,7 +21,7 @@
 	<button id="Reset_Page" onclick="reset_page()">Reset Current Listing</button>
 	<button id="Reset_Macros" onclick="reset_macros()">Reset Macros</button>
 	<button id="Download" onclick="download()">Save Changes</button>
-	<table>
+	<table id="RebindTable">
 		<tr>
 			<th>Key</th>
 			<th>Unmodified Binding</th>
@@ -189,57 +189,74 @@
 <br><br>
 <div id="macro_center">
 	<table>
+		<col width="50">
+		<col width="150">
+		<col width="100">
 		<tr>
 			<th>Macro #</th>
 			<th>Macro Actions</th>
+			<th>Does Macro run Indefinitely?</th>
 		</tr>
 		<tr>
+			
 			<th>Macro #1</th>
-			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+			<td><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></td>
+			<td><input type="checkbox" id="repeat1" value="Is macro toggled?" onclick="updateMacroLoopState();"/></td>
 		</tr>
 		<tr>
 			<th>Macro #2</th>
 			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+			<td><input type="checkbox" id="repeat2" value="Is macro toggled?" onclick="updateMacroLoopState();"/></td>
 		</tr>
 		<tr>
 			<th>Macro #3</th>
 			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+			<td><input type="checkbox" id="repeat3" value="Is macro toggled?" onclick="updateMacroLoopState();"/></td>
 		</tr>
 		<tr>
 			<th>Macro #4</th>
 			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+			<td><input type="checkbox" id="repeat4" value="Is macro toggled?" onclick="updateMacroLoopState();"/></td>
 		</tr>
 		<tr>
 			<th>Macro #5</th>
 			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+			<td><input type="checkbox" id="repeat5" value="Is macro toggled?" onclick="updateMacroLoopState();"/></td>
 		</tr>
 		<tr>
 			<th>Macro #6</th>
 			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+			<td><input type="checkbox" id="repeat6" value="Is macro toggled?" onclick="updateMacroLoopState();"/></td>
 		</tr>
 		<tr>
 			<th>Macro #7</th>
 			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+			<td><input type="checkbox" id="repeat7" value="Is macro toggled?" onclick="updateMacroLoopState();"/></td>
 		</tr>
 		<tr>
 			<th>Macro #8</th>
 			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+			<td><input type="checkbox" id="repeat8" value="Is macro toggled?" onclick="updateMacroLoopState();"/></td>
 		</tr>
 		<tr>
 			<th>Macro #9</th>
 			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+			<td><input type="checkbox" id="repeat9" value="Is macro toggled?" onclick="updateMacroLoopState();"/></td>
 		</tr>
 		<tr>
 			<th>Macro #10</th>
 			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+			<td><input type="checkbox" id="repeat10" value="Is macro toggled?" onclick="updateMacroLoopState();"/></td>
 		</tr>
 		<tr>
 			<th>Macro #11</th>
 			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+			<td><input type="checkbox" id="repeat11" value="Is macro toggled?" onclick="updateMacroLoopState();"/></td>
 		</tr>
 		<tr>
 			<th>Macro #12</th>
 			<th><textarea id="key2" rows='1' cols='150' placeholder="Hello World"></textarea></th>
+			<td><input type="checkbox" id="repeat12" value="Is macro toggled?" onclick="updateMacroLoopState();"/></td>
 		</tr>
 	</table>
 </div>
