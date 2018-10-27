@@ -172,7 +172,10 @@ class SiteData //value_Array
 
 	updatePage(index, page)
 	{
-		this.data[index] = page;
+		if (typeof(page) === Page)
+		{
+			this.data[index] = page;
+		}
 	}
 
 	getPage(index)

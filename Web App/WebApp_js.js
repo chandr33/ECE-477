@@ -140,10 +140,11 @@ function reset_page() {
 		var value_Array = get_var("value_Array");
 		var array_page = get_checklist_index();
 		store_var(array_page, "array_page");
-		value_Array.updatePage(undefined, array_page, get_placeholder_table(get_placeholder_index(array_page)));
+		var placeholder_table = get_placeholder_table(get_placeholder_index(array_page));
+		var page = new Page(array_page);
 		for(var i = 0; i < 61; i++)
 		{
-			var page = value_Array.getPage(array_page);
+			
 			document.getElementById("key"+i).value = page.getData(i).str_data;
 
 		/*var value_Array = get_var("value_Array");
@@ -154,6 +155,8 @@ function reset_page() {
 		}
 		store_var(value_Array, "value_Array");*/
 		}
+		value_Array.updatePage(array_page, page);
+		store_var(value_Array, "value_Array");
 	}
 }
 
