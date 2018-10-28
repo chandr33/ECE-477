@@ -16,6 +16,8 @@
   If Left or Right is not specified with the modifier, then default to plain versions 0x11-13, if need to choose, choose right to avoid gaming conflicts
 */
 
+var MAX_MACRO_LENGTH = 100;
+
 function initialize() {
     var default_placeholders = [
 	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", //0-13
@@ -327,6 +329,27 @@ function updateMacroLoopState()
 		macro_Array[i].setToggleState(document.getElementById("repeat"+i).checked);
 	}
 	store_var(macro_Array, "macro_Array");
+}
+
+function updateMacroText(obj)
+{
+	var macro_num = parseInt(obj.id.replace("macro", ''));
+	var macro_Array = get_var("macro_Array");
+	macro_Array[macro_num].setMacro(obj.value);
+	store_var(macro_Array, "macro_Array");
+}
+
+function checkMacroTextLength(obj)
+{
+	var macro_num = parseInt(obj.id.replace("macro", ''));
+	var macro_Array = get_var("macro_Array");
+	if (macro_Array[macro_num].getMacro().length > MAX_MACRO_LENGTH)
+	{
+		macro_Array[macro_num].setMacro(macro_Array[macro_num].getMacro().substring(0, MAX_MACRO_LENGTH));
+		document.getElementById(obj.id).value = macro_Array[macro_num].getMacro();
+	}
+	store_var(macro_Array, "macro_Array");
+	console.log(macro_Array[macro_num].getMacro().length);
 }
 
 function validate_keybind_syntax(data) //give name of textfield object. returns object with 2 fields: valid and data.
