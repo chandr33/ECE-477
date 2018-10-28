@@ -16,6 +16,8 @@
   If Left or Right is not specified with the modifier, then default to plain versions 0x11-13, if need to choose, choose right to avoid gaming conflicts
 */
 
+var MAX_MACRO_LENGTH = 100;
+
 function initialize() {
     var default_placeholders = [
 	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", //0-13
@@ -55,8 +57,16 @@ function initialize() {
     //store_var(fn_shift_placeholders, "fn_shift_placeholders");
 
     var value_Array = new SiteData(); //data storage for textareas
+    var macro_Array = new Array();
+
+    for (var i = 0; i < 12; i++)
+    {
+    	macro_Array[i] = new Macro();
+    }
 
     store_var(value_Array, "value_Array");
+    store_var(macro_Array, "macro_Array");
+
 	document.getElementById("SHIFT_box").checked = false;
 	document.getElementById("CTRL_box").checked = false;
 	document.getElementById("FN_box").checked = false;
@@ -99,7 +109,7 @@ function get_var(id_string) { //Retrieves objects stored in sessionStorage
     var storedData = sessionStorage.getItem(id_string);
     if (storedData) {
 	return JSON.parse(storedData, function(key, value) { //from https://stackoverflow.com/questions/14027168/how-to-restore-original-object-type-from-json
-        return key === '' && value.hasOwnProperty("__type")
+        return value.hasOwnProperty("__type")
         ? Types[value.__type].revive(value)
         : this[key];
     });
@@ -308,6 +318,38 @@ function update_values () {
     //Store Variables Again
     sessionStorage.array_page = array_page;
     store_var(value_Array, "value_Array");
+}
+
+function updateMacroLoopState()
+{
+	var macro_Array = get_var("macro_Array");
+	console.log(macro_Array);
+	for (var i = 0; i < 12; i++)
+	{
+		macro_Array[i].setToggleState(document.getElementById("repeat"+i).checked);
+	}
+	store_var(macro_Array, "macro_Array");
+}
+
+function updateMacroText(obj)
+{
+	var macro_num = parseInt(obj.id.replace("macro", ''));
+	var macro_Array = get_var("macro_Array");
+	macro_Array[macro_num].setMacro(obj.value);
+	store_var(macro_Array, "macro_Array");
+}
+
+function checkMacroTextLength(obj)
+{
+	var macro_num = parseInt(obj.id.replace("macro", ''));
+	var macro_Array = get_var("macro_Array");
+	if (macro_Array[macro_num].getMacro().length > MAX_MACRO_LENGTH)
+	{
+		macro_Array[macro_num].setMacro(macro_Array[macro_num].getMacro().substring(0, MAX_MACRO_LENGTH));
+		document.getElementById(obj.id).value = macro_Array[macro_num].getMacro();
+	}
+	store_var(macro_Array, "macro_Array");
+	console.log(macro_Array[macro_num].getMacro().length);
 }
 
 function validate_keybind_syntax(data) //give name of textfield object. returns object with 2 fields: valid and data.
