@@ -205,3 +205,94 @@ SiteData.revive = function(data)
 }
 
 Types.SiteData = SiteData;
+
+class Macro
+{
+	constructor(valid, str_macro, toggled)
+	{
+		if (valid === undefined)
+		{
+			this.valid = true;
+		}
+		else
+		{
+			this.valid = valid;
+		}
+		
+		if (str_macro === undefined)
+		{
+			this.str_macro = "";
+		}
+		else
+		{
+			this.str_macro = str_macro;
+		}
+		
+		if (toggled === undefined)
+		{
+			this.toggled = false;
+		}
+		else
+		{
+			this.toggled = toggled;
+		}
+		
+	}
+	
+	getMacro()
+	{
+		return this.str_macro;
+	}
+	
+	setMacro(macro)
+	{
+		if (typeof(macro) === 'string')
+		{
+			this.str_macro = macro;
+		}
+	}
+	
+	setToggleState(state)
+	{
+		if (typeof(state) === 'boolean')
+		{
+			this.toggled = state;
+		}
+	}
+	
+	getToggleState()
+	{
+		return this.toggled;
+	}
+	
+	isValid()
+	{
+		return this.valid;
+	}
+	
+	setValid(state)
+	{
+		if (typeof(state) === 'boolean')
+		{
+			this.valid = state;
+		}
+	}
+	
+	toJSON()
+	{
+		return {
+			__type: 'Macro',
+			valid: this.valid,
+			str_macro: this.str_macro,
+			toggled: this.toggled
+		};
+	}
+	
+}
+
+Macro.revive = function(data)
+{
+	return new Macro(data.valid, data.str_macro, data.toggled);
+}
+
+Types.Macro = Macro;
