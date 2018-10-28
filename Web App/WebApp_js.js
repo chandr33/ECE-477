@@ -318,6 +318,26 @@ function update_values () {
     //Store Variables Again
     sessionStorage.array_page = array_page;
     store_var(value_Array, "value_Array");
+    store_var(array_page, "array_page");
+}
+
+function validatePage()
+{
+	var value_Array = get_var("value_Array");
+	var cur_page = value_Array.getPage(get_checklist_index());
+	console.log(value_Array);
+
+	for (var i = 0; i < 61; i++)
+	{
+		if (cur_page.getData(i).getValidity() == false)
+		{
+			document.getElementById("key"+i).style.border = "2px solid red";
+		}
+		else
+		{
+			document.getElementById("key"+i).style.border = "";
+		}
+	}
 }
 
 function updateMacroLoopState()
@@ -366,12 +386,19 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
     var user_input = data.str_data;
     var token_array = user_input.split("+");
     var no_space_patt = /\S+/;
+    var no_multiple_words = /.+\s+.+/; //words separated by whitespace
 
     for (var i = 0; i < token_array.length; i++) //loop until user_input is completely scanned
     {
 		if (key_found) //key must be at end of token_array, so invalidate
 		{
 			console.log("Validate fxn return due to key_found");
+			return_data.valid = false;
+			return return_data;
+		}
+		if (no_multiple_words.exec(token_array[i]) != null) //keys were separated by spaces, not +. throw error
+		{
+			console.log("Validate fxn retuned due to keys separated by whitespace, not +");
 			return_data.valid = false;
 			return return_data;
 		}
@@ -480,10 +507,16 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
     return return_data;
 }
 
+function validateMacroSyntax(data)
+{
+
+}
+
 function download() {
     var temp_value_array = Array();
     var validation = true;
     var invalid_data_dump = []; //used for debugging validate fxn.
+    var value_Array = get_var("value_Array");
 
     for (var i = 0; i < 16; i++)
     {
@@ -493,23 +526,29 @@ function download() {
 
 		for (var j = 0; j < 61; j++)
 		{
-			var validation_data = validate_keybind_syntax(get_var("value_Array").getPage(i).page_data[j]); //check if valid
+			var validation_data = validate_keybind_syntax(value_Array.getPage(i).page_data[j]); //check if valid
 			if (validation_data.valid == false)
 			{
-				//TODO: CONVEY TO USER THAT ERROR OCCURS ON ANOTHER PAGE. FOR NOW, ONLY ALERT IF ON SAME PAGE, CANCEL DOWNLOAD.
 				validation = false;
-			if (get_checklist_index() == i) //currently on same page as error
-			{
-				document.getElementById("key"+j).style.border = "2px solid red";
-			}
+				if (get_checklist_index() == i) //currently on same page as error
+				{
+					document.getElementById("key"+j).style.border = "2px solid red";
+				}
+
 				invalid_data_dump.push(validation_data);
+
+				value_Array.getPage(i).getData(j).setValidity(false);
+				store_var(value_Array, "value_Array");
+
 			}
 			else if(document.getElementById("key"+j).style.border == "2px solid red") //keybind valid after previously invalid. reset it
 			{
-			if (get_checklist_index() == i) //confirm valid textarea is for this page
-			{
-				document.getElementById("key"+j).style.border = "";
-			}
+				if (get_checklist_index() == i) //confirm valid textarea is for this page
+				{
+					document.getElementById("key"+j).style.border = "";
+				}
+				value_Array.getPage(i).getData(j).setValidity(true);
+				store_var(value_Array, "value_Array");
 			}
 			if (validation_data.data == "")
 			{
@@ -532,6 +571,7 @@ function download() {
 		{
 		console.log("Download failed! A textbox had invalid syntax.");
 		console.log(invalid_data_dump);
+		window.alert("There was a syntax error in specified keybindings. Download halted.");
 		}
 }
 

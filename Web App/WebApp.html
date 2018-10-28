@@ -11,12 +11,12 @@
 
 <Body onload="initialize()">
 
-<img id="keyboard_image" src="img/AH_wk1.jpg" width="700px" height="300px"></img>
+<img id="keyboard_image" src="img/keyboard-layout.png" ></img>
 <div id="rebind_center">
-	<input type="checkbox" id="SHIFT_box" value="SHIFT" onclick="update_placeholders();update_values();"> SHIFT
-	<input type="checkbox" id="CTRL_box" value="CTRL" onclick="update_placeholders();update_values();"> CTRL
-	<input type="checkbox" id="FN_box" value="FN" onclick="update_placeholders();update_values();"> FN
-	<input type="checkbox" id="ALT_box" value="ALT" onclick="update_placeholders();update_values();"> ALT<br>
+	<input type="checkbox" id="SHIFT_box" value="SHIFT" onclick="update_placeholders();update_values();validatePage();"> SHIFT
+	<input type="checkbox" id="CTRL_box" value="CTRL" onclick="update_placeholders();update_values();validatePage();"> CTRL
+	<input type="checkbox" id="FN_box" value="FN" onclick="update_placeholders();update_values();validatePage();"> FN
+	<input type="checkbox" id="ALT_box" value="ALT" onclick="update_placeholders();update_values();validatePage();"> ALT<br>
 	<button id="Reset_All" onclick="reset_all()">Reset All Bindings</button>
 	<button id="Reset_Page" onclick="reset_page()">Reset Current Listing</button>
 	<button id="Reset_Macros" onclick="reset_macros()">Reset Macros</button>
