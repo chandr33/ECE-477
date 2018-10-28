@@ -386,12 +386,19 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
     var user_input = data.str_data;
     var token_array = user_input.split("+");
     var no_space_patt = /\S+/;
+    var no_multiple_words = /.+\s+.+/; //words separated by whitespace
 
     for (var i = 0; i < token_array.length; i++) //loop until user_input is completely scanned
     {
 		if (key_found) //key must be at end of token_array, so invalidate
 		{
 			console.log("Validate fxn return due to key_found");
+			return_data.valid = false;
+			return return_data;
+		}
+		if (no_multiple_words.exec(token_array[i]) != null) //keys were separated by spaces, not +. throw error
+		{
+			console.log("Validate fxn retuned due to keys separated by whitespace, not +");
 			return_data.valid = false;
 			return return_data;
 		}
