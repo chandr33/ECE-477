@@ -41,7 +41,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
-//#include "init_bleKeyboard.h"
+#include "keyboard_lookup_table.h"
 
 //Libs not included by example
 #include "nrf_delay.h"
@@ -200,6 +200,15 @@ static sensorsim_state_t m_battery_sim_state;                       /**< Battery
 static bool              m_caps_on = false;                         /**< Variable to indicate if Caps Lock is turned on. */
 static pm_peer_id_t      m_peer_id;                                 /**< Device reference handle to the current bonded central. */
 static buffer_list_t     buffer_list;                               /**< List to enqueue not just data to be sent, but also related information like the handle, connection handle etc */
+
+//-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//Team4 defined values
+uint8_t prev_key_value = 6;
+
+
+
+
+//-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_HUMAN_INTERFACE_DEVICE_SERVICE, BLE_UUID_TYPE_BLE}};
 
@@ -1539,12 +1548,12 @@ static void idle_state_handle(void)
 }
 
 //Matrix scanning function
-void scanMatrix()
+uint8_t scanMatrix()
 {
   uint8_t i;
   uint8_t j;    
   uint8_t key_value = 6;
-  uint8_t new_key_value = 6;
+  //uint8_t new_key_value = 6;
   for (i = 0; i < col_length; i++)
   {
     nrf_gpio_pin_write(col_offset + i, HIGH);
@@ -1553,8 +1562,10 @@ void scanMatrix()
     {
       if (nrf_gpio_pin_read(row_offset + j) == HIGH)
       {
-
-        new_key_value = (i) * row_length + (j); //updating key value
+        //NRF_LOG_INFO("Pressed key is: %d.\n", (i) * row_length + (j));
+        //send_key_press(default_lookup_table[(i) * row_length + (j)]);
+        key_value =  (i) * row_length + (j); //updating key value
+        
       }
       
 
@@ -1562,8 +1573,9 @@ void scanMatrix()
     }
     nrf_gpio_pin_write(col_offset + i, LOW);
   }
-  NRF_LOG_INFO("Pressed key is: %d.\n", new_key_value);
-  send_key_press(0x0b);
+  NRF_LOG_INFO("Pressed key is: %d.\n", key_value);
+  //send_key_press(0x0b);
+  return key_value;
 
 }
 
@@ -1591,12 +1603,22 @@ int main(void)
     NRF_LOG_INFO("HID Keyboard example started.");
     timers_start();
     advertising_start(erase_bonds);
+    uint8_t curr_key_value = 6;
 
     // Enter main loop.
     for (;;)
     {
+        
         idle_state_handle();
-        scanMatrix();
+        curr_key_value = scanMatrix();
+        if((curr_key_value != prev_key_value) && (curr_key_value!= 6))
+        {
+          send_key_press(default_lookup_table[curr_key_value]);
+          NRF_LOG_INFO("Pressed key is: %d.\n", curr_key_value);
+    
+        }
+        prev_key_value = curr_key_value;
+
     }
 }
 

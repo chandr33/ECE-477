@@ -120,4 +120,5 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/main.o: \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdlib.h \
  ../../../../../../components/libraries/balloc/nrf_balloc.h \
  ../../../../../../components/libraries/log/nrf_log_default_backends.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/keyboard_lookup_table.h \
  ../../../../../../components/libraries/delay/nrf_delay.h
