@@ -1,5 +1,5 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/main.o: \
- /Users/qchang/Downloads/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/string.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/__crossworks.h \

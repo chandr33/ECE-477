@@ -1,6 +1,6 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_drv_uart.o: \
- /Users/qchang/Downloads/ScriptedKeys_firmware/integration/nrfx/legacy/nrf_drv_uart.c \
- /Users/qchang/Downloads/ScriptedKeys_firmware/integration/nrfx/legacy/nrf_drv_uart.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/integration/nrfx/legacy/nrf_drv_uart.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/integration/nrfx/legacy/nrf_drv_uart.h \
  ../../../../../../modules/nrfx/nrfx.h \
  ../../../../../../integration/nrfx/nrfx_config.h ../config/sdk_config.h \
  ../../../../../../modules/nrfx/drivers/nrfx_common.h \

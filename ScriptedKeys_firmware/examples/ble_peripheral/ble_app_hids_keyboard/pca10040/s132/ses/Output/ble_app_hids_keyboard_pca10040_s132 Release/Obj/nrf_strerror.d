@@ -1,5 +1,5 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_strerror.o: \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/strerror/nrf_strerror.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/strerror/nrf_strerror.c \
  ../../../../../../components/libraries/util/sdk_common.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
@@ -27,5 +27,5 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_strerror.o: \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
  ../../../../../../components/libraries/util/sdk_macros.h \
  ../../../../../../components/libraries/util/nrf_assert.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/strerror/nrf_strerror.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/strerror/nrf_strerror.h \
  ../../../../../../components/libraries/util/sdk_errors.h

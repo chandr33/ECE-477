@@ -1,57 +1,10 @@
-/**
- * Copyright (c) 2012 - 2018, Nordic Semiconductor ASA
- *
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form, except as embedded into a Nordic
- *    Semiconductor ASA integrated circuit in a product or a software update for
- *    such product, must reproduce the above copyright notice, this list of
- *    conditions and the following disclaimer in the documentation and/or other
- *    materials provided with the distribution.
- *
- * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * 4. This software, with or without modification, must only be used with a
- *    Nordic Semiconductor ASA integrated circuit.
- *
- * 5. Any software provided in binary form under this license must not be reverse
- *    engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
- * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- */
-/** @file
- *
- * @defgroup ble_sdk_app_hids_keyboard_main main.c
- * @{
- * @ingroup ble_sdk_app_hids_keyboard
- * @brief HID Keyboard Sample Application main file.
- *
- * This file contains is the source code for a sample application using the HID, Battery and Device
- * Information Services for implementing a simple keyboard functionality.
- * Pressing Button 0 will send text 'hello' to the connected peer. On receiving output report,
- * it toggles the state of LED 2 on the mother board based on whether or not Caps Lock is on.
- * This application uses the @ref app_scheduler.
- *
- * Also it would accept pairing requests from any peer device.
- */
+/*
+Purdue University ECE477 Senior Design - ScriptedKeys
+Fall 2018
+This is the ScriptedKeys keyboard firmware's main.c
+This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
+
+*/
 
 #include <stdint.h>
 #include <string.h>
@@ -1066,6 +1019,13 @@ static void keys_send(uint8_t key_pattern_len, uint8_t * p_key_pattern)
     }
 }
 
+static void send_key_press(uint8_t keycode){
+    //uint8_t pattern_len = 1;
+    uint8_t key_pattern[] = {keycode};
+    keys_send(1, &key_pattern);
+
+}
+
 
 /**@brief Function for handling the HID Report Characteristic Write event.
  *
@@ -1584,6 +1544,7 @@ void scanMatrix()
   uint8_t i;
   uint8_t j;    
   uint8_t key_value = 6;
+  uint8_t new_key_value = 6;
   for (i = 0; i < col_length; i++)
   {
     nrf_gpio_pin_write(col_offset + i, HIGH);
@@ -1593,7 +1554,7 @@ void scanMatrix()
       if (nrf_gpio_pin_read(row_offset + j) == HIGH)
       {
 
-        key_value = (i) * row_length + (j);
+        new_key_value = (i) * row_length + (j); //updating key value
       }
       
 
@@ -1601,12 +1562,12 @@ void scanMatrix()
     }
     nrf_gpio_pin_write(col_offset + i, LOW);
   }
+  NRF_LOG_INFO("Pressed key is: %d.\n", new_key_value);
+  send_key_press(0x0b);
 
-  NRF_LOG_INFO("Pressed key is: %d.\n", key_value);
 }
 
 int main(void)
-
 {
     bool erase_bonds;
 

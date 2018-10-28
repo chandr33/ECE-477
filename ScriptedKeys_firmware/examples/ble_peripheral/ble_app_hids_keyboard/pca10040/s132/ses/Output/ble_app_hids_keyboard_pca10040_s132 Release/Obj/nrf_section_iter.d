@@ -1,5 +1,5 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_section_iter.o: \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/experimental_section_vars/nrf_section_iter.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/experimental_section_vars/nrf_section_iter.c \
  ../../../../../../components/libraries/util/sdk_common.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
@@ -27,8 +27,8 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_section_iter.o: \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
  ../../../../../../components/libraries/util/sdk_macros.h \
  ../../../../../../components/libraries/util/nrf_assert.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/experimental_section_vars/nrf_section_iter.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/experimental_section_vars/nrf_section.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/experimental_section_vars/nrf_section_iter.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/experimental_section_vars/nrf_section.h \
  ../../../../../../components/libraries/util/nordic_common.h \
  ../../../../../../components/libraries/util/nrf_assert.h \
  ../../../../../../components/libraries/util/app_util.h

@@ -1,5 +1,5 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_sdh_ble.o: \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/softdevice/common/nrf_sdh_ble.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/softdevice/common/nrf_sdh_ble.c \
  ../../../../../../components/libraries/util/sdk_common.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
@@ -27,7 +27,7 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_sdh_ble.o: \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
  ../../../../../../components/libraries/util/sdk_macros.h \
  ../../../../../../components/libraries/util/nrf_assert.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/softdevice/common/nrf_sdh_ble.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/softdevice/common/nrf_sdh_ble.h \
  ../../../../../../components/libraries/util/app_util.h \
  ../../../../../../components/softdevice/s132/headers/ble.h \
  ../../../../../../components/softdevice/s132/headers/nrf_svc.h \
@@ -46,7 +46,7 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_sdh_ble.o: \
  ../../../../../../components/libraries/util/nordic_common.h \
  ../../../../../../components/libraries/util/nrf_assert.h \
  ../../../../../../components/libraries/util/sdk_errors.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/softdevice/common/nrf_sdh.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/softdevice/common/nrf_sdh.h \
  ../../../../../../components/libraries/util/app_error.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdio.h \
  ../../../../../../components/libraries/util/app_error_weak.h \

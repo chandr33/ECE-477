@@ -1,5 +1,5 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrfx_uarte.o: \
- /Users/qchang/Downloads/ScriptedKeys_firmware/modules/nrfx/drivers/src/nrfx_uarte.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/modules/nrfx/drivers/src/nrfx_uarte.c \
  ../../../../../../modules/nrfx/nrfx.h \
  ../../../../../../integration/nrfx/nrfx_config.h ../config/sdk_config.h \
  ../../../../../../modules/nrfx/drivers/nrfx_common.h \
@@ -49,7 +49,7 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrfx_uarte.o: \
  ../../../../../../modules/nrfx/drivers/nrfx_errors.h \
  ../../../../../../modules/nrfx/drivers/include/nrfx_uarte.h \
  ../../../../../../modules/nrfx/hal/nrf_uarte.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/modules/nrfx/drivers/src/prs/nrfx_prs.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/modules/nrfx/drivers/src/prs/nrfx_prs.h \
  ../../../../../../modules/nrfx/hal/nrf_gpio.h \
  ../../../../../../integration/nrfx/nrfx_log.h \
  ../../../../../../components/libraries/log/nrf_log.h \

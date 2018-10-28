@@ -1,5 +1,5 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/ble_dis.o: \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/ble/ble_services/ble_dis/ble_dis.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/ble/ble_services/ble_dis/ble_dis.c \
  ../../../../../../components/libraries/util/sdk_common.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
@@ -27,7 +27,7 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/ble_dis.o: \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
  ../../../../../../components/libraries/util/sdk_macros.h \
  ../../../../../../components/libraries/util/nrf_assert.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/ble/ble_services/ble_dis/ble_dis.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/ble/ble_services/ble_dis/ble_dis.h \
  ../../../../../../components/ble/common/ble_srv_common.h \
  ../../../../../../components/softdevice/s132/headers/ble_types.h \
  ../../../../../../components/libraries/util/app_util.h \

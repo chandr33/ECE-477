@@ -1,17 +1,17 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/app_error_handler_gcc.o: \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/util/app_error_handler_gcc.c \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/util/sdk_common.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/util/app_error_handler_gcc.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/util/sdk_common.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/string.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/__crossworks.h \
  ../config/sdk_config.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/util/nordic_common.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/util/nordic_common.h \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/util/sdk_os.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/util/sdk_errors.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/util/sdk_os.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/util/sdk_errors.h \
  ../../../../../../components/softdevice/s132/headers/nrf_error.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/util/app_util.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/util/app_util.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stddef.h \
  ../../../../../../modules/nrfx/mdk/nrf.h \
  ../../../../../../modules/nrfx/mdk/nrf52.h \
@@ -25,8 +25,8 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/app_error_handler_gcc.o:
  ../../../../../../modules/nrfx/mdk/nrf51_to_nrf52.h \
  ../../../../../../modules/nrfx/mdk/nrf52_name_change.h \
  ../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/util/sdk_macros.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/util/nrf_assert.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/util/app_error.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/util/sdk_macros.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/util/nrf_assert.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/util/app_error.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdio.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/util/app_error_weak.h
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/util/app_error_weak.h

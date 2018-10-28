@@ -1,7 +1,7 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/SEGGER_RTT_printf.o: \
- /Users/qchang/Downloads/ScriptedKeys_firmware/external/segger_rtt/SEGGER_RTT_printf.c \
- /Users/qchang/Downloads/ScriptedKeys_firmware/external/segger_rtt/SEGGER_RTT.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/external/segger_rtt/SEGGER_RTT_Conf.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/external/segger_rtt/SEGGER_RTT_printf.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/external/segger_rtt/SEGGER_RTT.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/external/segger_rtt/SEGGER_RTT_Conf.h \
  ../../../../../../components/libraries/util/nordic_common.h \
  ../../../../../../components/libraries/util/app_util_platform.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \

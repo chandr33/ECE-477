@@ -1,7 +1,7 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_fstorage.o: \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/fstorage/nrf_fstorage.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/fstorage/nrf_fstorage.c \
  ../config/sdk_config.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/components/libraries/fstorage/nrf_fstorage.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/libraries/fstorage/nrf_fstorage.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
  ../../../../../../components/libraries/util/sdk_errors.h \

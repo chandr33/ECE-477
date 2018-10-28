@@ -1,5 +1,5 @@
 Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_fprintf_format.o: \
- /Users/qchang/Downloads/ScriptedKeys_firmware/external/fprintf/nrf_fprintf_format.c \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/external/fprintf/nrf_fprintf_format.c \
  ../../../../../../components/libraries/util/sdk_common.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdint.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdbool.h \
@@ -29,5 +29,5 @@ Output/ble_app_hids_keyboard_pca10040_s132\ Release/Obj/nrf_fprintf_format.o: \
  ../../../../../../components/libraries/util/nrf_assert.h \
  /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 3.52/include/stdarg.h \
  ../../../../../../components/libraries/util/nrf_assert.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/external/fprintf/nrf_fprintf.h \
- /Users/qchang/Downloads/ScriptedKeys_firmware/external/fprintf/nrf_fprintf_format.h
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/external/fprintf/nrf_fprintf.h \
+ /Users/qchang/Library/Mobile\ Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/external/fprintf/nrf_fprintf_format.h
