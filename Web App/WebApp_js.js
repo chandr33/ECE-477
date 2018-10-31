@@ -509,7 +509,21 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 
 function validateMacroSyntax(data)
 {
+	var string_data = data; //possibly changed later
+	var repeat_token_patt = /repeat\((.+?)\){(.*?)}/m; //finds a repeat structure
+	var string_patt = /\".+?\"/; //finds a string
+	var no_whitespace_patt = /\s*(.*)/; //remove leading whitespace
+	var parallel_patt = /(.*?)\s*\&\s*(.*?)/; //find a parallel structure (multiple keys simultaneous)
 
+	var ready_string = string_data.replace(no_whitespace_patt, '$1') //strip leading whitespace
+
+	//run string_patt, repeat_token_patt, and parallel_patt. find starting index. pick one that starts at 0, throw error if none
+
+	//remove regex from string
+
+	//validate substring syntax
+
+	//repeat until ready_string == NULL
 }
 
 function download() {
