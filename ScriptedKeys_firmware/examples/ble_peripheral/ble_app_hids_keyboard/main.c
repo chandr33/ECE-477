@@ -49,8 +49,8 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 
 #define SHIFT_BUTTON_ID                     1                                          /**< Button used as 'SHIFT' Key. */
 
-#define DEVICE_NAME                         "Nordic_Keyboard"                          /**< Name of device. Will be included in the advertising data. */
-#define MANUFACTURER_NAME                   "NordicSemiconductor"                      /**< Manufacturer. Will be passed to Device Information Service. */
+#define DEVICE_NAME                         "ScriptedKeys Ver.1.0"                          /**< Name of device. Will be included in the advertising data. */
+#define MANUFACTURER_NAME                   "PurdueECE477Team4"                      /**< Manufacturer. Will be passed to Device Information Service. */
 
 #define APP_BLE_OBSERVER_PRIO               3                                          /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG                1                                          /**< A tag identifying the SoftDevice BLE configuration. */
@@ -204,6 +204,7 @@ static buffer_list_t     buffer_list;                               /**< List to
 //-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //Team4 defined values
 uint8_t prev_key_value = 6;
+bool shift_flag = false;
 
 
 
@@ -819,7 +820,7 @@ static uint32_t send_key_scan_press_release(ble_hids_t * p_hids,
         // Copy the scan code.
         memcpy(data + SCAN_CODE_POS + offset, p_key_pattern + offset, data_len - offset);
 
-        if (bsp_button_is_pressed(SHIFT_BUTTON_ID))
+        if (bsp_button_is_pressed(SHIFT_BUTTON_ID) || (shift_flag == true))
         {
             data[MODIFIER_KEY_POS] |= SHIFT_KEY_CODE;
         }
@@ -846,8 +847,7 @@ static uint32_t send_key_scan_press_release(ble_hids_t * p_hids,
         }
 
         offset++;
-    }
-    while (offset <= data_len);
+    }while (offset <= data_len);
 
     *p_actual_len = offset;
 
@@ -1560,27 +1560,35 @@ uint8_t scanMatrix()
     nrf_delay_us(10);
     for (j = 0; j < row_length; j++)
     {
-      if (nrf_gpio_pin_read(row_offset + j) == HIGH)
+      if (nrf_gpio_pin_read(row_offset + j) == HIGH) //Key is pressed
       {
-        //NRF_LOG_INFO("Pressed key is: %d.\n", (i) * row_length + (j));
-        //send_key_press(default_lookup_table[(i) * row_length + (j)]);
-        key_value =  (i) * row_length + (j); //updating key value
+        
+        if(((i) * row_length + (j)) == 4)
+        {
+          shift_flag = true; 
+        }
+        else
+        {
+          shift_flag = false;
+          key_value =  (i) * row_length + (j); //updating key value
+        }
+        
         
       }
-      
-
       nrf_delay_us(10);
     }
     nrf_gpio_pin_write(col_offset + i, LOW);
   }
-  NRF_LOG_INFO("Pressed key is: %d.\n", key_value);
+  NRF_LOG_INFO("Pressed key is: %d, shift flag is %d.\n", key_value, shift_flag);
+  //nrf_delay_ms(10);
   //send_key_press(0x0b);
+  //NRF_LOG_INFO("");
   return key_value;
 
 }
 
 int main(void)
-{
+  {
     bool erase_bonds;
 
     // Initialize.
@@ -1611,8 +1619,9 @@ int main(void)
         
         idle_state_handle();
         curr_key_value = scanMatrix();
-        if((curr_key_value != prev_key_value) && (curr_key_value!= 6))
+        if((curr_key_value != prev_key_value) && (curr_key_value != 6))
         {
+          
           send_key_press(default_lookup_table[curr_key_value]);
           NRF_LOG_INFO("Pressed key is: %d.\n", curr_key_value);
     
