@@ -518,15 +518,16 @@ function validateMacroSyntax(data)
 	{
 		string_data = data.getMacro();
 	}
+
 	
-	var repeat_token_patt = /repeat\((.+?)\){(.*?)}/m; //finds a repeat structure
+	var repeat_token_patt = /repeat\((.+?)\)\s*?{(.*)}\s*/m; //finds a repeat structure
 	var string_patt = /\".+?\"/; //finds a string
 	var no_whitespace_patt = /\s*(.*)/; //remove leading whitespace
-	var parallel_patt = /(.*?)\s*\&\s*(.*?)/; //find a parallel structure (multiple keys simultaneous)l
+	var parallel_patt = /([\w\"]*)\s*\&\s*([\w\"]*)/; //find a parallel structure (multiple keys simultaneous)l
 
 	var ready_string = string_data.replace(no_whitespace_patt, '$1') //strip leading whitespace
 	while (ready_string.length != 0)
-	{		
+	{
 
 		//run string_patt, repeat_token_patt, and parallel_patt. find starting index. pick one that starts at 0, throw error if none
 		var repeat_index = ready_string.search(repeat_token_patt);
@@ -544,11 +545,11 @@ function validateMacroSyntax(data)
 		var token;
 		if (repeat_index == 0)
 		{
-			token = ready_string.match(repeat_patt);
-			ready_string = ready_string.replace(token, '');
+
+			token = ready_string.match(repeat_token_patt);
+			ready_string = ready_string.replace(token[0], ""); //returns an array of matched values, 0 index is whole string
 
 			var repeat_val = token[1]; //iteration number
-			console.log("repeat_value: " + repeat_val);
 
 			if (isNaN(repeat_val)) //confirm it is an integer
 			{
@@ -563,32 +564,49 @@ function validateMacroSyntax(data)
 				return false;
 			}
 		}
+		else if (parallel_index == 0) //must check before string_patt, so that this has priority
+		{
+			token = ready_string.match(parallel_patt);
+			ready_string = ready_string.replace(token[0], '');
+
+			var parallel_1 = token[1].match(string_patt);
+			var parallel_2 = token[2].match(string_patt);
+
+			if (parallel_1 == null || parallel_2 == null) //parse error
+			{
+				return false;
+			}
+
+			parallel_1 = parallel_1[0];
+			parallel_2 = parallel_2[0];
+
+			if (validateMacroSyntax(parallel_1) && validateMacroSyntax(parallel_2))
+			{
+				if (parallel_1.length != 3 || parallel_2.length != 3) //TODO: Change this check to allow SHIFT, CTRL, etc.
+				{
+					console.log("Parallel structure only accepts single characters");
+					return false;
+				}
+
+				if (parallel_1 == parallel_2)
+				{
+					console.log("Parallel structure cannot use the same character in parallel!");
+					return false;
+				}
+			}
+			else
+			{
+				console.log("Parallel structure was given an invalid argument.");
+				return false;
+			}
+		}
 		else if (string_index == 0)
 		{
 			token = ready_string.match(string_patt);
-			ready_string = ready_string.replace(token, '');
+			ready_string = ready_string.replace(token[0], '');
 			//as far as I'm aware, there is no invalid string that can be given...
 		}
-		else if (parallel_index == 0)
-		{
-			token = ready_string.match(parallel_patt);
-			ready_string = ready_string.replace(token, '');
-
-			var parallel_1 = token[1];
-			var parallel_2 = token[2];
-
-			if (parallel_1.length() != 1 || parallel_2.length() != 1)
-			{
-				console.log("Parallel structure only accepts single characters");
-				return false;
-			}
-
-			if (parallel_1 == parallel_2)
-			{
-				console.log("Parallel structure cannot use the same character in parallel!");
-				return false;
-			}
-		}
+		
 
 		//repeat until ready_string == NULL
 
@@ -656,7 +674,7 @@ function download() {
 		macro_frame.name = "macro " + (j + 1);
 		macro_frame.macro = macro.getMacro();
 		macro_frame.inf_loop = macro.getToggleState();
-		var result = validateMacroSyntax();
+		var result = validateMacroSyntax(macro.getMacro());
 		if (!result)
 		{
 			validation = false;
@@ -678,6 +696,7 @@ function download() {
 	if (validation && macro_validation)
 	{
 		download_file(JSON.stringify(temp_value_array), "test.txt", "/application/json");
+		//console.log("Validation successful! Download halted for debugging purposes.");
 	}
 	else if (!validation)
 	{
