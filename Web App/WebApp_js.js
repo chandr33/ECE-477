@@ -523,7 +523,8 @@ function validateMacroSyntax(data)
 	var repeat_token_patt = /repeat\((.+?)\)\s*?{(.*)}\s*/m; //finds a repeat structure
 	var string_patt = /\".+?\"/; //finds a string
 	var no_whitespace_patt = /\s*(.*)/; //remove leading whitespace
-	var parallel_patt = /([\w\"]*)\s*\&\s*([\w\"]*)/; //find a parallel structure (multiple keys simultaneous)l
+	var parallel_patt = /\"(\w*)\"(\s*\&\s*\"(\w*)\")+/; //find a parallel structure (multiple keys simultaneous)
+	var parallel_parse = /\w+/; //meant to parse tokens out of parallel_patt
 
 	var ready_string = string_data.replace(no_whitespace_patt, '$1') //strip leading whitespace
 	while (ready_string.length != 0)
@@ -566,39 +567,49 @@ function validateMacroSyntax(data)
 		}
 		else if (parallel_index == 0) //must check before string_patt, so that this has priority
 		{
-			token = ready_string.match(parallel_patt);
-			ready_string = ready_string.replace(token[0], '');
+			var parallel_string = ready_string.match(parallel_patt)[0];
+			ready_string = ready_string.replace(parallel_string, '');
+			var tokens = new Array();
 
-			var parallel_1 = token[1].match(string_patt);
-			var parallel_2 = token[2].match(string_patt);
-
-			if (parallel_1 == null || parallel_2 == null) //parse error
+			while (parallel_parse.test(parallel_string))
 			{
-				return false;
-			}
-
-			parallel_1 = parallel_1[0];
-			parallel_2 = parallel_2[0];
-
-			if (validateMacroSyntax(parallel_1) && validateMacroSyntax(parallel_2))
-			{
-				if (parallel_1.length != 3 || parallel_2.length != 3) //TODO: Change this check to allow SHIFT, CTRL, etc.
+				token = parallel_parse.exec(parallel_string)[0];
+				if (tokens.includes(token))
 				{
-					console.log("Parallel structure only accepts single characters");
+					console.log("Key entered multiple times!");
 					return false;
 				}
 
-				if (parallel_1 == parallel_2)
+				tokens.push(token);
+
+				/*var parallel_1 = token[1];
+				var parallel_2 = token[3];
+
+				if (parallel_1 == null || parallel_2 == null) //parse error
 				{
-					console.log("Parallel structure cannot use the same character in parallel!");
+					console.log("parallel token was null");
+					return false;
+				}*/
+
+				console.log(token);
+				//console.log(parallel_1);
+				//console.log(token[2]);
+				//console.log(parallel_2);
+
+				var default_placeholders = get_var("default_placeholders");
+
+				if (!default_placeholders.includes(token))
+				{
+					console.log("Parallel structure was given an invalid argument.");
 					return false;
 				}
+
+				parallel_string = parallel_string.replace(token, '');
 			}
-			else
-			{
-				console.log("Parallel structure was given an invalid argument.");
-				return false;
-			}
+			
+
+
+			
 		}
 		else if (string_index == 0)
 		{
