@@ -52,6 +52,7 @@
 #include <stdint.h>
 #include "nrf_delay.h"
 #include "boards.h"
+#include "nrf_log_ctrl.h"
 
 /**
  * @brief Function for application main entry.
@@ -64,11 +65,10 @@ int main(void)
     /* Toggle LEDs. */
     while (true)
     {
-        for (int i = 0; i < LEDS_NUMBER; i++)
-        {
-            bsp_board_led_invert(i);
-            nrf_delay_ms(500);
-        }
+//        bsp_board_led_invert(5);
+        nrf_gpio_pin_toggle(12);
+        //NRF_LOG_INFO("Hello\n");
+        nrf_delay_ms(100);
     }
 }
 

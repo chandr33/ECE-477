@@ -47,9 +47,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "nrf_delay.h"
 
 
-#define SHIFT_BUTTON_ID                     1                                          /**< Button used as 'SHIFT' Key. */
-
-#define DEVICE_NAME                         "ScriptedKeys Ver.1.0"                          /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                         "ScriptedKeys Ver.2.0"                          /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                   "PurdueECE477Team4"                      /**< Manufacturer. Will be passed to Device Information Service. */
 
 #define APP_BLE_OBSERVER_PRIO               3                                          /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -122,13 +120,34 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 
 #define MAX_KEYS_IN_ONE_REPORT              (INPUT_REPORT_KEYS_MAX_LEN - SCAN_CODE_POS)/**< Maximum number of key presses that can be sent in one Input Report. */
 
-#define row_offset                          11
-#define row_length                          2
-#define col_offset                          13
-#define col_length                          3
+#define row_length                          8
+#define col_length                          8
+
+
+#define COL0                                3
+#define COL1                                4
+#define COL2                                5
+#define COL3                                6
+#define COL4                                7
+#define COL5                                8
+#define COL6                                9
+#define COL7                                10
+uint8_t COLS[8] =  {COL0, COL1, COL2, COL3, COL4, COL5, COL6, COL7};
+
+#define ROW0                                25
+#define ROW1                                26
+#define ROW2                                27
+#define ROW3                                28
+#define ROW4                                29
+#define ROW5                                30
+#define ROW6                                31
+#define ROW7                                2
+uint8_t ROWS[8] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 
 #define HIGH                                1
 #define LOW                                 0
+
+#define GARBAGE_KEY                         64
 
 
 /**Buffer queue access macros
@@ -203,7 +222,7 @@ static buffer_list_t     buffer_list;                               /**< List to
 
 //-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //Team4 defined values
-uint8_t prev_key_value = 6;
+uint8_t prev_key_value = GARBAGE_KEY;
 bool shift_flag = false;
 
 
@@ -820,7 +839,7 @@ static uint32_t send_key_scan_press_release(ble_hids_t * p_hids,
         // Copy the scan code.
         memcpy(data + SCAN_CODE_POS + offset, p_key_pattern + offset, data_len - offset);
 
-        if (bsp_button_is_pressed(SHIFT_BUTTON_ID) || (shift_flag == true))
+        if (shift_flag == true)
         {
             data[MODIFIER_KEY_POS] |= SHIFT_KEY_CODE;
         }
@@ -1498,11 +1517,11 @@ static void buttons_leds_init(bool * p_erase_bonds)
     ret_code_t err_code;
     bsp_event_t startup_event;
 
-    //initiate pin 11 to pin 12 as input for key matrix scanning
-    nrf_gpio_range_cfg_input(11, 12, NRF_GPIO_PIN_PULLDOWN);
-    //initiate pin 13 to pin 15 as output for key matrix scanning
-    nrf_gpio_range_cfg_output(13, 15);
-
+    //initiate pin 2 to pin 8 as input for key matrix scanning
+    nrf_gpio_range_cfg_input(25, 31, NRF_GPIO_PIN_PULLDOWN);
+    nrf_gpio_cfg_input(2, NRF_GPIO_PIN_PULLDOWN);
+    //initiate pin 16 to pin 23 as output for key matrix scanning
+    nrf_gpio_range_cfg_output(3, 10);
     err_code = bsp_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS, bsp_event_handler);
     APP_ERROR_CHECK(err_code);
 
@@ -1551,35 +1570,38 @@ static void idle_state_handle(void)
 uint8_t scanMatrix()
 {
   uint8_t i;
-  uint8_t j;    
-  uint8_t key_value = 6;
-  //uint8_t new_key_value = 6;
+  uint8_t j;  
+  uint8_t key_value = GARBAGE_KEY;
+  //uint8_t new_key_value = 63;
   for (i = 0; i < col_length; i++)
   {
-    nrf_gpio_pin_write(col_offset + i, HIGH);
+    nrf_gpio_pin_write(COLS[i], HIGH);
     nrf_delay_us(10);
     for (j = 0; j < row_length; j++)
     {
-      if (nrf_gpio_pin_read(row_offset + j) == HIGH) //Key is pressed
+      if (nrf_gpio_pin_read(ROWS[j]) == HIGH) //Key is pressed
       {
         
-        if(((i) * row_length + (j)) == 4)
-        {
-          shift_flag = true; 
-        }
-        else
-        {
-          shift_flag = false;
-          key_value =  (i) * row_length + (j); //updating key value
-        }
-        
+//        if(((i) * row_length + (j)) == 14)
+//        {
+//          shift_flag = true; 
+//        }
+//        else
+//        {
+//          shift_flag = false;
+//          key_value =  (i) * row_length + (j); //updating key value
+//        }
+         NRF_LOG_INFO("Key Pressed, i = %d, j = %d\n", i, j);
+         key_value =  (i) * row_length + (j);
         
       }
       nrf_delay_us(10);
     }
-    nrf_gpio_pin_write(col_offset + i, LOW);
+    nrf_gpio_pin_write(COLS[i], LOW);
   }
   NRF_LOG_INFO("Pressed key is: %d, shift flag is %d.\n", key_value, shift_flag);
+  
+  NRF_LOG_FLUSH();
   //nrf_delay_ms(10);
   //send_key_press(0x0b);
   //NRF_LOG_INFO("");
@@ -1611,19 +1633,29 @@ int main(void)
     NRF_LOG_INFO("HID Keyboard example started.");
     timers_start();
     advertising_start(erase_bonds);
-    uint8_t curr_key_value = 6;
+    uint8_t curr_key_value = GARBAGE_KEY;
 
     // Enter main loop.
     for (;;)
     {
         
         idle_state_handle();
+//        nrf_gpio_pin_write(3, HIGH);
+//        nrf_gpio_pin_write(4, HIGH);
+//        nrf_gpio_pin_write(5, HIGH);
+//        nrf_gpio_pin_write(6, HIGH);
+//        nrf_gpio_pin_write(7, HIGH);
+//        nrf_gpio_pin_write(8, HIGH);
+//        nrf_gpio_pin_write(9, HIGH);
+//        nrf_gpio_pin_write(10, HIGH);
+
         curr_key_value = scanMatrix();
-        if((curr_key_value != prev_key_value) && (curr_key_value != 6))
+        //send_key_press(default_lookup_table[0]);
+        if((curr_key_value != prev_key_value) && (curr_key_value != GARBAGE_KEY))
         {
           
           send_key_press(default_lookup_table[curr_key_value]);
-          NRF_LOG_INFO("Pressed key is: %d.\n", curr_key_value);
+          //NRF_LOG_INFO("Pressed key is: %d.\n", curr_key_value);
     
         }
         prev_key_value = curr_key_value;

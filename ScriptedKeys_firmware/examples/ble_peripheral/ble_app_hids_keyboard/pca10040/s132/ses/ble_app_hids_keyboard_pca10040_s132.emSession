@@ -24,7 +24,6 @@
   <ProjectSessionItem path="ble_app_hids_keyboard_pca10040_s132"/>
   <ProjectSessionItem path="ble_app_hids_keyboard_pca10040_s132;ble_app_hids_keyboard_pca10040_s132"/>
   <ProjectSessionItem path="ble_app_hids_keyboard_pca10040_s132;ble_app_hids_keyboard_pca10040_s132;Application"/>
-  <ProjectSessionItem path="ble_app_hids_keyboard_pca10040_s132;ble_app_hids_keyboard_pca10040_s132;Board Support"/>
   <ProjectSessionItem path="ble_app_hids_keyboard_pca10040_s132;ble_app_hids_keyboard_pca10040_s132;nRF_Libraries"/>
  </Project>
  <Register1>
@@ -58,10 +57,11 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="30" y="1532" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../main.c" selected="1" top="1518" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="456" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/bsp/bsp.c" selected="0" top="340" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="95" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/boards/boards.h" selected="0" top="75" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="1590" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../main.c" selected="1" top="1580" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="7" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../keyboard_lookup_table.h" selected="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="24" y="52" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/boards/pca10040.h" selected="0" top="40" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="35" y="12542" useTextEdit="1" useBinaryEdit="0" left="0" path="../config/sdk_config.h" selected="0" top="12523" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="99" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/util/app_error_weak.c" selected="0" top="89" codecName=""/>
  </Files>
- <ARMCrossStudioWindow activeProject="ble_app_hids_keyboard_pca10040_s132" fileDialogDefaultFilter="*.h" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="/Users/qchang/Downloads/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c&#xa;/Users/qchang/Library/Mobile Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c&#xa;/Users/qchang/Downloads/ScriptedKeys_firmware/modules/nrfx/drivers/src/nrfx_clock.c&#xa;/Users/qchang/Library/Mobile Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c" fileDialogInitialDirectory="/Users/qchang/Library/Mobile Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard" debugSearchPath="" autoConnectCapabilities="3711"/>
+ <ARMCrossStudioWindow activeProject="ble_app_hids_keyboard_pca10040_s132" fileDialogDefaultFilter="*.h" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="/Users/qchang/Downloads/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c&#xa;/Users/qchang/Library/Mobile Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c&#xa;/Users/qchang/Downloads/ScriptedKeys_firmware/modules/nrfx/drivers/src/nrfx_clock.c&#xa;/Users/qchang/Library/Mobile Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c" fileDialogInitialDirectory="/Users/qchang/Library/Mobile Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/pca10040/s132/config" debugSearchPath="" autoConnectCapabilities="3711"/>
 </session>
