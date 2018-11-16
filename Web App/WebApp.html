@@ -11,8 +11,13 @@
 
 <Body onload="initialize()">
 
-<img id="keyboard_image" src="img/keyboard-layout.png" ></img>
-<div id="rebind_center">
+<div>
+	<img id="keyboard_image" src="img/keyboard-layout.png" align="left"></img>
+	<p>Keybinds: Use modifier keys in conjunction with keys given in table below. Use '+' to indicate keys are pressed simultaneously. (e.g. CTRL + v)</p>
+	<p>Macros: Three possible structures: 1) string structure, which types the indicated text. Use "" to use. 2) parallel structure, which presses keys simultaneously. Use '&' to use. 3) repeat structure, which repeats macro structures a given number of times. Use 'repeat(number){ statements }' to use. </p>
+</div>
+
+<div id="rebind_center" style="clear:both;"> <!--This style apparently forces entries below previous components. Not entirely sure why...-->
 	<input type="checkbox" id="SHIFT_box" value="SHIFT" onclick="update_placeholders();update_values();validatePage();"> SHIFT
 	<input type="checkbox" id="CTRL_box" value="CTRL" onclick="update_placeholders();update_values();validatePage();"> CTRL
 	<input type="checkbox" id="FN_box" value="FN" onclick="update_placeholders();update_values();validatePage();"> FN
@@ -195,7 +200,7 @@
 		<tr>
 			<th>Macro #</th>
 			<th>Macro Actions</th>
-			<th>Does Macro run Indefinitely?</th>
+			<th>Toggled on Keypress?</th>
 		</tr>
 		<tr>
 			

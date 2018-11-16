@@ -509,7 +509,122 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 
 function validateMacroSyntax(data)
 {
+	var string_data = "";
+	if (typeof(data) === 'string')
+	{
+		string_data = data;
+	}
+	else if (typeof(data) === 'Macro')
+	{
+		string_data = data.getMacro();
+	}
 
+	
+	var repeat_token_patt = /repeat\((.+?)\)\s*?{(.*)}\s*/m; //finds a repeat structure
+	var string_patt = /\".+?\"/; //finds a string
+	var no_whitespace_patt = /\s*(.*)/; //remove leading whitespace
+	var parallel_patt = /\"(\w*)\"(\s*\&\s*\"(\w*)\")+/; //find a parallel structure (multiple keys simultaneous)
+	var parallel_parse = /\w+/; //meant to parse tokens out of parallel_patt
+
+	var ready_string = string_data.replace(no_whitespace_patt, '$1') //strip leading whitespace
+	while (ready_string.length != 0)
+	{
+
+		//run string_patt, repeat_token_patt, and parallel_patt. find starting index. pick one that starts at 0, throw error if none
+		var repeat_index = ready_string.search(repeat_token_patt);
+		var string_index = ready_string.search(string_patt);
+		var parallel_index = ready_string.search(parallel_patt);
+
+		if (repeat_index != 0 && string_index != 0 && parallel_index != 0) //basic syntax error
+		{
+			console.log("Macro did not have a valid regex at next index");
+			return false;
+		}
+
+		//remove regex from string
+
+		var token;
+		if (repeat_index == 0)
+		{
+
+			token = ready_string.match(repeat_token_patt);
+			ready_string = ready_string.replace(token[0], ""); //returns an array of matched values, 0 index is whole string
+
+			var repeat_val = token[1]; //iteration number
+
+			if (isNaN(repeat_val)) //confirm it is an integer
+			{
+				console.log("Given repeat value was not a number.");
+				return false;
+			}
+
+			var result = validateMacroSyntax(token[2]);
+			if (!result)
+			{
+				console.log("Repeat body was not valid");
+				return false;
+			}
+		}
+		else if (parallel_index == 0) //must check before string_patt, so that this has priority
+		{
+			var parallel_string = ready_string.match(parallel_patt)[0];
+			ready_string = ready_string.replace(parallel_string, '');
+			var tokens = new Array();
+
+			while (parallel_parse.test(parallel_string))
+			{
+				token = parallel_parse.exec(parallel_string)[0];
+				if (tokens.includes(token))
+				{
+					console.log("Key entered multiple times!");
+					return false;
+				}
+
+				tokens.push(token);
+
+				/*var parallel_1 = token[1];
+				var parallel_2 = token[3];
+
+				if (parallel_1 == null || parallel_2 == null) //parse error
+				{
+					console.log("parallel token was null");
+					return false;
+				}*/
+
+				console.log(token);
+				//console.log(parallel_1);
+				//console.log(token[2]);
+				//console.log(parallel_2);
+
+				var default_placeholders = get_var("default_placeholders");
+
+				if (!default_placeholders.includes(token))
+				{
+					console.log("Parallel structure was given an invalid argument.");
+					return false;
+				}
+
+				parallel_string = parallel_string.replace(token, '');
+			}
+			
+
+
+			
+		}
+		else if (string_index == 0)
+		{
+			token = ready_string.match(string_patt);
+			ready_string = ready_string.replace(token[0], '');
+			//as far as I'm aware, there is no invalid string that can be given...
+		}
+		
+
+		//repeat until ready_string == NULL
+
+		var ready_string = ready_string.replace(no_whitespace_patt, '$1') //strip leading whitespace
+	}
+
+	return true;
 }
 
 function download() {
@@ -559,20 +674,51 @@ function download() {
 				array_frame.bindings[j] = validation_data.data;
 			}
 		}
-		//TODO: Add macros to temp_value_array
-		//var macro_array_frame = {name};
 		temp_value_array.push(array_frame);
-		}
-		if (validation)
+	}
+	var macro_validation = true;
+	var macro_Array = get_var("macro_Array");
+	for (var j = 0; j < 12; j++)
+	{
+		var macro_frame = {name: "", macro: "", inf_loop: false};
+		var macro = macro_Array[j];
+		macro_frame.name = "macro " + (j + 1);
+		macro_frame.macro = macro.getMacro();
+		macro_frame.inf_loop = macro.getToggleState();
+		var result = validateMacroSyntax(macro.getMacro());
+		if (!result)
 		{
-			download_file(JSON.stringify(temp_value_array), "test.txt", "/application/json");
+			validation = false;
+			macro.setValid(false);
+			macro_Array[j] = macro;
+			document.getElementById("macro" + j).style.border = "2px solid red";
 		}
 		else
 		{
+			macro.setValid(true);
+			macro_Array[j] = macro;
+			document.getElementById("macro" + j).style.border = "";
+		}
+
+		temp_value_array.push(macro_frame)
+	}
+	store_var(macro_Array, "macro_Array");
+
+	if (validation && macro_validation)
+	{
+		download_file(JSON.stringify(temp_value_array), "test.txt", "/application/json");
+		//console.log("Validation successful! Download halted for debugging purposes.");
+	}
+	else if (!validation)
+	{
 		console.log("Download failed! A textbox had invalid syntax.");
 		console.log(invalid_data_dump);
 		window.alert("There was a syntax error in specified keybindings. Download halted.");
-		}
+	}
+	else
+	{
+		console.log("Download failed! A macro had invalid syntax.");
+	}
 }
 
 function download_file (data, filename, type) { //source: https://stackoverflow.com/questions/13405129/javascript-create-and-save-file
