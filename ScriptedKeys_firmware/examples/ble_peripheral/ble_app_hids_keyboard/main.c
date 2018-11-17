@@ -132,7 +132,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #define COL5                                8
 #define COL6                                9
 #define COL7                                10
-uint8_t COLS[8] =  {COL0, COL1, COL2, COL3, COL4, COL5, COL6, COL7};
+uint8_t COLS[col_length] =  {COL0, COL1, COL2, COL3, COL4, COL5, COL6, COL7};
 
 #define ROW0                                25
 #define ROW1                                26
@@ -142,7 +142,7 @@ uint8_t COLS[8] =  {COL0, COL1, COL2, COL3, COL4, COL5, COL6, COL7};
 #define ROW5                                30
 #define ROW6                                31
 #define ROW7                                2
-uint8_t ROWS[8] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
+uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 
 #define HIGH                                1
 #define LOW                                 0
@@ -1517,11 +1517,20 @@ static void buttons_leds_init(bool * p_erase_bonds)
     ret_code_t err_code;
     bsp_event_t startup_event;
 
-    //initiate pin 2 to pin 8 as input for key matrix scanning
-    nrf_gpio_range_cfg_input(25, 31, NRF_GPIO_PIN_PULLDOWN);
-    nrf_gpio_cfg_input(2, NRF_GPIO_PIN_PULLDOWN);
-    //initiate pin 16 to pin 23 as output for key matrix scanning
-    nrf_gpio_range_cfg_output(3, 10);
+    //set row pins as input, according to ROWS array
+    for (int i = 0; i < row_length; i++)
+    {
+      nrf_gpio_cfg_input(ROWS[i], NRF_GPIO_PIN_PULLDOWN);
+    }
+    //nrf_gpio_range_cfg_input(25, 31, NRF_GPIO_PIN_PULLDOWN);
+    //nrf_gpio_cfg_input(2, NRF_GPIO_PIN_PULLDOWN);
+
+    //set row columns as output, according to COLS array
+    for (int j = 0; j < col_length; j++)
+    {
+      nrf_gpio_cfg_output(COLS[j]);
+    }
+    //nrf_gpio_range_cfg_output(3, 10);
     err_code = bsp_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS, bsp_event_handler);
     APP_ERROR_CHECK(err_code);
 
