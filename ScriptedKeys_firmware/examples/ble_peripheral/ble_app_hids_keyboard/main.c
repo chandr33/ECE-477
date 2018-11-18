@@ -47,7 +47,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "nrf_delay.h"
 
 
-#define DEVICE_NAME                         "ScriptedKeys Ver.2.0"                          /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                         "ScriptedKeys Ver.1.2"                          /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                   "PurdueECE477Team4"                      /**< Manufacturer. Will be passed to Device Information Service. */
 
 #define APP_BLE_OBSERVER_PRIO               3                                          /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -134,8 +134,8 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #define COL7                                10
 uint8_t COLS[col_length] =  {COL0, COL1, COL2, COL3, COL4, COL5, COL6, COL7};
 
-#define ROW0                                25
-#define ROW1                                26
+#define ROW0                                15
+#define ROW1                                16
 #define ROW2                                27
 #define ROW3                                28
 #define ROW4                                29
@@ -148,6 +148,7 @@ uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 #define LOW                                 0
 
 #define GARBAGE_KEY                         64
+#define LED_LEFT                            12
 
 
 /**Buffer queue access macros
@@ -1050,7 +1051,7 @@ static void keys_send(uint8_t key_pattern_len, uint8_t * p_key_pattern)
 static void send_key_press(uint8_t keycode){
     //uint8_t pattern_len = 1;
     uint8_t key_pattern[] = {keycode};
-    keys_send(1, &key_pattern);
+    keys_send(1, key_pattern);
 
 }
 
@@ -1522,6 +1523,8 @@ static void buttons_leds_init(bool * p_erase_bonds)
     {
       nrf_gpio_cfg_input(ROWS[i], NRF_GPIO_PIN_PULLDOWN);
     }
+    nrf_gpio_cfg_input(11, NRF_GPIO_PIN_NOPULL);
+
     //nrf_gpio_range_cfg_input(25, 31, NRF_GPIO_PIN_PULLDOWN);
     //nrf_gpio_cfg_input(2, NRF_GPIO_PIN_PULLDOWN);
 
@@ -1530,6 +1533,7 @@ static void buttons_leds_init(bool * p_erase_bonds)
     {
       nrf_gpio_cfg_output(COLS[j]);
     }
+    nrf_gpio_cfg_output(12);
     //nrf_gpio_range_cfg_output(3, 10);
     err_code = bsp_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS, bsp_event_handler);
     APP_ERROR_CHECK(err_code);
@@ -1608,7 +1612,16 @@ uint8_t scanMatrix()
     }
     nrf_gpio_pin_write(COLS[i], LOW);
   }
-  NRF_LOG_INFO("Pressed key is: %d, shift flag is %d.\n", key_value, shift_flag);
+  if (key_value != GARBAGE_KEY)
+  {
+
+    NRF_LOG_INFO("Pressed key is: %d, shift flag is %d.\n", key_value, shift_flag);
+    nrf_gpio_pin_write(LED_LEFT, HIGH);
+  }
+  else
+  {
+    nrf_gpio_pin_write(LED_LEFT, LOW);
+  }
   
   NRF_LOG_FLUSH();
   //nrf_delay_ms(10);
@@ -1619,6 +1632,7 @@ uint8_t scanMatrix()
 }
 
 int main(void)
+
   {
     bool erase_bonds;
 
@@ -1643,6 +1657,7 @@ int main(void)
     timers_start();
     advertising_start(erase_bonds);
     uint8_t curr_key_value = GARBAGE_KEY;
+    bool switch_output;
 
     // Enter main loop.
     for (;;)
@@ -1669,6 +1684,10 @@ int main(void)
         }
         prev_key_value = curr_key_value;
 
+        switch_output = nrf_gpio_pin_read(11);
+        //nrf_gpio_pin_write(12, switch_output);
+        NRF_LOG_INFO("Switch is in state %d\n", switch_output);
+        NRF_LOG_FLUSH();
     }
 }
 

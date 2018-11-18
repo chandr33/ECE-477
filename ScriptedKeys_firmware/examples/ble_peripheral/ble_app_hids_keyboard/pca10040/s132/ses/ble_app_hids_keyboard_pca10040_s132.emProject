@@ -140,7 +140,7 @@
   </project>
   <configuration
     Name="Release"
-    c_preprocessor_definitions="NDEBUG"
+    c_preprocessor_definitions="NDEBUG;CONFIG_NFCT_PINS_AS_GPIOS"
     gcc_optimization_level="Optimize For Size" />
   <configuration
     Name="Debug"
