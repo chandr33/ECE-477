@@ -127,7 +127,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #define COL0                                3
 #define COL1                                4
 #define COL2                                5
-#define COL3                                6
+#define COL3                                14
 #define COL4                                7
 #define COL5                                8
 #define COL6                                9
@@ -135,7 +135,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 uint8_t COLS[col_length] =  {COL0, COL1, COL2, COL3, COL4, COL5, COL6, COL7};
 
 #define ROW0                                15
-#define ROW1                                16
+#define ROW1                                26
 #define ROW2                                27
 #define ROW3                                28
 #define ROW4                                29
