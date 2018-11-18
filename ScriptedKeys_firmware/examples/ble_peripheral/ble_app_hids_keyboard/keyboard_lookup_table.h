@@ -9,7 +9,7 @@ const uint8_t default_lookup_table[64] = {
     0x00,        /* undefined */
     0xE0,       /* Key LeftControl */
     0x00,       /* undefined */
-    0x86,       /* Key = */
+    0x2E,       /* Key = */
     0x1E,       /* Key 1 */
     0x30,       /* Key ] */
     0x14,        /* Key q */
