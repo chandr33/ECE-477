@@ -232,6 +232,11 @@ static buffer_list_t     buffer_list;                               /**< List to
 //-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //Team4 defined values
 uint8_t modifiers = 0;
+uint8_t mode = 0;
+bool caps_lock = true; //0x39
+bool scroll_lock = false;  //0x47
+bool num_lock = true;  //0x53
+bool fn_lock = false;  //0xE9
 
 
 
@@ -1587,7 +1592,7 @@ static void idle_state_handle(void)
 
 uint16_t check_for_modifiers(uint8_t key_value) {
     //9'b{FN, R_GUI,R_ALT,R_SHIFT,R_CTRL,L_GUI,L_ALT,L_SHIFT,L_CTRL};
-    uint8_t value = default_lookup_table[key_value];
+    uint8_t value = default_lookup_table [mode] [key_value];
     if (value == 0xE0) { //L_CTRL
       return 0x0001;
     } else if (value == 0xE1) {
@@ -1604,7 +1609,7 @@ uint16_t check_for_modifiers(uint8_t key_value) {
       return 0x0040;
     } else if(value == 0xE7) {
       return 0x0080;
-    } else if (value == 0x00) { //FN: NOT CURRENTLY BOUND
+    } else if (value == 0xE8) { //FN: NOT CURRENTLY BOUND
       return 0x0100;
     }
     return 0;
@@ -1711,6 +1716,42 @@ uint32_t scanMatrix(uint8_t* prev_keys)
   return (prev_flags << 24) + (flags << 8) + key_value;
 }
 
+void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_flags) {
+  //Get the final key value using the flags and value
+  NRF_LOG_INFO("Sending key press\nValue: %d\nFlags: %d\nPrev: %d\nCaps: %d\nNum: %d\nFN Lock: %d\n",
+        key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
+  modifiers = key_flags & 0xFF; //9'b{FN, R_GUI,R_ALT,R_SHIFT,R_CTRL,   L_GUI,L_ALT,L_SHIFT,L_CTRL};
+  
+  if(fn_lock) {
+    key_flags ^= 0x0100;
+  }
+  uint8_t table_offset = mode + ((key_flags >> 8) & 0x01);
+  uint8_t final_value = default_lookup_table[table_offset] [key_value];
+
+  if(final_value == 0x39) {
+    caps_lock = !caps_lock;
+  } else if(final_value == 0x47) { //Scroll Lock
+    scroll_lock = !scroll_lock;
+  } else if(final_value == 0x53) { //Num Lock
+    num_lock = !num_lock;
+  } else if(final_value == 0xE9) { //FN Lock
+    fn_lock = !fn_lock;
+  } else {
+    if(caps_lock && final_value <= 0x1D && final_value >= 0x04) {
+      if(!(modifiers & 0x22)) {
+        modifiers |= 0x22;
+      } else {
+        modifiers &= 0xDD;
+      }
+    } else if (scroll_lock && false) {
+      
+    } else if (!num_lock && false) {
+      
+    } 
+    send_key_press(final_value);
+  }
+}
+
 int main(void)
 
   {
@@ -1752,23 +1793,29 @@ int main(void)
         idle_state_handle();
 
         key_info = scanMatrix(prev_key_value);
-        NRF_LOG_INFO("Key press\nValue: %d\nFlags: %d\nPrev: %d\n", key_value, key_flags, prev_flags);
+        NRF_LOG_INFO("Key press\nValue: %d\nFlags: %d\nPrev: %d\nCaps: %d\nNum: %d\nFN Lock: %d\n",
+          key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
         key_value = key_info & 0xFF;
         key_flags = (key_info >> 8) & 0x01FF;
         prev_flags = (key_info >> 24) & 0x0F;
         if(key_value != GARBAGE_KEY)
         {
           //Get the final key value using the flags and value
-          NRF_LOG_INFO("Sending key press\nValue: %d\nFlags: %d\nPrev: %d\n", key_value, key_flags, prev_flags);
-          modifiers = key_flags & 0xFF;
-          send_key_press(default_lookup_table[key_value]);   
+          manage_send_keypress(key_value, key_flags, prev_flags);
         }
         timer = update_prev_key(prev_key_value, prev_flags, key_value, &last_pressed_index, timer);
         if(timer <= 0) {
-          modifiers = key_flags & 0xFF;
-          send_key_press(default_lookup_table[prev_key_value[last_pressed_index]]);  
+          manage_send_keypress(prev_key_value[last_pressed_index], key_flags, prev_flags);
           timer = SEC_HOLD_COOLDOWN;
         }
+
+        if(nrf_gpio_pin_read(SWITCH_LEFT) == HIGH) {
+          nrf_gpio_pin_write(LED_LEFT, HIGH);
+          mode = 2;
+        } else {
+          nrf_gpio_pin_write(LED_LEFT, LOW);
+          mode = 0;
+        } 
     }
 }
 
