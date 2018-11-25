@@ -534,7 +534,6 @@ static void gatt_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
 /**@brief Function for handling Queued Write Module errors.
  *
  * @details A pointer to this function will be passed to each service which may need to inform the
@@ -739,24 +738,36 @@ static void hids_init(void)
     err_code = ble_hids_init(&m_hids, &hids_init_obj);
     APP_ERROR_CHECK(err_code);
 }
+
 static void nus_data_handler(ble_nus_evt_t * p_evt)
 {
 
     if (p_evt->type == BLE_NUS_EVT_RX_DATA)
     {
-        NRF_LOG_DEBUG("Received data from BLE NUS.");
+        uint32_t err_code;
 
-        if((memcmp(p_evt->params.rx_data.p_data,"disconnect", p_evt->params.rx_data.length) == 0))
+        NRF_LOG_DEBUG("Received data from BLE NUS. Writing data on UART.");
+        NRF_LOG_HEXDUMP_DEBUG(p_evt->params.rx_data.p_data, p_evt->params.rx_data.length);
+
+        for (uint32_t i = 0; i < p_evt->params.rx_data.length; i++)
         {
-            sd_ble_gap_disconnect(p_evt->conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+            do
+            {
+                err_code = app_uart_put(p_evt->params.rx_data.p_data[i]);
+                if ((err_code != NRF_SUCCESS) && (err_code != NRF_ERROR_BUSY))
+                {
+                    NRF_LOG_ERROR("Failed receiving NUS message. Error 0x%x. ", err_code);
+                    APP_ERROR_CHECK(err_code);
+                }
+            } while (err_code == NRF_ERROR_BUSY);
         }
-        if((memcmp(p_evt->params.rx_data.p_data,"LED", p_evt->params.rx_data.length) == 0))
+        if (p_evt->params.rx_data.p_data[p_evt->params.rx_data.length - 1] == '\r')
         {
-            bsp_board_led_invert(BSP_BOARD_LED_3);
+            while (app_uart_put('\n') == NRF_ERROR_BUSY);
         }
     }
-}
 
+}
 
 /**@brief Function for initializing services that will be used by the application.
  */
@@ -1489,8 +1500,8 @@ static void uart_init(void)
     {
         .rx_pin_no    = RX_PIN_NUMBER,
         .tx_pin_no    = TX_PIN_NUMBER,
-        .rts_pin_no   = RTS_PIN_NUMBER,
-        .cts_pin_no   = CTS_PIN_NUMBER,
+        //.rts_pin_no   = RTS_PIN_NUMBER,
+        //.cts_pin_no   = CTS_PIN_NUMBER,
         .flow_control = APP_UART_FLOW_CONTROL_DISABLED,
         .use_parity   = false,
 #if defined (UART_PRESENT)
