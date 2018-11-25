@@ -26,6 +26,7 @@
   <ProjectSessionItem path="ble_app_hids_keyboard_pca10040_s132;ble_app_hids_keyboard_pca10040_s132;Application"/>
   <ProjectSessionItem path="ble_app_hids_keyboard_pca10040_s132;ble_app_hids_keyboard_pca10040_s132;Board Definition"/>
   <ProjectSessionItem path="ble_app_hids_keyboard_pca10040_s132;ble_app_hids_keyboard_pca10040_s132;nRF_BLE"/>
+  <ProjectSessionItem path="ble_app_hids_keyboard_pca10040_s132;ble_app_hids_keyboard_pca10040_s132;nRF_Drivers"/>
   <ProjectSessionItem path="ble_app_hids_keyboard_pca10040_s132;ble_app_hids_keyboard_pca10040_s132;nRF_Libraries"/>
   <ProjectSessionItem path="ble_app_hids_keyboard_pca10040_s132;ble_app_hids_keyboard_pca10040_s132;nRF_SoftDevice"/>
  </Project>
@@ -60,17 +61,19 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="44" y="343" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../main.c" selected="1" top="335" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="1879" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../main.c" selected="1" top="1850" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="6027" useTextEdit="1" useBinaryEdit="0" left="0" path="../config/sdk_config.h" selected="0" top="6005" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="87" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/boards/pca10040.h" selected="0" top="63" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="7" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../keyboard_lookup_table.h" selected="0" top="0" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="25" y="53" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/boards/pca10040.h" selected="0" top="27" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="12542" useTextEdit="1" useBinaryEdit="0" left="0" path="../config/sdk_config.h" selected="0" top="12523" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="99" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/util/app_error_weak.c" selected="0" top="47" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="39" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/boards/boards.c" selected="0" top="13" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="0" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/boards/boards.h" selected="0" top="321" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="309" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/ble/common/ble_conn_state.c" selected="0" top="283" codecName=""/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="390" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/timer/app_timer.c" selected="0" top="364" codecName=""/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="279" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/scheduler/app_scheduler.c" selected="0" top="253" codecName=""/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="357" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/softdevice/common/nrf_sdh.c" selected="0" top="331" codecName=""/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="309" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/ble/common/ble_conn_state.c" selected="0" top="283" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="390" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/timer/app_timer.c" selected="0" top="364" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="279" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/scheduler/app_scheduler.c" selected="0" top="253" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="357" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/softdevice/common/nrf_sdh.c" selected="0" top="331" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="67" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/uart/app_uart_fifo.c" selected="0" top="45" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="80" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/uart/app_uart.h" selected="0" top="57" codecName="Default"/>
  </Files>
- <ARMCrossStudioWindow activeProject="ble_app_hids_keyboard_pca10040_s132" fileDialogDefaultFilter="*.asm;*.s;*.inc" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="/Applications/SEGGER Embedded Studio for ARM 3.52/source/thumb_crt0.s&#xa;&#xa;/Users/qchang/Downloads/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c&#xa;/Users/qchang/Library/Mobile Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c&#xa;/Users/qchang/Downloads/ScriptedKeys_firmware/modules/nrfx/drivers/src/nrfx_clock.c&#xa;/Users/qchang/Library/Mobile Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c" fileDialogInitialDirectory="/Users/qchang/Library/Mobile Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/pca10040/s132/config" debugSearchPath="" autoConnectCapabilities="3711"/>
+ <ARMCrossStudioWindow activeProject="ble_app_hids_keyboard_pca10040_s132" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="/Applications/SEGGER Embedded Studio for ARM 3.52/source/thumb_crt0.s&#xa;&#xa;/Users/qchang/Downloads/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c&#xa;/Users/qchang/Library/Mobile Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c&#xa;/Users/qchang/Downloads/ScriptedKeys_firmware/modules/nrfx/drivers/src/nrfx_clock.c&#xa;/Users/qchang/Library/Mobile Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/examples/ble_peripheral/ble_app_hids_keyboard/main.c" fileDialogInitialDirectory="C:/Users/ee07pc19adm/Desktop/ECE-477-master/ScriptedKeys_firmware/components/libraries/fifo" debugSearchPath="" autoConnectCapabilities="3199"/>
 </session>

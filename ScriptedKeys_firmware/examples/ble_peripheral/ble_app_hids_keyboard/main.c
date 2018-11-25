@@ -21,6 +21,8 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "ble_hids.h"
 #include "ble_bas.h"
 #include "ble_dis.h"
+#include "ble_nus.h"
+#include "ble_link_ctx_manager.h"
 #include "ble_conn_params.h"
 #include "sensorsim.h"
 #include "bsp_btn_ble.h"
@@ -36,6 +38,14 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "nrf_ble_qwr.h"
 #include "nrf_pwr_mgmt.h"
 #include "peer_manager_handler.h"
+#include "app_uart.h"
+
+#if defined (UART_PRESENT)
+#include "nrf_uart.h"
+#endif
+#if defined (UARTE_PRESENT)
+#include "nrf_uarte.h"
+#endif
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -158,6 +168,12 @@ uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 
 #define INIT_HOLD_COOLDOWN                      50
 #define SEC_HOLD_COOLDOWN                       10
+
+#define UART_TX_BUF_SIZE 256
+#define UART_RX_BUF_SIZE 256
+
+BLE_NUS_DEF(m_nus, NRF_SDH_BLE_TOTAL_LINK_COUNT);                                   /**< BLE NUS service instance. */
+static uint16_t m_ble_nus_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3;     /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
 
 /**Buffer queue access macros
  *
@@ -723,18 +739,44 @@ static void hids_init(void)
     err_code = ble_hids_init(&m_hids, &hids_init_obj);
     APP_ERROR_CHECK(err_code);
 }
+static void nus_data_handler(ble_nus_evt_t * p_evt)
+{
+
+    if (p_evt->type == BLE_NUS_EVT_RX_DATA)
+    {
+        NRF_LOG_DEBUG("Received data from BLE NUS.");
+
+        if((memcmp(p_evt->params.rx_data.p_data,"disconnect", p_evt->params.rx_data.length) == 0))
+        {
+            sd_ble_gap_disconnect(p_evt->conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+        }
+        if((memcmp(p_evt->params.rx_data.p_data,"LED", p_evt->params.rx_data.length) == 0))
+        {
+            bsp_board_led_invert(BSP_BOARD_LED_3);
+        }
+    }
+}
 
 
 /**@brief Function for initializing services that will be used by the application.
  */
 static void services_init(void)
 {
+    ret_code_t err_code;
     qwr_init();
     dis_init();
     bas_init();
     hids_init();
-}
+    ble_nus_init_t     nus_init;
 
+    // Initialize NUS.
+    memset(&nus_init, 0, sizeof(nus_init));
+
+    nus_init.data_handler = nus_data_handler;
+
+    err_code = ble_nus_init(&m_nus, &nus_init);
+    APP_ERROR_CHECK(err_code);
+}
 
 /**@brief Function for initializing the battery sensor simulator.
  */
@@ -1382,12 +1424,89 @@ static void ble_stack_init(void)
     NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
 }
 
+void uart_event_handle(app_uart_evt_t * p_event)
+{
+    static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
+    static uint8_t index = 0;
+    uint32_t       err_code;
+
+    switch (p_event->evt_type)
+    {
+        case APP_UART_DATA_READY:
+            UNUSED_VARIABLE(app_uart_get(&data_array[index]));
+            index++;
+
+            if ((data_array[index - 1] == '\n') ||
+                (data_array[index - 1] == '\r') ||
+                (index >= m_ble_nus_max_data_len))
+            {
+                if (index > 1)
+                {
+                    NRF_LOG_DEBUG("Ready to send data over BLE NUS");
+                    NRF_LOG_HEXDUMP_DEBUG(data_array, index);
+
+                    do
+                    {
+                        uint16_t length = (uint16_t)index;
+                        err_code = ble_nus_data_send(&m_nus, data_array, &length, m_conn_handle);
+                        if ((err_code != NRF_ERROR_INVALID_STATE) &&
+                            (err_code != NRF_ERROR_RESOURCES) &&
+                            (err_code != NRF_ERROR_NOT_FOUND))
+                        {
+                            APP_ERROR_CHECK(err_code);
+                        }
+                    } while (err_code == NRF_ERROR_RESOURCES);
+                }
+
+                index = 0;
+            }
+            break;
+
+        case APP_UART_COMMUNICATION_ERROR:
+            APP_ERROR_HANDLER(p_event->data.error_communication);
+            break;
+
+        case APP_UART_FIFO_ERROR:
+            APP_ERROR_HANDLER(p_event->data.error_code);
+            break;
+
+        default:
+            break;
+    }
+}
 
 /**@brief Function for the Event Scheduler initialization.
  */
 static void scheduler_init(void)
 {
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
+}
+
+static void uart_init(void)
+{
+    uint32_t                     err_code;
+    app_uart_comm_params_t const comm_params =
+    {
+        .rx_pin_no    = RX_PIN_NUMBER,
+        .tx_pin_no    = TX_PIN_NUMBER,
+        .rts_pin_no   = RTS_PIN_NUMBER,
+        .cts_pin_no   = CTS_PIN_NUMBER,
+        .flow_control = APP_UART_FLOW_CONTROL_DISABLED,
+        .use_parity   = false,
+#if defined (UART_PRESENT)
+        .baud_rate    = NRF_UART_BAUDRATE_115200
+#else
+        .baud_rate    = NRF_UARTE_BAUDRATE_115200
+#endif
+    };
+
+    APP_UART_FIFO_INIT(&comm_params,
+                       UART_RX_BUF_SIZE,
+                       UART_TX_BUF_SIZE,
+                       uart_event_handle,
+                       APP_IRQ_PRIORITY_LOWEST,
+                       err_code);
+    APP_ERROR_CHECK(err_code);
 }
 
 
@@ -1758,6 +1877,7 @@ int main(void)
     bool erase_bonds;
 
     // Initialize.
+    uart_init();
     log_init();
     timers_init();
     buttons_leds_init(&erase_bonds);
