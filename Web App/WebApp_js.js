@@ -18,6 +18,17 @@
 
 var MAX_MACRO_LENGTH = 100;
 
+var keyboard_lookup_table = [
+"BACKSPACE", "ESC", "\\", "TAB", "CAPS", null, "L_CTRL", null, 
+"=", "1", "]", "q", "a", "ENTER", "L_SHIFT", "R_CTRL", 
+"-", "2", "[", "w", "s", "'", "L_WIN", "R_SHIFT", 
+"0", "3", "p", "e", "d", ";", "z", "FN_KEY", 
+"9", "4", "o", "r", "c", "l", "L_ALT", "R_WIN",
+"8", "5", "i", "t", "f", ",", "x", "/",
+"7", "6", "k", "g", "v", "m", "SPACE", ".",
+"u", "y", "j", "h", "b", "n", null, "R_ALT"
+];
+
 function initialize() {
     var default_placeholders = [
 	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", //0-13
@@ -380,7 +391,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 
     var shift_found = false;
     var key_found = false; //used to verify key is at end of entry
-    var return_data = {valid: false, data: ""};
+    var return_data = {valid: false, data: 0};
 
     //retrieve value from id
     var user_input = data.str_data;
@@ -412,64 +423,58 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 				var shift_position = get_var("shift_placeholders").indexOf(token); //used to detect if shifted value was used
 				if (shift_position != -1) //entry exists in shift table
 				{
-					if (shift_found == false) //shift keyword was not found. add to entry
-					{
-						if (return_data.data == "") //nothing exists yet, don't add "+"
-						{
-							return_data.data = "SHIFT+" + get_var("default_placeholders")[shift_position];
-						}
-						else
-						{
-							return_data.data = return_data.data + "+SHIFT+" + get_var("default_placeholders")[shift_position];
-						}
-					}
-					else
-					{
-						if (return_data.data == "")
-						{
-							return_data.data = "SHIFT+" + get_var("default_placeholders")[shift_position];
-						}
-						else
-						{
-							return_data.data = return_data.data + "+SHIFT+" + get_var("default_placeholders")[shift_position];
-						}
-					}
+					return_data.data |= 0x0800; //set SHIFT flag
+					return_data.data &= 0xFF00; //clear character code
+					return_data.data |= keyboard_lookup_table.indexOf(get_var("default_placeholders")[shift_position]); //set character code according to position in shift table
+					//+ get_var("default_placeholders")[shift_position];
 					key_found = true;
 				} //if (shift_position != -1) //entry exists in shift table
 				else if (get_var("default_placeholders").includes(token)) //entry exists in default table
 				{
-					if (return_data.data == "")
+					return_data.data &= 0xFF00;
+					return_data.data |= keyboard_lookup_table.indexOf(token);
+					/*if (return_data.data == "")
 					{
 						return_data.data = token;
 					}
 					else
 					{
 						return_data.data = return_data.data+"+" + token;
-					}
+					}*/
 					key_found = true;
 				}
 				else if(token.toUpperCase() == "SHIFT") //shift keyword detected. set flag
 				{
-					if (return_data.data == "")
+					return_data.data |= 0x0800;
+					/*if (return_data.data == "")
 					{
 						return_data.data = "SHIFT";
 					}
 					else
 					{
 						return_data.data = return_data.data + "+SHIFT";
-					}
+					}*/
 					shift_found = true;
 				}
-				else if(token.toUpperCase() == "CTRL" || token.toUpperCase() == "FN" || token.toUpperCase() == "ALT")
+				else if(token.toUpperCase() == "CTRL")
 				{
-					if (return_data.data == "")
+					return_data.data |= 0x0400;
+					/*if (return_data.data == "")
 					{
 						return_data.data = token.toUpperCase();
 					}
 					else
 					{
 						return_data.data = return_data.data+"+" + token.toUpperCase();
-					}
+					}*/
+				}
+				else if (token.toUpperCase() == "FN")
+				{
+					return_data.data |= 0x0200;
+				}
+				else if (token.toUpperCase() == "ALT")
+				{
+					return_data.data |= 0x0100;
 				}
 				else //not recognized. throw error
 				{
@@ -480,14 +485,16 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 			}
 			else //token is a keyword that is in both shift and default tables. counts as a key.
 			{
-				if (return_data.data == "")
+				return_data.data &= 0xFF00;
+				return_data.data |= keyboard_lookup_table.indexOf(token);
+				/*if (return_data.data == "")
 				{
 					return_data.data = token.toUpperCase();
 				}
 				else
 				{
 					return_data.data = return_data.data+"+" + token.toUpperCase();
-				}
+				}*/
 				key_found = true;
 			}
 
@@ -582,19 +589,7 @@ function validateMacroSyntax(data)
 
 				tokens.push(token);
 
-				/*var parallel_1 = token[1];
-				var parallel_2 = token[3];
-
-				if (parallel_1 == null || parallel_2 == null) //parse error
-				{
-					console.log("parallel token was null");
-					return false;
-				}*/
-
 				console.log(token);
-				//console.log(parallel_1);
-				//console.log(token[2]);
-				//console.log(parallel_2);
 
 				var default_placeholders = get_var("default_placeholders");
 
