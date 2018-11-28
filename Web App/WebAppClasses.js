@@ -148,7 +148,7 @@ class SiteData //value_Array
         if (data === undefined)
         {
             this.data = new Array();
-            for(var i = 0; i < 16; i++)
+            for(var i = 0; i < 32; i++)
             {
                 var page = new Page(i);//{name: convert_index_to_readable_name(i), page_data: []}; //specific page of website
                 this.addPage(page);
@@ -157,7 +157,7 @@ class SiteData //value_Array
         else
         {
             this.data = new Array();
-            for (var i = 0; i < 16; i++)
+            for (var i = 0; i < 32; i++)
             {
                 this.data[i] = Page.revive(data.data[i]);
             }

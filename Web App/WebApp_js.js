@@ -82,6 +82,7 @@ function initialize() {
 	document.getElementById("CTRL_box").checked = false;
 	document.getElementById("FN_box").checked = false;
 	document.getElementById("ALT_box").checked = false;
+	document.getElementById("Mode_box").checked = false;
 	
 
     sessionStorage.array_page = 0;
@@ -93,8 +94,9 @@ function get_checklist_index() //checks marked checkboxs and returns an integer 
     var fn = document.getElementById("FN_box").checked;
     var shift = document.getElementById("SHIFT_box").checked;
     var ctrl = document.getElementById("CTRL_box").checked;
+    var mode = document.getElementById("Mode_box").checked;
 
-    return alt * 1 + fn * 2 + ctrl * 4 + shift * 8;
+    return alt * 1 + fn * 2 + ctrl * 4 + shift * 8 + mode * 16;
 }
 
 function get_placeholder_index(chk_number) //converts chk_number (an index from 0 to 15) into its corresponding placeholder table index (from 0 to 3)
@@ -628,7 +630,7 @@ function download() {
     var invalid_data_dump = []; //used for debugging validate fxn.
     var value_Array = get_var("value_Array");
 
-    for (var i = 0; i < 16; i++)
+    for (var i = 0; i < 32; i++)
     {
 		var array_frame = {name: convert_index_to_readable_name(i), bindings: []};
 		console.log("key"+i+" is currently being validated");

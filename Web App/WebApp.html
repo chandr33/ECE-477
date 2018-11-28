@@ -18,10 +18,11 @@
 </div>
 
 <div id="rebind_center" style="clear:both;"> <!--This style apparently forces entries below previous components. Not entirely sure why...-->
+	<input type="checkbox" id="Mode_box" value="MODE" onclick="update_placeholders();update_values();validatePage();"> MODE<br>
 	<input type="checkbox" id="SHIFT_box" value="SHIFT" onclick="update_placeholders();update_values();validatePage();"> SHIFT
 	<input type="checkbox" id="CTRL_box" value="CTRL" onclick="update_placeholders();update_values();validatePage();"> CTRL
 	<input type="checkbox" id="FN_box" value="FN" onclick="update_placeholders();update_values();validatePage();"> FN
-	<input type="checkbox" id="ALT_box" value="ALT" onclick="update_placeholders();update_values();validatePage();"> ALT<br>
+	<input type="checkbox" id="ALT_box" value="ALT" onclick="update_placeholders();update_values();validatePage();"> ALT
 	<button id="Reset_All" onclick="reset_all()">Reset All Bindings</button>
 	<button id="Reset_Page" onclick="reset_page()">Reset Current Listing</button>
 	<button id="Reset_Macros" onclick="reset_macros()">Reset Macros</button>
