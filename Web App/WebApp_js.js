@@ -662,13 +662,14 @@ function download() {
 				value_Array.getPage(i).getData(j).setValidity(true);
 				store_var(value_Array, "value_Array");
 			}
-			if (validation_data.data == "")
+			if (validation_data.data == 0)
 			{
 				array_frame.bindings[j] = null;
 			}
 			else
 			{
-				array_frame.bindings[j] = validation_data.data;
+				array_frame.bindings[array_frame.bindings.length] = (validation_data.data & 0xFF00) >> 8;
+				array_frame.bindings[array_frame.bindings.length] = validation_data.data & 0x00FF;
 			}
 		}
 		temp_value_array.push(array_frame);
