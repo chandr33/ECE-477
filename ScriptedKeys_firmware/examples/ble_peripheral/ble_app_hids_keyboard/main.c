@@ -9,6 +9,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include <stdint.h>
 #include <string.h>
 #include "nordic_common.h"
+#include "Fingerprint_Scanner-TTL-master/src/Scanner.h"
 #include "nrf.h"
 #include "nrf_assert.h"
 #include "app_error.h"
@@ -159,12 +160,12 @@ uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 
 #define GARBAGE_KEY                         64
 
-#define LED_LEFT                            12
+#define LED_LEFT                            41 //Change it to 12
 #define LED_RIGHT                           13
-#define SWITCH_LEFT                         11
+#define SWITCH_LEFT                         40 //Change it to 11
 #define SWITCH_RIGHT                        22
-#define SCANNER_RX                          17
-#define SCANNER_TX                          19
+#define SCANNER_RX                          11
+#define SCANNER_TX                          12
 
 #define INIT_HOLD_COOLDOWN                      50
 #define SEC_HOLD_COOLDOWN                       10
@@ -1915,6 +1916,7 @@ int main(void)
     uint8_t prev_key_value[4] = {GARBAGE_KEY, GARBAGE_KEY, GARBAGE_KEY, GARBAGE_KEY}; 
     uint8_t timer = INIT_HOLD_COOLDOWN;
     uint8_t last_pressed_index = 4;
+    Open_func();
 
     bool switch_output;
 
@@ -1946,7 +1948,11 @@ int main(void)
         } else {
           nrf_gpio_pin_write(LED_LEFT, LOW);
           mode = 0;
-        } 
+        }
+        // SetLED_func(true);
+         nrf_delay_ms(1000);
+        // SetLED_func(false);
+         //Enroll1_func();
     }
 }
 
