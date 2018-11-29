@@ -425,7 +425,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 				var shift_position = get_var("shift_placeholders").indexOf(token); //used to detect if shifted value was used
 				if (shift_position != -1) //entry exists in shift table
 				{
-					return_data.data |= 0x0800; //set SHIFT flag
+					return_data.data |= 0x2200; //set SHIFT flag
 					return_data.data &= 0xFF00; //clear character code
 					return_data.data |= keyboard_lookup_table.indexOf(get_var("default_placeholders")[shift_position]); //set character code according to position in shift table
 					//+ get_var("default_placeholders")[shift_position];
@@ -447,7 +447,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 				}
 				else if(token.toUpperCase() == "SHIFT") //shift keyword detected. set flag
 				{
-					return_data.data |= 0x0800;
+					return_data.data |= 0x2200;
 					/*if (return_data.data == "")
 					{
 						return_data.data = "SHIFT";
@@ -460,7 +460,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 				}
 				else if(token.toUpperCase() == "CTRL")
 				{
-					return_data.data |= 0x0400;
+					return_data.data |= 0x1100;
 					/*if (return_data.data == "")
 					{
 						return_data.data = token.toUpperCase();
@@ -472,11 +472,13 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 				}
 				else if (token.toUpperCase() == "FN")
 				{
-					return_data.data |= 0x0200;
+					/**NOT USED**/
+
+					//return_data.data |= 0x0200;
 				}
 				else if (token.toUpperCase() == "ALT")
 				{
-					return_data.data |= 0x0100;
+					return_data.data |= 0x4400;
 				}
 				else //not recognized. throw error
 				{
