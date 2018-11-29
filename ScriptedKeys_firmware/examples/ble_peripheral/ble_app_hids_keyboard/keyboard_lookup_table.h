@@ -77,7 +77,7 @@ uint8_t default_lookup_table [4] [64] = {
 {	//Mode 1 FN
     0x2A,       /* Key backspace */
     0x29,       /* Key esc */
-    0x31,       /* Key \ */
+    0xEA,        /* Macro1 */ //0x31,       /* Key \ */
     0x2B,       /* Key tab */
     0x39,       /* Key capslock */
     0x00,        /* undefined */
@@ -99,7 +99,7 @@ uint8_t default_lookup_table [4] [64] = {
     0x60,       /* Key Numpad8 */
     0x5D,       /* Key Numpad5 */
     0x34,       /* Key ' */
-    0xE3,       /* Key LeftWindow */ //NOTE: Assuming LeftWindow as Left GUI
+    0xE9,       /* Key LeftWindow */ //NOTE: Assuming LeftWindow as Left GUI
     0xE5,        /* Key RightShift */
 	
     0x43,       /* Key F10 */
@@ -118,7 +118,7 @@ uint8_t default_lookup_table [4] [64] = {
     0x5B,       /* Key Numpad3 */
     0x4F,        /* Key ARROW_RIGHT */
     0xE2,       /* Key LeftAlt */
-    0xE7,       /* Key RightWindow */
+    0xE9,       /* Key RightWindow */
 	
     0x41,       /* Key F8 */
     0x3E,       /* Key F5 */
@@ -293,3 +293,23 @@ uint8_t default_lookup_table [4] [64] = {
     0x00,       /* undefined */
     0xE6        /* Key RightAlt */
 }};
+
+uint8_t macro_1 [ ] = {
+  0x46, //Send string, 6 chars
+  0x22, 0x0b, //H
+  0x00, 0x08, //e
+  0x00, 0x0f, //l
+  0x00, 0x0f, //l
+  0x00, 0x12, //o
+  0x00, 0x2c, //SPACE
+  0x81, 0x04, //Repeat 1 command 4 times
+  0x45, //Send string, 5 chars
+  0x22, 0x1A, //W
+  0x00, 0x12, //o
+  0x00, 0x15, //r
+  0x00, 0x0f, //l
+  0x00, 0x07, //d
+  0x41, //Send string, 1 char
+  0x00, 0x28 //\n
+  
+};

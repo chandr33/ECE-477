@@ -47,7 +47,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "nrf_delay.h"
 
 
-#define DEVICE_NAME                         "ScriptedKeys Ver.1.2"                          /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                         "ScriptedKeys Ver AH"                          /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                   "PurdueECE477Team4"                      /**< Manufacturer. Will be passed to Device Information Service. */
 
 #define APP_BLE_OBSERVER_PRIO               3                                          /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -149,8 +149,8 @@ uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 
 #define GARBAGE_KEY                         64
 
-#define LED_LEFT                            12
-#define LED_RIGHT                           13
+#define LED_RIGHT                           12
+#define LED_LEFT                            13
 #define SWITCH_LEFT                         11
 #define SWITCH_RIGHT                        22
 #define SCANNER_RX                          17
@@ -158,6 +158,18 @@ uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 
 #define INIT_HOLD_COOLDOWN                      50
 #define SEC_HOLD_COOLDOWN                       10
+
+#define NUM_MACROS                          12
+
+//Some functions
+uint8_t macro_send_str(uint8_t, uint8_t*);
+void run_macro();
+uint8_t get_op(uint8_t);
+void manage_send_keypress(uint8_t, uint16_t, uint8_t, bool);
+uint32_t scanMatrix(uint8_t*);
+uint16_t check_for_modifiers(uint8_t);
+uint8_t update_prev_key (uint8_t*, uint8_t, uint8_t, uint8_t*, uint8_t);
+
 
 /**Buffer queue access macros
  *
@@ -233,10 +245,12 @@ static buffer_list_t     buffer_list;                               /**< List to
 //Team4 defined values
 uint8_t modifiers = 0;
 uint8_t mode = 0;
-bool caps_lock = true; //0x39
+bool caps_lock = false; //0x39
 bool scroll_lock = false;  //0x47
 bool num_lock = true;  //0x53
 bool fn_lock = false;  //0xE9
+
+int macro_active = 0;  //0 - no macro active, 1 - 12 - The corresponding macro is active
 
 
 
@@ -1540,7 +1554,7 @@ static void buttons_leds_init(bool * p_erase_bonds)
     //set row columns as output, according to COLS array
     for (int j = 0; j < col_length; j++)
     {
-      nrf_gpio_cfg_output(COLS[j]);
+      nrf_gpio_cfg_output_high(COLS[j]);
     }
     nrf_gpio_cfg_output(LED_LEFT);
     nrf_gpio_cfg_output(LED_RIGHT);
@@ -1611,7 +1625,7 @@ uint16_t check_for_modifiers(uint8_t key_value) {
       return 0x0080;
     } else if (value == 0xE8) { //FN: NOT CURRENTLY BOUND
       return 0x0100;
-    }
+    } 
     return 0;
 }
 
@@ -1716,9 +1730,9 @@ uint32_t scanMatrix(uint8_t* prev_keys)
   return (prev_flags << 24) + (flags << 8) + key_value;
 }
 
-void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_flags) {
+void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_flags, bool repeat) {
   //Get the final key value using the flags and value
-  NRF_LOG_INFO("Sending key press\nValue: %d\nFlags: %d\nPrev: %d\nCaps: %d\nNum: %d\nFN Lock: %d\n",
+  NRF_LOG_INFO("Sending key press Value: %d Flags: %d Prev: %d Caps: %d Num: %d FN Lock: %d\n",
         key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
   modifiers = key_flags & 0xFF; //9'b{FN, R_GUI,R_ALT,R_SHIFT,R_CTRL,   L_GUI,L_ALT,L_SHIFT,L_CTRL};
   
@@ -1736,6 +1750,10 @@ void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_fl
     num_lock = !num_lock;
   } else if(final_value == 0xE9) { //FN Lock
     fn_lock = !fn_lock;
+  } else if(final_value >= 0xEA && final_value < 0xEA + NUM_MACROS) {
+    if(!repeat) {
+      macro_active = final_value - 0xE9;
+    }
   } else {
     if(caps_lock && final_value <= 0x1D && final_value >= 0x04) {
       if(!(modifiers & 0x22)) {
@@ -1752,9 +1770,61 @@ void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_fl
   }
 }
 
+void run_macro() {
+  uint8_t* macro_ptr = macro_1;
+  uint8_t counter = 0;
+  uint8_t op = 0;
+
+  do {
+    op = get_op(macro_ptr[counter]);
+    if(op == 1) {
+      counter = macro_send_str(counter, macro_ptr);
+    } else if (op == 2) {
+      op = 0;
+    } else if (op == 3) {
+      op = 0;
+    }
+  } while (op > 0);
+
+  macro_active = 0;
+}
+
+uint8_t macro_send_str(uint8_t counter, uint8_t* macro_ptr) {
+  uint8_t num_keys = macro_ptr[counter++] & 0x3F;
+  //uint8_t num_keys = 6;
+  NRF_LOG_INFO("Sending %d keys.", num_keys);
+  for(int macro_index = 0; macro_index < num_keys; macro_index++) {
+     NRF_LOG_INFO("Sending: %d with modifier: %d Counter: %d\n", macro_ptr[counter + 1], macro_ptr[counter], counter);
+     NRF_LOG_FLUSH();
+     modifiers = macro_ptr[counter++];
+     send_key_press(macro_ptr[counter++]);
+      nrf_delay_ms(500);
+
+  }
+  /*counter++;
+  modifiers = macro_ptr[counter++];
+  send_key_press(macro_ptr[counter++]);
+  modifiers = macro_ptr[counter++];
+  send_key_press(macro_ptr[counter++]);
+  modifiers = macro_ptr[counter++];
+  send_key_press(macro_ptr[counter++]);
+  modifiers = macro_ptr[counter++];
+  send_key_press(macro_ptr[counter++]);
+  modifiers = macro_ptr[counter++];
+  send_key_press(macro_ptr[counter++]);
+  modifiers = macro_ptr[counter++];
+  send_key_press(macro_ptr[counter++]);*/
+   
+  return counter;
+} 
+
+uint8_t get_op(uint8_t byte) {
+  return (byte & 0xC0) >> 6;
+}
+
 int main(void)
 
-  {
+{
     bool erase_bonds;
 
     // Initialize.
@@ -1785,37 +1855,45 @@ int main(void)
     uint8_t timer = INIT_HOLD_COOLDOWN;
     uint8_t last_pressed_index = 4;
 
-    bool switch_output;
-
     // Enter main loop.
     for (;;)
     {
         idle_state_handle();
 
-        key_info = scanMatrix(prev_key_value);
-        NRF_LOG_INFO("Key press\nValue: %d\nFlags: %d\nPrev: %d\nCaps: %d\nNum: %d\nFN Lock: %d\n",
-          key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
-        key_value = key_info & 0xFF;
-        key_flags = (key_info >> 8) & 0x01FF;
-        prev_flags = (key_info >> 24) & 0x0F;
-        if(key_value != GARBAGE_KEY)
-        {
-          //Get the final key value using the flags and value
-          manage_send_keypress(key_value, key_flags, prev_flags);
-        }
-        timer = update_prev_key(prev_key_value, prev_flags, key_value, &last_pressed_index, timer);
-        if(timer <= 0) {
-          manage_send_keypress(prev_key_value[last_pressed_index], key_flags, prev_flags);
-          timer = SEC_HOLD_COOLDOWN;
+        if(macro_active == 0) {
+          key_info = scanMatrix(prev_key_value);
+          NRF_LOG_INFO("Key press: Value: %d Flags: %d Prev: %d Caps: %d Num: %d FN Lock: %d\n",
+            key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
+          key_value = key_info & 0xFF;
+          key_flags = (key_info >> 8) & 0x01FF;
+          prev_flags = (key_info >> 24) & 0x0F;
+          if(key_value != GARBAGE_KEY)
+          {
+            //Get the final key value using the flags and value
+            manage_send_keypress(key_value, key_flags, prev_flags, false);
+          }
+          timer = update_prev_key(prev_key_value, prev_flags, key_value, &last_pressed_index, timer);
+          if(timer <= 0) {
+            manage_send_keypress(prev_key_value[last_pressed_index], key_flags, prev_flags, true);
+            timer = SEC_HOLD_COOLDOWN;
+          }
+        } else {
+          run_macro();
         }
 
-        if(nrf_gpio_pin_read(SWITCH_LEFT) == HIGH) {
-          nrf_gpio_pin_write(LED_LEFT, HIGH);
+        if(nrf_gpio_pin_read(SWITCH_RIGHT) == HIGH) { //MODE SWITCH
+          nrf_gpio_pin_write(LED_RIGHT, HIGH);
           mode = 2;
         } else {
-          nrf_gpio_pin_write(LED_LEFT, LOW);
+          nrf_gpio_pin_write(LED_RIGHT, LOW);
           mode = 0;
-        } 
+        }
+         
+        if(nrf_gpio_pin_read(SWITCH_LEFT) == HIGH) { //TEMP, WILL BE LOAD SWITCH
+          nrf_gpio_pin_write(LED_LEFT, HIGH);
+        } else {
+          nrf_gpio_pin_write(LED_LEFT, LOW);
+        }
     }
 }
 
