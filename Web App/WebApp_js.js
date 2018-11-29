@@ -521,6 +521,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 function validateMacroSyntax(data)
 {
 	var string_data = "";
+	var return_data = {valid: false, bytecode: []};
 	if (typeof(data) === 'string')
 	{
 		string_data = data;
@@ -532,7 +533,7 @@ function validateMacroSyntax(data)
 
 	
 	var repeat_token_patt = /repeat\((.+?)\)\s*?{(.*)}\s*/m; //finds a repeat structure
-	var string_patt = /\".+?\"/; //finds a string
+	var string_patt = /\"(.+?)\"/; //finds a string
 	var no_whitespace_patt = /\s*(.*)/; //remove leading whitespace
 	var parallel_patt = /\"(\w*)\"(\s*\&\s*\"(\w*)\")+/; //find a parallel structure (multiple keys simultaneous)
 	var parallel_parse = /\w+/; //meant to parse tokens out of parallel_patt
@@ -593,6 +594,8 @@ function validateMacroSyntax(data)
 
 				tokens.push(token);
 
+				//TODO: Set modifiers according to indicated raw keys (L_CTRL, L_ALT, etc.). Apply modifiers to all parallel keys.
+
 				console.log(token);
 
 				var default_placeholders = get_var("default_placeholders");
@@ -612,7 +615,18 @@ function validateMacroSyntax(data)
 		}
 		else if (string_index == 0)
 		{
-			token = ready_string.match(string_patt);
+			token = ready_string.match(string_patt)[1];
+			var opcode = 0;
+			opcode |= (0x01 << 6); //actual opcode
+			opcode |= token.length;
+			return_data.bytecode.push(opcode);
+			for (var i = 0; i < token.length; i++)
+			{
+				var bytecode = getBytecodeFromCharacter(token[i]);
+				return_data.bytecode.push((bytecode & 0xFF00) >> 8);
+				return_data.bytecode.push(bytecode & 0x00FF);
+			}
+
 			ready_string = ready_string.replace(token[0], '');
 			//as far as I'm aware, there is no invalid string that can be given...
 		}
@@ -624,6 +638,24 @@ function validateMacroSyntax(data)
 	}
 
 	return true;
+}
+
+function getBytecodeFromCharacter(char)
+{
+	var return_var = 0;
+	var shift_table = get_var("shift_placeholders");
+	var default_table = get_var("default_placeholders");
+	if (shift_table.includes(char) && !default_table.includes(char)) //in shift table, but not default table. shift flag is applied
+	{
+		return_var |= 0x2200;
+		return_var |= keyboard_lookup_table.indexOf(default_table[shift_table.indexOf(char)]); //lookup position in shift_table, get character from default table, get its index in keyboard_table
+	}
+	else
+	{
+		return_var |= keyboard_lookup_table.indexOf(char);
+	}
+
+	return return_var;
 }
 
 function download() {
