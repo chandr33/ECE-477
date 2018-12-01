@@ -29,6 +29,94 @@ var keyboard_lookup_table = [
 "u", "y", "j", "h", "b", "n", null, "R_ALT" //56-63
 ];
 
+var hid_codes = {
+	"a": 0x04, "b": 0x05, "c": 0x06,
+	"d": 0x07, "e": 0x08,
+	"f": 0x09, "g": 0x0A,
+	"h": 0x0B, "i": 0x0C,
+	"j": 0x0D, "k": 0x0E,
+	"l": 0x0F, "m": 0x10,
+	"n": 0x11, "o": 0x12,
+	"p": 0x13, "q": 0x14,
+	"r": 0x15, "s": 0x16,
+	"t": 0x17, "u": 0x18,
+	"v": 0x19, "w": 0x1A,
+	"x": 0x1B, "y": 0x1C,
+	"z": 0x1D, "1": 0x1E,
+	"2": 0x1F, "3": 0x20,
+	"4": 0x21, "5": 0x22,
+	"6": 0x23, "7": 0x24,
+	"8": 0x25, "9": 0x26,
+	"0": 0x27, "ENTER": 0x28,
+	"ESC": 0x29,
+	"BACKSPACE": 0x2A,
+	"TAB": 0x2B,
+	"SPACE": 0x2C,
+	"-": 0x2D,
+	"=": 0x2E,
+	"[": 0x2F,
+	"]": 0x30,
+	"\\": 0x31,
+	";": 0x33,
+	"'": 0x34,
+	"TILDE": 0x35,
+	",": 0x36,
+	".": 0x37,
+	"/": 0x38,
+	"CAPS": 0x39,
+	"F1": 0x3A,
+	"F2": 0x3B,
+	"F3": 0x3C,
+	"F4": 0x3D,
+	"F5": 0x3E,
+	"F6": 0x3F,
+	"F7": 0x40,
+	"F8": 0x41,
+	"F9": 0x42, 
+	"F10": 0x43,
+	"F11": 0x44,
+	"F12": 0x45,
+	"PNT_SCRN": 0x46,
+	"SCROLL_LOCK": 0x47,
+	"PAUSE": 0x48,
+	"INSERT": 0x49,
+	"HOME": 0x4A,
+	"PAGE_UP": 0x4B,
+	"DELETE": 0x4C,
+	"END": 0x4D,
+	"PAGE_DOWN": 0x4E,
+	"RIGHT_ARROW": 0x4F,
+	"LEFT_ARROW": 0x50,
+	"DOWN_ARROW": 0x51,
+	"UP_ARROW": 0x52,
+	"MUTE": 0x7F,
+	"VOLUME_UP": 0x80,
+	"VOLUME_DOWN": 0x81,
+	"L_CTRL": 0xE0,
+	"L_SHIFT": 0xE1,
+	"L_ALT": 0xE2,
+	"L_WIN": 0xE3,
+	"R_CTRL": 0xE4,
+	"R_SHIFT": 0xE5,
+	"R_ALT": 0xE6,
+	"R_WIN": 0xE7,
+
+	"FN_KEY": 0xE8,
+	"FN_LOCK": 0xE9,
+	"MACRO1": 0xEA,
+	"MACRO2": 0xEB,
+	"MACRO3": 0xEC,
+	"MACRO4": 0xED,
+	"MACRO5": 0xEE,
+	"MACRO6": 0xEF,
+	"MACRO7": 0xF0,
+	"MACRO8": 0xF1,
+	"MACRO9": 0xF2,
+	"MACRO10": 0xF3,
+	"MACRO11": 0xF4,
+	"MACRO12": 0xF5,
+};
+
 function initialize() {
     var default_placeholders = [
 	"ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", //0-13
@@ -96,16 +184,16 @@ function get_checklist_index() //checks marked checkboxs and returns an integer 
     var ctrl = document.getElementById("CTRL_box").checked;
     var mode = document.getElementById("Mode_box").checked;
 
-    return alt * 1 + fn * 2 + ctrl * 4 + shift * 8 + mode * 16;
+    return ctrl * 1 + shift * 2 + alt * 4 + fn * 8 + mode * 16;
 }
 
 function get_placeholder_index(chk_number) //converts chk_number (an index from 0 to 15) into its corresponding placeholder table index (from 0 to 3)
 {
     if(chk_number == 10) { //fn && shift && !ctrl && !alt
 	return 0;
-    } else if (chk_number == 2) { //fn
+    } else if (chk_number == 8) { //fn
 	return 0;
-    } else if(chk_number == 8 || chk_number == 10) { //shift && !ctrl && !alt
+    } else if(chk_number == 2 || chk_number == 10) { //shift && !ctrl && !alt
 	return 1;
     } else {
 	return 0;
@@ -209,12 +297,12 @@ function get_placeholder_table(index) //return placeholder table from placeholde
 function convert_index_to_readable_name(index) //decode index (0 to 15) into a readable name
 {
     var ret_string = "";
-    if ((index >> 1) & 1) //fn
+    if ((index >> 3) & 1) //fn
     {
 	ret_string = ret_string + "FN";
     }
 
-    if ((index >> 2) & 1) //ctrl
+    if ((index) & 1) //ctrl
     {
 	if (ret_string != "")
 	{
@@ -223,7 +311,7 @@ function convert_index_to_readable_name(index) //decode index (0 to 15) into a r
 	ret_string = ret_string + "CTRL";
     }
 
-    if (index & 1) //alt
+    if ((index >> 2) & 1) //alt
     {
 	if (ret_string != "")
 	{
@@ -232,7 +320,7 @@ function convert_index_to_readable_name(index) //decode index (0 to 15) into a r
 	ret_string = ret_string + "ALT";
     }
 
-    if ((index >> 3) & 1) //shift
+    if ((index >> 1) & 1) //shift
     {
 	if (ret_string != "")
 	{
@@ -388,7 +476,7 @@ function checkMacroTextLength(obj)
 function validate_keybind_syntax(data) //give name of textfield object. returns object with 2 fields: valid and data.
 {
     var keywords = [ "BACKSPACE", "ESC", "CAPS", "L_SHIFT", "L_CTRL", "L_WIN",
-		     "L_ALT", "SPACE", "R_ALT", "R_WIN", "R_CTRL", "FN_KEY", "R_SHIFT", "ENTER"
+		     "L_ALT", "SPACE", "R_ALT", "R_WIN", "R_CTRL", "FN_KEY", "R_SHIFT", "ENTER", "TAB"
 		   ];
 
     var shift_found = false;
@@ -427,14 +515,14 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 				{
 					return_data.data |= 0x2200; //set SHIFT flag
 					return_data.data &= 0xFF00; //clear character code
-					return_data.data |= keyboard_lookup_table.indexOf(get_var("default_placeholders")[shift_position]); //set character code according to position in shift table
+					return_data.data |= hid_codes[(get_var("default_placeholders")[shift_position])]; //set character code according to position in shift table
 					//+ get_var("default_placeholders")[shift_position];
 					key_found = true;
 				} //if (shift_position != -1) //entry exists in shift table
 				else if (get_var("default_placeholders").includes(token)) //entry exists in default table
 				{
 					return_data.data &= 0xFF00;
-					return_data.data |= keyboard_lookup_table.indexOf(token);
+					return_data.data |= hid_codes[(token)];
 					/*if (return_data.data == "")
 					{
 						return_data.data = token;
@@ -480,7 +568,11 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 				{
 					return_data.data |= 0x4400;
 				}
-				else //not recognized. throw error
+				else if (hid_codes.exists(token)) //not recognized. throw error
+				{
+					return_data.data |= hid_codes[token];
+				}
+				else
 				{
 					console.log("Validate fxn returned due to not recognizing input: " + token);
 					return_data.valid = false;
@@ -490,7 +582,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 			else //token is a keyword that is in both shift and default tables. counts as a key.
 			{
 				return_data.data &= 0xFF00;
-				return_data.data |= keyboard_lookup_table.indexOf(token);
+				return_data.data |= hid_codes[(token)];
 				/*if (return_data.data == "")
 				{
 					return_data.data = token.toUpperCase();
@@ -707,11 +799,11 @@ function getBytecodeFromCharacter(char)
 	if (shift_table.includes(char) && !default_table.includes(char)) //in shift table, but not default table. shift flag is applied
 	{
 		return_var |= 0x2200;
-		return_var |= keyboard_lookup_table.indexOf(default_table[shift_table.indexOf(char)]); //lookup position in shift_table, get character from default table, get its index in keyboard_table
+		return_var |= hid_codes[(default_table[shift_table.indexOf(char)])]; //lookup position in shift_table, get character from default table, get its index in keyboard_table
 	}
 	else
 	{
-		return_var |= keyboard_lookup_table.indexOf(char);
+		return_var |= hid_codes[(char)];
 	}
 
 	return return_var;
@@ -721,21 +813,32 @@ function download() {
     var temp_value_array = Array();
     var validation = true;
     var invalid_data_dump = []; //used for debugging validate fxn.
+    var default_placeholders = get_var("default_placeholders");
     var value_Array = get_var("value_Array");
+    class binding_obj
+    {
+    	constructor()
+    	{
+    		this.binding = new Array();
+    		this.idx = 0;
+    	}
+    };
 
     for (var i = 0; i < 32; i++)
     {
-		var array_frame = {name: convert_index_to_readable_name(i), mode: 0, bindings: []};
-		if (i > 15)
+		var array_frame = {bindings: [], file_out: []}; //artifact of old header information. not breaking functioning code to fix.
+		/*if (i > 15)
 		{
 			array_frame.mode = 1;
-		}
+		}*/
 		console.log("key"+i+" is currently being validated");
 		console.log(get_var("value_Array").getPage(i));
 
 		for (var j = 0; j < 61; j++)
 		{
+			var bind_object = new binding_obj();
 			var validation_data = validate_keybind_syntax(value_Array.getPage(i).page_data[j]); //check if valid
+			bind_object.idx = keyboard_lookup_table.indexOf(default_placeholders[j]);
 			if (validation_data.valid == false)
 			{
 				validation = false;
@@ -761,15 +864,28 @@ function download() {
 			}
 			if (validation_data.data == 0)
 			{
-				array_frame.bindings[j] = null;
+				console.log("No data returned! i: " + i + " j: " + j);
 			}
 			else
 			{
-				array_frame.bindings[array_frame.bindings.length] = (validation_data.data & 0xFF00) >> 8;
-				array_frame.bindings[array_frame.bindings.length] = validation_data.data & 0x00FF;
+				bind_object.binding.push((validation_data.data & 0xFF00) >> 8);
+				bind_object.binding.push(validation_data.data & 0x00FF);
 			}
+			array_frame.bindings.push(bind_object);
 		}
-		temp_value_array.push(array_frame);
+		array_frame.bindings.sort(function(a, b) {return a.idx - b.idx});
+		console.log("array_frame", array_frame);
+		for (var k = 0; k < 61; k++)
+		{
+			if (k == 5 || k == 6 || k == 60)
+			{
+				array_frame.file_out.push(0);
+				array_frame.file_out.push(0);
+			}
+			array_frame.file_out.push.apply(array_frame.file_out, array_frame.bindings[k].binding);
+		}
+
+		temp_value_array.push(array_frame.file_out);
 	}
 	var macro_validation = true;
 	var macro_Array = get_var("macro_Array");
