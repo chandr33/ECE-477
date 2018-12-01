@@ -6579,12 +6579,12 @@
 
 // <o> HCI_UART_RX_PIN - UART RX pin 
 #ifndef HCI_UART_RX_PIN
-#define HCI_UART_RX_PIN 11 //Change it to 8
+#define HCI_UART_RX_PIN 0 //Change it to 8
 #endif
 
 // <o> HCI_UART_TX_PIN - UART TX pin 
 #ifndef HCI_UART_TX_PIN
-#define HCI_UART_TX_PIN 12 //Change it to 6
+#define HCI_UART_TX_PIN 1 //Change it to 6
 #endif
 
 // <o> HCI_UART_RTS_PIN - UART RTS pin 

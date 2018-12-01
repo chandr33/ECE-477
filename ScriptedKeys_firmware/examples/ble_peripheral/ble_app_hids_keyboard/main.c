@@ -164,8 +164,8 @@ uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 #define LED_RIGHT                           13
 #define SWITCH_LEFT                         40 //Change it to 11
 #define SWITCH_RIGHT                        22
-#define SCANNER_RX                          11
-#define SCANNER_TX                          12
+//#define SCANNER_RX                          0 //Change it to 23
+//#define SCANNER_TX                          1 //Change it to 24
 
 #define INIT_HOLD_COOLDOWN                      50
 #define SEC_HOLD_COOLDOWN                       10
@@ -255,7 +255,20 @@ bool scroll_lock = false;  //0x47
 bool num_lock = true;  //0x53
 bool fn_lock = false;  //0xE9
 
+/* Use flow control in loopback test. */
+#define UART_HWFC APP_UART_FLOW_CONTROL_ENABLED
 
+void uart_error_handle(app_uart_evt_t * p_event)
+{
+    if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
+    {
+        APP_ERROR_HANDLER(p_event->data.error_communication);
+    }
+    else if (p_event->evt_type == APP_UART_FIFO_ERROR)
+    {
+        APP_ERROR_HANDLER(p_event->data.error_code);
+    }
+}
 
 
 //-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -1496,29 +1509,33 @@ static void scheduler_init(void)
 
 static void uart_init(void)
 {
-    uint32_t                     err_code;
-    app_uart_comm_params_t const comm_params =
-    {
-        .rx_pin_no    = RX_PIN_NUMBER,
-        .tx_pin_no    = TX_PIN_NUMBER,
-        //.rts_pin_no   = RTS_PIN_NUMBER,
-        //.cts_pin_no   = CTS_PIN_NUMBER,
-        .flow_control = APP_UART_FLOW_CONTROL_DISABLED,
-        .use_parity   = false,
+    uint32_t err_code;
+//    bsp_board_init(BSP_INIT_LEDS);
+
+    const app_uart_comm_params_t comm_params =
+      {
+          RX_PIN_NUMBER,
+          TX_PIN_NUMBER,
+          //RTS_PIN_NUMBER,
+          //CTS_PIN_NUMBER,
+          UART_HWFC,
+          false,
 #if defined (UART_PRESENT)
-        .baud_rate    = NRF_UART_BAUDRATE_115200
+          NRF_UART_BAUDRATE_115200
 #else
-        .baud_rate    = NRF_UARTE_BAUDRATE_115200
+          NRF_UARTE_BAUDRATE_115200
 #endif
-    };
+      };
 
     APP_UART_FIFO_INIT(&comm_params,
-                       UART_RX_BUF_SIZE,
-                       UART_TX_BUF_SIZE,
-                       uart_event_handle,
-                       APP_IRQ_PRIORITY_LOWEST,
-                       err_code);
+                         UART_RX_BUF_SIZE,
+                         UART_TX_BUF_SIZE,
+                         uart_error_handle,
+                         APP_IRQ_PRIORITY_LOWEST,
+                         err_code);
+
     APP_ERROR_CHECK(err_code);
+    
 }
 
 
@@ -1889,7 +1906,7 @@ int main(void)
     bool erase_bonds;
 
     // Initialize.
-    uart_init();
+    //uart_init();
     log_init();
     timers_init();
     buttons_leds_init(&erase_bonds);

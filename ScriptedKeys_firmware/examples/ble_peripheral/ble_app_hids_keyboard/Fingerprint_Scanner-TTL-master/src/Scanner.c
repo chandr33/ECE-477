@@ -39,7 +39,7 @@ short CalculateChecksum_Command() {
 void SendCommand() {
     int i = 0;
     for (i = 0; i < 12; i++) {
-        uint32_t success = app_uart_put((uint8_t)command_packet[i]);
+        uint32_t success = app_uart_put(command_packet[i]);
         if (success == NRF_ERROR_NO_MEM) {
             NRF_LOG_INFO("UART Transmission failed\n");
             NRF_LOG_FLUSH();
@@ -52,11 +52,14 @@ void getResponse() {
   bool done = false;
   uint8_t first_byte = 0;
   unsigned char response_packet[12];
+  NRF_LOG_INFO("Waiting for response.\n");
   while (done == false) {
       app_uart_get(&first_byte);
       if (first_byte == 0x55)
           done = true;
+      //NRF_LOG_INFO("The byte we got: %d.", first_byte);
   }
+  NRF_LOG_INFO("Did get first byte.\n");
   unsigned char response[12];
   response[0] = first_byte;
   for (int i = 1; i < 12; i++) {
@@ -65,6 +68,7 @@ void getResponse() {
      }
      response[i] = first_byte;
   }
+  NRF_LOG_INFO("Got all 12 bytes.\n");
   
 }
 
