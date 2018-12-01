@@ -78,9 +78,22 @@ class Page
                 var checklist_names = this.name;
                 var field_value = new fieldEntry(); //entry within page
 
-                if (checklist_names == "Default" || checklist_names == "SHIFT")
+                if (checklist_names == "Default")
                 {
                     field_value.setData(get_placeholder_table(get_placeholder_index(page_number))[j]);
+                }
+                else if (checklist_names == "SHIFT")
+                {
+                	var table = get_placeholder_table(get_placeholder_index(page_number));
+                	var default_table = get_var("default_placeholders");
+                	if (default_table.includes(table[j])) //key exists in both tables. prefix with "SHIFT"
+                	{
+                		field_value.setData("SHIFT + " + table[j]);
+                	}
+                	else
+                	{
+                		field_value.setData(table[j]);
+                	}
                 }
                 else
                 {

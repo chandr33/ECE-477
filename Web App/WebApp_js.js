@@ -16,17 +16,17 @@
   If Left or Right is not specified with the modifier, then default to plain versions 0x11-13, if need to choose, choose right to avoid gaming conflicts
 */
 
-var MAX_MACRO_LENGTH = 100;
+var MAX_MACRO_LENGTH = 128;
 
 var keyboard_lookup_table = [
-"BACKSPACE", "ESC", "\\", "TAB", "CAPS", null, "L_CTRL", null, 
-"=", "1", "]", "q", "a", "ENTER", "L_SHIFT", "R_CTRL", 
-"-", "2", "[", "w", "s", "'", "L_WIN", "R_SHIFT", 
-"0", "3", "p", "e", "d", ";", "z", "FN_KEY", 
-"9", "4", "o", "r", "c", "l", "L_ALT", "R_WIN",
-"8", "5", "i", "t", "f", ",", "x", "/",
-"7", "6", "k", "g", "v", "m", "SPACE", ".",
-"u", "y", "j", "h", "b", "n", null, "R_ALT"
+"BACKSPACE", "ESC", "\\", "TAB", "CAPS", null, "L_CTRL", null, //0-7
+"=", "1", "]", "q", "a", "ENTER", "L_SHIFT", "R_CTRL", //8-15
+"-", "2", "[", "w", "s", "'", "L_WIN", "R_SHIFT", //16-23
+"0", "3", "p", "e", "d", ";", "z", "FN_KEY", //24-31
+"9", "4", "o", "r", "c", "l", "L_ALT", "R_WIN", //32-39
+"8", "5", "i", "t", "f", ",", "x", "/", //40-47
+"7", "6", "k", "g", "v", "m", "SPACE", ".", //48-55
+"u", "y", "j", "h", "b", "n", null, "R_ALT" //56-63
 ];
 
 function initialize() {
@@ -425,7 +425,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 				var shift_position = get_var("shift_placeholders").indexOf(token); //used to detect if shifted value was used
 				if (shift_position != -1) //entry exists in shift table
 				{
-					return_data.data |= 0x0800; //set SHIFT flag
+					return_data.data |= 0x2200; //set SHIFT flag
 					return_data.data &= 0xFF00; //clear character code
 					return_data.data |= keyboard_lookup_table.indexOf(get_var("default_placeholders")[shift_position]); //set character code according to position in shift table
 					//+ get_var("default_placeholders")[shift_position];
@@ -447,7 +447,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 				}
 				else if(token.toUpperCase() == "SHIFT") //shift keyword detected. set flag
 				{
-					return_data.data |= 0x0800;
+					return_data.data |= 0x2200;
 					/*if (return_data.data == "")
 					{
 						return_data.data = "SHIFT";
@@ -460,7 +460,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 				}
 				else if(token.toUpperCase() == "CTRL")
 				{
-					return_data.data |= 0x0400;
+					return_data.data |= 0x1100;
 					/*if (return_data.data == "")
 					{
 						return_data.data = token.toUpperCase();
@@ -472,11 +472,13 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 				}
 				else if (token.toUpperCase() == "FN")
 				{
-					return_data.data |= 0x0200;
+					/**NOT USED**/
+
+					//return_data.data |= 0x0200;
 				}
 				else if (token.toUpperCase() == "ALT")
 				{
-					return_data.data |= 0x0100;
+					return_data.data |= 0x4400;
 				}
 				else //not recognized. throw error
 				{
@@ -516,26 +518,29 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
     return return_data;
 }
 
-function validateMacroSyntax(data)
+function validateMacroSyntax(data, repeatAllowed)
 {
+	
 	var string_data = "";
+	var return_data = {valid: false, bytecode: [], command_count: 0};
 	if (typeof(data) === 'string')
 	{
 		string_data = data;
 	}
-	else if (typeof(data) === 'Macro')
+	else if (typeof(data) === Macro)
 	{
 		string_data = data.getMacro();
 	}
 
 	
 	var repeat_token_patt = /repeat\((.+?)\)\s*?{(.*)}\s*/m; //finds a repeat structure
-	var string_patt = /\".+?\"/; //finds a string
+	var string_patt = /\"(.+?)\"/; //finds a string
 	var no_whitespace_patt = /\s*(.*)/; //remove leading whitespace
 	var parallel_patt = /\"(\w*)\"(\s*\&\s*\"(\w*)\")+/; //find a parallel structure (multiple keys simultaneous)
 	var parallel_parse = /\w+/; //meant to parse tokens out of parallel_patt
 
 	var ready_string = string_data.replace(no_whitespace_patt, '$1') //strip leading whitespace
+	console.log("ready_string: " + ready_string);
 	while (ready_string.length != 0)
 	{
 
@@ -544,10 +549,18 @@ function validateMacroSyntax(data)
 		var string_index = ready_string.search(string_patt);
 		var parallel_index = ready_string.search(parallel_patt);
 
+		console.log("Repeat_index: " + repeat_index);
+		console.log("String_index: " + string_index);
+		console.log("Parallel_index: " + parallel_index);
+
 		if (repeat_index != 0 && string_index != 0 && parallel_index != 0) //basic syntax error
 		{
 			console.log("Macro did not have a valid regex at next index");
-			return false;
+			console.log("Repeat_index: " + repeat_index);
+			console.log("String_index: " + string_index);
+			console.log("Parallel_index: " + parallel_index);
+			return_data.valid = false;
+			return return_data;
 		}
 
 		//remove regex from string
@@ -555,6 +568,12 @@ function validateMacroSyntax(data)
 		var token;
 		if (repeat_index == 0)
 		{
+			if (!repeatAllowed)
+			{
+				console.log("Repeat structure was blocked! Syntax fails.");
+				return_data.valid = false;
+				return return_data;
+			}
 
 			token = ready_string.match(repeat_token_patt);
 			ready_string = ready_string.replace(token[0], ""); //returns an array of matched values, 0 index is whole string
@@ -564,21 +583,38 @@ function validateMacroSyntax(data)
 			if (isNaN(repeat_val)) //confirm it is an integer
 			{
 				console.log("Given repeat value was not a number.");
-				return false;
+				return_data.valid = false;
+				return return_data;
 			}
 
-			var result = validateMacroSyntax(token[2]);
-			if (!result)
+			var opcode = 0;
+			opcode |= (0x2) << 6; //store opcode
+			var repeats = repeat_val;
+
+			var result = validateMacroSyntax(token[2], false); //Note: repeat cannot be nested now!
+			if (!result.valid)
 			{
 				console.log("Repeat body was not valid");
-				return false;
+				return_data.valid = false;
+				return return_data;
 			}
+			opcode |= result.command_count & 0x3F; //note: impossible for this to overflow, given the character limit. 
+			
+			return_data.bytecode.push(opcode);
+			return_data.bytecode.push(parseInt(repeats));
+			return_data.bytecode.push.apply(return_data.bytecode, result.bytecode); 
+			return_data.command_count += result.command_count; //add nested statement's count to current count
+			return_data.command_count++;
 		}
 		else if (parallel_index == 0) //must check before string_patt, so that this has priority
 		{
 			var parallel_string = ready_string.match(parallel_patt)[0];
 			ready_string = ready_string.replace(parallel_string, '');
 			var tokens = new Array();
+			var modifier = 0;
+			var opcode = 0x3 << 6;
+			var num_characters = 0;
+			var characters = new Array();
 
 			while (parallel_parse.test(parallel_string))
 			{
@@ -586,7 +622,8 @@ function validateMacroSyntax(data)
 				if (tokens.includes(token))
 				{
 					console.log("Key entered multiple times!");
-					return false;
+					return_data.valid = false;
+					return return_data;
 				}
 
 				tokens.push(token);
@@ -595,23 +632,60 @@ function validateMacroSyntax(data)
 
 				var default_placeholders = get_var("default_placeholders");
 
-				if (!default_placeholders.includes(token))
+				if (!default_placeholders.includes(token) && token.toUpperCase() != "SHIFT" && token.toUpperCase() != "CTRL" && token.toUpperCase() != "ALT") //TODO: How is FN handled?
 				{
 					console.log("Parallel structure was given an invalid argument.");
-					return false;
+					return_data.valid = false;
+					return return_data;
+				}
+
+				if (token == "SHIFT")
+				{
+					modifier |= 0x22;
+				}
+				else if (token == "CTRL")
+				{
+					modifier |= 0x11;
+				}
+				else if (token == "ALT")
+				{
+					modifier |= 0x44;
+				}
+				else
+				{
+					characters.push(keyboard_lookup_table.indexOf(token));
+					num_characters++;
 				}
 
 				parallel_string = parallel_string.replace(token, '');
 			}
-			
 
+			opcode |= 0x3F & num_characters; //not possible to overflow, given character limit
+			return_data.bytecode.push(opcode);
+			return_data.bytecode.push(modifier);
+			return_data.bytecode.push.apply(return_data.bytecode, characters);
+
+			
+			return_data.command_count++;
 
 			
 		}
 		else if (string_index == 0)
 		{
-			token = ready_string.match(string_patt);
-			ready_string = ready_string.replace(token[0], '');
+			token = ready_string.match(string_patt)[1];
+			var opcode = 0;
+			opcode |= (0x01 << 6); //actual opcode
+			opcode |= token.length;
+			return_data.bytecode.push(opcode);
+			for (var i = 0; i < token.length; i++)
+			{
+				var bytecode = getBytecodeFromCharacter(token[i]);
+				return_data.bytecode.push((bytecode & 0xFF00) >> 8);
+				return_data.bytecode.push(bytecode & 0x00FF);
+			}
+
+			ready_string = ready_string.replace(ready_string.match(string_patt)[0], '');
+			return_data.command_count++;
 			//as far as I'm aware, there is no invalid string that can be given...
 		}
 		
@@ -621,7 +695,26 @@ function validateMacroSyntax(data)
 		var ready_string = ready_string.replace(no_whitespace_patt, '$1') //strip leading whitespace
 	}
 
-	return true;
+	return_data.valid = true;
+	return return_data;
+}
+
+function getBytecodeFromCharacter(char)
+{
+	var return_var = 0;
+	var shift_table = get_var("shift_placeholders");
+	var default_table = get_var("default_placeholders");
+	if (shift_table.includes(char) && !default_table.includes(char)) //in shift table, but not default table. shift flag is applied
+	{
+		return_var |= 0x2200;
+		return_var |= keyboard_lookup_table.indexOf(default_table[shift_table.indexOf(char)]); //lookup position in shift_table, get character from default table, get its index in keyboard_table
+	}
+	else
+	{
+		return_var |= keyboard_lookup_table.indexOf(char);
+	}
+
+	return return_var;
 }
 
 function download() {
@@ -632,7 +725,11 @@ function download() {
 
     for (var i = 0; i < 32; i++)
     {
-		var array_frame = {name: convert_index_to_readable_name(i), bindings: []};
+		var array_frame = {name: convert_index_to_readable_name(i), mode: 0, bindings: []};
+		if (i > 15)
+		{
+			array_frame.mode = 1;
+		}
 		console.log("key"+i+" is currently being validated");
 		console.log(get_var("value_Array").getPage(i));
 
@@ -681,10 +778,10 @@ function download() {
 		var macro_frame = {name: "", macro: "", inf_loop: false};
 		var macro = macro_Array[j];
 		macro_frame.name = "macro " + (j + 1);
-		macro_frame.macro = macro.getMacro();
+		//macro_frame.macro = macro.getMacro();
 		macro_frame.inf_loop = macro.getToggleState();
-		var result = validateMacroSyntax(macro.getMacro());
-		if (!result)
+		var result = validateMacroSyntax(macro.getMacro(), true);
+		if (!result.valid)
 		{
 			validation = false;
 			macro.setValid(false);
@@ -696,6 +793,7 @@ function download() {
 			macro.setValid(true);
 			macro_Array[j] = macro;
 			document.getElementById("macro" + j).style.border = "";
+			macro_frame.macro = result.bytecode;
 		}
 
 		temp_value_array.push(macro_frame)
