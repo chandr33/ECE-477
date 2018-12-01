@@ -162,13 +162,12 @@ uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 #define NUM_MACROS                          12
 
 //Some functions
-uint8_t macro_send_str(uint8_t, uint8_t*);
-void run_macro();
-uint8_t get_op(uint8_t);
 void manage_send_keypress(uint8_t, uint16_t, uint8_t, bool);
 uint32_t scanMatrix(uint8_t*);
 uint16_t check_for_modifiers(uint8_t);
 uint8_t update_prev_key (uint8_t*, uint8_t, uint8_t, uint8_t*, uint8_t);
+void set_key_press(uint8_t, uint8_t);
+void set_modifiers(uint8_t, uint8_t, bool);
 
 
 /**Buffer queue access macros
@@ -1080,6 +1079,10 @@ static void send_key_press(uint8_t keycode){
 
 }
 
+static void send_key_press_parallel(uint8_t* key_pattern, uint8_t length){
+    keys_send(length, key_pattern);
+}
+
 
 /**@brief Function for handling the HID Report Characteristic Write event.
  *
@@ -1606,7 +1609,7 @@ static void idle_state_handle(void)
 
 uint16_t check_for_modifiers(uint8_t key_value) {
     //9'b{FN, R_GUI,R_ALT,R_SHIFT,R_CTRL,L_GUI,L_ALT,L_SHIFT,L_CTRL};
-    uint8_t value = default_lookup_table [mode] [key_value];
+    uint8_t value = default_lookup_table [mode * 16] [2 * key_value + 1];
     if (value == 0xE0) { //L_CTRL
       return 0x0001;
     } else if (value == 0xE1) {
@@ -1734,29 +1737,39 @@ void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_fl
   //Get the final key value using the flags and value
   NRF_LOG_INFO("Sending key press Value: %d Flags: %d Prev: %d Caps: %d Num: %d FN Lock: %d\n",
         key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
-  modifiers = key_flags & 0xFF; //9'b{FN, R_GUI,R_ALT,R_SHIFT,R_CTRL,   L_GUI,L_ALT,L_SHIFT,L_CTRL};
+  uint8_t local_modifiers = key_flags & 0xFF; //9'b{FN, R_GUI,R_ALT,R_SHIFT,R_CTRL,   L_GUI,L_ALT,L_SHIFT,L_CTRL};
   
   if(fn_lock) {
     key_flags ^= 0x0100;
   }
-  uint8_t table_offset = mode + ((key_flags >> 8) & 0x01);
-  uint8_t final_value = default_lookup_table[table_offset] [key_value];
+  uint8_t table_offset = mode + ((key_flags & 0x0100) >> 8) * 8 + (key_flags & 0x07);
+  NRF_LOG_INFO("Offset: %d\n", table_offset);
+  set_modifiers(local_modifiers, key_value, !(!(key_flags & 0x0100)));
+  uint8_t final_value = default_lookup_table[table_offset] [2 * key_value + 1];
 
   if(final_value == 0x39) {
-    caps_lock = !caps_lock;
+    if(!repeat) {
+      caps_lock = !caps_lock;
+    }
   } else if(final_value == 0x47) { //Scroll Lock
-    scroll_lock = !scroll_lock;
+    if(!repeat) {
+      scroll_lock = !scroll_lock;
+    }
   } else if(final_value == 0x53) { //Num Lock
-    num_lock = !num_lock;
+    if(!repeat) {
+      num_lock = !num_lock;
+    }
   } else if(final_value == 0xE9) { //FN Lock
-    fn_lock = !fn_lock;
+    if(!repeat) {
+      fn_lock = !fn_lock;
+    }
   } else if(final_value >= 0xEA && final_value < 0xEA + NUM_MACROS) {
     if(!repeat) {
       macro_active = final_value - 0xE9;
     }
   } else {
     if(caps_lock && final_value <= 0x1D && final_value >= 0x04) {
-      if(!(modifiers & 0x22)) {
+      if(!(local_modifiers & 0x22)) {
         modifiers |= 0x22;
       } else {
         modifiers &= 0xDD;
@@ -1766,60 +1779,13 @@ void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_fl
     } else if (!num_lock && false) {
       
     } 
+    
     send_key_press(final_value);
   }
 }
 
-void run_macro() {
-  uint8_t* macro_ptr = macro_1;
-  uint8_t counter = 0;
-  uint8_t op = 0;
-
-  do {
-    op = get_op(macro_ptr[counter]);
-    if(op == 1) {
-      counter = macro_send_str(counter, macro_ptr);
-    } else if (op == 2) {
-      op = 0;
-    } else if (op == 3) {
-      op = 0;
-    }
-  } while (op > 0);
-
-  macro_active = 0;
-}
-
-uint8_t macro_send_str(uint8_t counter, uint8_t* macro_ptr) {
-  uint8_t num_keys = macro_ptr[counter++] & 0x3F;
-  //uint8_t num_keys = 6;
-  NRF_LOG_INFO("Sending %d keys.", num_keys);
-  for(int macro_index = 0; macro_index < num_keys; macro_index++) {
-     NRF_LOG_INFO("Sending: %d with modifier: %d Counter: %d\n", macro_ptr[counter + 1], macro_ptr[counter], counter);
-     NRF_LOG_FLUSH();
-     modifiers = macro_ptr[counter++];
-     send_key_press(macro_ptr[counter++]);
-      nrf_delay_ms(500);
-
-  }
-  /*counter++;
-  modifiers = macro_ptr[counter++];
-  send_key_press(macro_ptr[counter++]);
-  modifiers = macro_ptr[counter++];
-  send_key_press(macro_ptr[counter++]);
-  modifiers = macro_ptr[counter++];
-  send_key_press(macro_ptr[counter++]);
-  modifiers = macro_ptr[counter++];
-  send_key_press(macro_ptr[counter++]);
-  modifiers = macro_ptr[counter++];
-  send_key_press(macro_ptr[counter++]);
-  modifiers = macro_ptr[counter++];
-  send_key_press(macro_ptr[counter++]);*/
-   
-  return counter;
-} 
-
-uint8_t get_op(uint8_t byte) {
-  return (byte & 0xC0) >> 6;
+void set_modifiers(uint8_t modify_byte, uint8_t key_location, bool fn) {
+  modifiers = modify_byte;
 }
 
 int main(void)
@@ -1855,6 +1821,16 @@ int main(void)
     uint8_t timer = INIT_HOLD_COOLDOWN;
     uint8_t last_pressed_index = 4;
 
+    //Macro Stuff
+    uint8_t macro_status = 0; //0 - none active, 1 - reading op, 2 - sending chars
+    uint8_t macro_count = 0;  //The index of the pointer
+    uint8_t send_char_stop = 0; //The count for the number of characters to send
+    uint8_t repeat_instructions = 0; //The 
+    uint8_t curr_repeat_instructions = 0;
+    uint8_t repeat_counter_start = 0;
+    uint8_t repeats_left = 0;
+    bool macro_key_sent = false;
+
     // Enter main loop.
     for (;;)
     {
@@ -1877,19 +1853,97 @@ int main(void)
             manage_send_keypress(prev_key_value[last_pressed_index], key_flags, prev_flags, true);
             timer = SEC_HOLD_COOLDOWN;
           }
+
+          if(macro_active > 0) {
+            macro_count = 0;
+            macro_status = 1;
+          }
+
         } else {
-          run_macro();
+          
+          uint8_t* macro_ptr = macros[!(!mode) * NUM_MACROS + macro_active - 1];
+          if(macro_status == 1) { //Parsing Ops
+            //If the number of instructions run is the same as the number of instructions to repeat, move back to the beginning, decrement the # of repeats
+            if(repeat_instructions > 0 && curr_repeat_instructions == repeat_instructions) {
+              curr_repeat_instructions = 0;
+              repeats_left--;
+
+              //If number of repeats left is 0, then done repeating
+              if(repeats_left <= 0) {
+                curr_repeat_instructions = 0;
+                repeat_counter_start = 0;
+                repeat_instructions = 0;
+              } else {
+                macro_count = repeat_counter_start;
+              }
+            }
+
+            //If the number of instructions to repeat is more than 0, then increment the count
+            if(repeat_instructions > 0) {
+              curr_repeat_instructions++;
+            }
+
+            NRF_LOG_INFO("Cycle run\n"); //Lags if this isn't here
+
+            uint8_t op = (macro_ptr[macro_count] & 0xC0) >> 6;
+
+            if(op == 0) {
+              macro_status = 0;
+            } else if (op == 1) {
+              macro_status = 2;
+              send_char_stop = (macro_ptr[macro_count] & 0x3F) * 2 + macro_count + 1;
+              macro_count = macro_count + 1;
+            } else if (op == 2) {
+              macro_status = 1;
+              repeat_instructions = macro_ptr[macro_count] & 0x3F;
+              repeats_left = macro_ptr[macro_count + 1];
+              curr_repeat_instructions = 0;
+              repeat_counter_start = macro_count + 2;
+              macro_count = macro_count + 2;
+            } else if (op == 3) {
+              uint8_t num_parallel = macro_ptr[macro_count] & 0x3F;
+              if(num_parallel <= 8 && num_parallel >= 2) {
+                uint8_t parallel_keys[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+                for(uint8_t loop_index = 0; loop_index < num_parallel; loop_index++) {
+                  parallel_keys[loop_index] = macro_ptr[macro_count + 2 + loop_index];
+                }
+                set_modifiers(macro_ptr[macro_count + 1], 64, false);
+                send_key_press_parallel(parallel_keys, num_parallel);
+              }
+              macro_count += num_parallel + 2;
+            } else {
+              macro_status = 0;
+            }
+    
+          } else { //Sending Chars
+
+            set_modifiers(macro_ptr[macro_count], 64, false);
+            send_key_press(macro_ptr[macro_count + 1]);
+            macro_key_sent = true;
+            macro_count = macro_count + 2;
+            if(macro_count >= send_char_stop) {
+              macro_status = 1;
+            }
+          }
+
+          if(macro_status == 0) {
+            macro_active = 0;
+          }
+          if(macro_key_sent) {
+            nrf_delay_ms(20);
+            macro_key_sent = false;
+          }
         }
 
         if(nrf_gpio_pin_read(SWITCH_RIGHT) == HIGH) { //MODE SWITCH
           nrf_gpio_pin_write(LED_RIGHT, HIGH);
-          mode = 2;
+          mode = 16;
         } else {
           nrf_gpio_pin_write(LED_RIGHT, LOW);
           mode = 0;
         }
          
-        if(nrf_gpio_pin_read(SWITCH_LEFT) == HIGH) { //TEMP, WILL BE LOAD SWITCH
+        if(caps_lock == true) { //TEMP, WILL BE LOAD SWITCH
           nrf_gpio_pin_write(LED_LEFT, HIGH);
         } else {
           nrf_gpio_pin_write(LED_LEFT, LOW);
