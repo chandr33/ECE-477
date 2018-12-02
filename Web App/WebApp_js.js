@@ -48,10 +48,13 @@ var hid_codes = {
 	"6": 0x23, "7": 0x24,
 	"8": 0x25, "9": 0x26,
 	"0": 0x27, "ENTER": 0x28,
+	"\\n": 0x28,
 	"ESC": 0x29,
 	"BACKSPACE": 0x2A,
 	"TAB": 0x2B,
+	"\\t": 0x2B,
 	"SPACE": 0x2C,
+	" ": 0x2C,
 	"-": 0x2D,
 	"=": 0x2E,
 	"[": 0x2F,
@@ -60,6 +63,7 @@ var hid_codes = {
 	";": 0x33,
 	"'": 0x34,
 	"TILDE": 0x35,
+	"`": 0x35,
 	",": 0x36,
 	".": 0x37,
 	"/": 0x38,
@@ -116,6 +120,14 @@ var hid_codes = {
 	"MACRO11": 0xF4,
 	"MACRO12": 0xF5,
 };
+
+var default_other = [
+"`"
+];
+
+var shift_other = [
+"~"
+];
 
 function initialize() {
     var default_placeholders = [
@@ -511,15 +523,16 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 			if (!keywords.includes(token.toUpperCase())) //token is not a keyword
 			{
 				var shift_position = get_var("shift_placeholders").indexOf(token); //used to detect if shifted value was used
+				var default_placeholders = get_var("default_placeholders");
 				if (shift_position != -1) //entry exists in shift table
 				{
 					return_data.data |= 0x2200; //set SHIFT flag
 					return_data.data &= 0xFF00; //clear character code
-					return_data.data |= hid_codes[(get_var("default_placeholders")[shift_position])]; //set character code according to position in shift table
+					return_data.data |= hid_codes[(default_placeholders[shift_position])]; //set character code according to position in shift table
 					//+ get_var("default_placeholders")[shift_position];
 					key_found = true;
 				} //if (shift_position != -1) //entry exists in shift table
-				else if (get_var("default_placeholders").includes(token)) //entry exists in default table
+				else if (default_placeholders.includes(token)) //entry exists in default table
 				{
 					return_data.data &= 0xFF00;
 					return_data.data |= hid_codes[(token)];
@@ -532,6 +545,17 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 						return_data.data = return_data.data+"+" + token;
 					}*/
 					key_found = true;
+				}
+				else if (default_other.includes(token))
+				{
+					return_data.data &= 0xFF00;
+					return_data.data |= hid_codes[token];
+				}
+				else if (shift_other.includes(token))
+				{
+					return_data.data |= 0x2200;
+					return_data.data &= 0xFF00;
+					return_data.data |= hid_codes[default_other[shift_other.indexOf(token)]];
 				}
 				else if(token.toUpperCase() == "SHIFT") //shift keyword detected. set flag
 				{
@@ -628,8 +652,8 @@ function validateMacroSyntax(data, repeatAllowed)
 	var repeat_token_patt = /repeat\((.+?)\)\s*?{(.*)}\s*/m; //finds a repeat structure
 	var string_patt = /\"(.+?)\"/; //finds a string
 	var no_whitespace_patt = /\s*(.*)/; //remove leading whitespace
-	var parallel_patt = /\"(\w*)\"(\s*\&\s*\"(\w*)\")+/; //find a parallel structure (multiple keys simultaneous)
-	var parallel_parse = /\w+/; //meant to parse tokens out of parallel_patt
+	var parallel_patt = /\"([^\"\&]*)\"(\s*\&\s*\"([^\"\&]*)\")+/; //find a parallel structure (multiple keys simultaneous)
+	var parallel_parse = /\"([^\"\&]+)\"/; //meant to parse tokens out of parallel_patt
 
 	var ready_string = string_data.replace(no_whitespace_patt, '$1') //strip leading whitespace
 	console.log("ready_string: " + ready_string);
@@ -710,7 +734,7 @@ function validateMacroSyntax(data, repeatAllowed)
 
 			while (parallel_parse.test(parallel_string))
 			{
-				token = parallel_parse.exec(parallel_string)[0];
+				token = parallel_parse.exec(parallel_string)[1];
 				if (tokens.includes(token))
 				{
 					console.log("Key entered multiple times!");
@@ -724,7 +748,7 @@ function validateMacroSyntax(data, repeatAllowed)
 
 				var default_placeholders = get_var("default_placeholders");
 
-				if (!default_placeholders.includes(token) && token.toUpperCase() != "SHIFT" && token.toUpperCase() != "CTRL" && token.toUpperCase() != "ALT") //TODO: How is FN handled?
+				if (!default_placeholders.includes(token) && !default_other.includes(token) && token.toUpperCase() != "SHIFT" && token.toUpperCase() != "CTRL" && token.toUpperCase() != "ALT") //TODO: How is FN handled?
 				{
 					console.log("Parallel structure was given an invalid argument.");
 					return_data.valid = false;
@@ -745,7 +769,7 @@ function validateMacroSyntax(data, repeatAllowed)
 				}
 				else
 				{
-					characters.push(keyboard_lookup_table.indexOf(token));
+					characters.push(hid_codes[token]);
 					num_characters++;
 				}
 
@@ -800,6 +824,11 @@ function getBytecodeFromCharacter(char)
 	{
 		return_var |= 0x2200;
 		return_var |= hid_codes[(default_table[shift_table.indexOf(char)])]; //lookup position in shift_table, get character from default table, get its index in keyboard_table
+	}
+	else if (shift_other.includes(char) && !default_other.includes(char))
+	{
+		return_var |= 0x2200;
+		return_var |= hid_codes[default_other[shift_other.indexOf(char)]];
 	}
 	else
 	{
@@ -891,11 +920,10 @@ function download() {
 	var macro_Array = get_var("macro_Array");
 	for (var j = 0; j < 12; j++)
 	{
-		var macro_frame = {name: "", macro: "", inf_loop: false};
+		var macro_frame = [];
 		var macro = macro_Array[j];
-		macro_frame.name = "macro " + (j + 1);
+		//macro_frame.name = "macro " + (j + 1);
 		//macro_frame.macro = macro.getMacro();
-		macro_frame.inf_loop = macro.getToggleState();
 		var result = validateMacroSyntax(macro.getMacro(), true);
 		if (!result.valid)
 		{
@@ -909,9 +937,16 @@ function download() {
 			macro.setValid(true);
 			macro_Array[j] = macro;
 			document.getElementById("macro" + j).style.border = "";
-			macro_frame.macro = result.bytecode;
+			macro_frame = result.bytecode;
 		}
-
+		if (macro.getToggleState())
+		{
+			macro_frame.push(1);
+		}
+		else
+		{
+			macro_frame.push(0);
+		}
 		temp_value_array.push(macro_frame)
 	}
 	store_var(macro_Array, "macro_Array");
