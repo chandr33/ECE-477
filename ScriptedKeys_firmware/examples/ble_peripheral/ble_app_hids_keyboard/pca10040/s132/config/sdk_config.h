@@ -4309,6 +4309,10 @@
 
 // </e>
 
+#define UART0_USE_EASY_DMA        false
+#define UART_EASY_DMA_SUPPORT     1
+#define UART_LEGACY_SUPPORT       1
+
 // <e> NRFX_UART_ENABLED - nrfx_uart - UART peripheral driver
 //==========================================================
 #ifndef NRFX_UART_ENABLED
@@ -6577,15 +6581,15 @@
 #define HCI_UART_FLOW_CONTROL 0
 #endif
 
-// <o> HCI_UART_RX_PIN - UART RX pin 
-#ifndef HCI_UART_RX_PIN
-#define HCI_UART_RX_PIN 0 //Change it to 8
-#endif
-
-// <o> HCI_UART_TX_PIN - UART TX pin 
-#ifndef HCI_UART_TX_PIN
-#define HCI_UART_TX_PIN 1 //Change it to 6
-#endif
+//// <o> HCI_UART_RX_PIN - UART RX pin 
+//#ifndef HCI_UART_RX_PIN
+//#define HCI_UART_RX_PIN 0 //Change it to 8
+//#endif
+//
+//// <o> HCI_UART_TX_PIN - UART TX pin 
+//#ifndef HCI_UART_TX_PIN
+//#define HCI_UART_TX_PIN 1 //Change it to 6
+//#endif
 
 // <o> HCI_UART_RTS_PIN - UART RTS pin 
 #ifndef HCI_UART_RTS_PIN

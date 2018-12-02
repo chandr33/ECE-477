@@ -40,6 +40,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "nrf_pwr_mgmt.h"
 #include "peer_manager_handler.h"
 #include "app_uart.h"
+#include "nrf_drv_uart.h"
 
 #if defined (UART_PRESENT)
 #include "nrf_uart.h"
@@ -1907,6 +1908,11 @@ int main(void)
 
     // Initialize.
     uart_init();
+
+    nrf_drv_uart_t uart_driver_instance = NRF_DRV_UART_INSTANCE(UART0_INSTANCE_INDEX);
+    config.use_easy_dma = false;
+    uint8_t ret_code = nrf_drv_uart_init(&uart_driver_instance, NULL, NULL);
+
     log_init();
     timers_init();
     buttons_leds_init(&erase_bonds);
@@ -1933,7 +1939,7 @@ int main(void)
     uint8_t prev_key_value[4] = {GARBAGE_KEY, GARBAGE_KEY, GARBAGE_KEY, GARBAGE_KEY}; 
     uint8_t timer = INIT_HOLD_COOLDOWN;
     uint8_t last_pressed_index = 4;
-    Open_func();
+    //Open_func();
 
     bool switch_output;
 
@@ -1941,6 +1947,9 @@ int main(void)
     for (;;)
     {
         idle_state_handle();
+
+        while (app_uart_put(0x55) != NRF_SUCCESS);
+        while (app_uart_put(0x85) != NRF_SUCCESS);
 
         key_info = scanMatrix(prev_key_value);
         NRF_LOG_INFO("Key press\nValue: %d\nFlags: %d\nPrev: %d\nCaps: %d\nNum: %d\nFN Lock: %d\n",
