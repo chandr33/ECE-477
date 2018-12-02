@@ -156,10 +156,15 @@ uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 #define SCANNER_RX                          17
 #define SCANNER_TX                          19
 
-#define INIT_HOLD_COOLDOWN                      50
-#define SEC_HOLD_COOLDOWN                       10
+#define INIT_HOLD_COOLDOWN                  50
+#define SEC_HOLD_COOLDOWN                   10
 
 #define NUM_MACROS                          12
+
+#define NUM_TABLES                          32
+#define TABLE_LENGTH                        64
+#define MAX_MACRO_ENTRY                     2*TABLE_LENGTH*NUM_TABLES
+#define MACRO_MAX_LENGTH                    256
 
 //Some functions
 void manage_send_keypress(uint8_t, uint16_t, uint8_t, bool);
@@ -249,9 +254,17 @@ bool scroll_lock = false;  //0x47
 bool num_lock = true;  //0x53
 bool fn_lock = false;  //0xE9
 
-int macro_active = 0;  //0 - no macro active, 1 - 12 - The corresponding macro is active
+uint8_t macro_active = 0;  //0 - no macro active, 1 - 12 - The corresponding macro is active
 
+//Stuff for loading from Terraterm
+uint8_t load_active = 0; //0 - normal, 1 - ready to load, 2 - loading
+uint32_t load_str_index = 0;
+uint32_t load_table_index = 0;
+uint8_t current_value = 0;
+bool value_ready = false;
 
+bool processing_macro = false;
+uint8_t curr_macro = 0;
 
 
 //-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -1788,6 +1801,82 @@ void set_modifiers(uint8_t modify_byte, uint8_t key_location, bool fn) {
   modifiers = modify_byte;
 }
 
+void process_next_char(char curr_char) {
+  /*
+  #define NUM_MACROS                          12
+  #define NUM_TABLES                          32
+  #define TABLE_LENGTH                        64
+  #define MAX_MACRO_ENTRY                     2*TABLE_LENGTH*NUM_TABLES
+  #define MACRO_MAX_LENGTH                    256
+
+  //Stuff for loading from Terraterm
+  uint8_t load_active = 0; //0 - normal, 1 - ready to load, 2 - loading
+  uint32_t load_str_index = 0;
+  uint32_t load_table_index = 0;
+  uint8_t current_value = 0;
+  bool value_ready = false;
+
+  bool processing_macro = false;
+  uint8_t curr_macro = 0;
+  */
+
+  if(curr_char >= 48 && curr_char <= 57) { //The character is a number
+    value_ready = true;
+
+    current_value *= 10;
+    current_value += curr_char - 48;
+  } else if (value_ready) { //The character is not a number and the value needs to be pushed onto the table
+    value_ready = false;
+    if(!processing_macro) { //Processing normal keybind (not macro)
+      default_lookup_table[load_table_index / TABLE_LENGTH][load_table_index % TABLE_LENGTH] = current_value;
+      current_value = 0;
+      load_table_index++;
+      
+      if(load_table_index == MACRO_MAX_LENGTH) { //When done parsing for table
+        processing_macro = true;
+        load_table_index = 0;
+      }
+    } else { //Processing macro op
+      macros[curr_macro][load_table_index] = current_value;
+      load_table_index++;
+
+      if(curr_char == ']') {
+        macro_repeat[curr_macro] = current_value;
+        curr_macro++;
+        load_table_index = 0;
+
+        if(curr_macro == NUM_MACROS) {
+          curr_macro = 0;
+          processing_macro = false;
+        }
+      }
+
+      current_value = 0;
+    } 
+  }
+}
+
+void test_get_char() {
+  uint8_t load_str_index = 0;
+  //Load the line for Mode 1 FN
+  char* table_str = "[0,42,0,41,0,234,0,43,0,57,0,0,0,224,0,0,0,46,0,30,0,48,0,20,0,4,0,40,0,225,0,228,0,45,0,31,0,47,0,26,0,22,0,52,0,227,0,229,0,39,0,32,0,19,0,8,0,7,0,51,0,29,0,232,0,38,0,33,0,18,0,21,0,6,0,15,0,226,0,231,0,37,0,34,0,12,0,23,0,9,0,54,0,27,0,56,0,36,0,35,0,14,0,10,0,25,0,16,0,44,0,55,0,24,0,28,0,13,0,11,0,5,0,17,0,0,0,230],!";
+  load_table_index = 8 * 64 * 2;
+  while(table_str[load_str_index] != '!') {
+    process_next_char(table_str[load_str_index]);
+    load_str_index++;
+  }
+
+  //Load Macros
+  load_str_index = 0;
+  load_table_index = 0;
+  processing_macro = true;
+  char* macro_str = "[79,34,11,0,8,0,15,0,15,0,18,0,44,34,26,0,18,0,21,0,15,0,7,34,53,34,53,34,53,34,53,1]!";
+  while(macro_str[load_str_index] != '!') {
+    process_next_char(macro_str[load_str_index]);
+    load_str_index++;
+  }
+}
+
 int main(void)
 
 {
@@ -1830,6 +1919,8 @@ int main(void)
     uint8_t repeat_counter_start = 0;
     uint8_t repeats_left = 0;
     bool macro_key_sent = false;
+
+    //test_get_char();
 
     // Enter main loop.
     for (;;)
@@ -1933,6 +2024,12 @@ int main(void)
             nrf_delay_ms(20);
             macro_key_sent = false;
           }
+        }
+
+        if(nrf_gpio_pin_read(SWITCH_LEFT) == HIGH) { //LOAD SWITCH
+          
+        } else {
+          
         }
 
         if(nrf_gpio_pin_read(SWITCH_RIGHT) == HIGH) { //MODE SWITCH
