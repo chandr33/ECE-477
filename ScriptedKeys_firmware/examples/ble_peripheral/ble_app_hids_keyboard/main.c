@@ -256,7 +256,7 @@ bool num_lock = true;  //0x53
 bool fn_lock = false;  //0xE9
 
 /* Use flow control in loopback test. */
-#define UART_HWFC APP_UART_FLOW_CONTROL_ENABLED
+#define UART_HWFC APP_UART_FLOW_CONTROL_DISABLED
 
 void uart_error_handle(app_uart_evt_t * p_event)
 {
@@ -1906,7 +1906,7 @@ int main(void)
     bool erase_bonds;
 
     // Initialize.
-    //uart_init();
+    uart_init();
     log_init();
     timers_init();
     buttons_leds_init(&erase_bonds);

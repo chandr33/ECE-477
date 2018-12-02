@@ -97,6 +97,7 @@ static void show_error(void)
         // Do nothing.
     }
 }
+ 
 
 /** @brief Function for testing UART loop back.
  *  @details Transmitts one character at a time to check if the data received from the loopback is same as the transmitted data.
