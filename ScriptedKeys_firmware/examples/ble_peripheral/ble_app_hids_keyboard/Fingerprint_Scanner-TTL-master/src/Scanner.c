@@ -4,8 +4,8 @@ static unsigned char command_packet[12];
 static struct Command command_members;
 
 void getPacketBytes(unsigned char command) {
-  command_members.command[0] = 0x00;
-  command_members.command[1] = command;
+  command_members.command[0] = command;
+  command_members.command[1] = 0x00;
   short checksum = CalculateChecksum_Command();
   command_packet[0] = COMMAND_START_CODE_1;
   command_packet[1] = COMMAND_START_CODE_2;
@@ -57,6 +57,7 @@ void getResponse() {
     while (app_uart_get(&first_byte) != NRF_SUCCESS);
     if (first_byte == 0x55)
     {
+      printf("%x,", first_byte);
       break;
       //NRF_LOG_INFO("The byte we got: %d.", first_byte);
     }
@@ -65,14 +66,13 @@ void getResponse() {
   unsigned char response[12];
   response[0] = first_byte;
   for (int i = 1; i < 12; i++) {
-     while (app_uart_get(&first_byte) == NRF_ERROR_NOT_FOUND) {
-          NRF_LOG_INFO("UART Transmission failed\n");
-     }
+     while (app_uart_get(&first_byte) != NRF_SUCCESS) {}
+     printf("%x,", first_byte);
      response[i] = first_byte;
   }
   NRF_LOG_INFO("Got all 12 bytes.\n");
   
-}
+ }
 
 bool SetLED_func(bool on) {
   unsigned char command = CmosLed;

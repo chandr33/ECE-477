@@ -1953,8 +1953,8 @@ int main(void)
     {
         idle_state_handle();
 
-        while (app_uart_put(0x55) != NRF_SUCCESS);
-        while (app_uart_put(0x85) != NRF_SUCCESS);
+        //while (app_uart_put(0x55) != NRF_SUCCESS);
+        //while (app_uart_put(0x85) != NRF_SUCCESS);
 
         key_info = scanMatrix(prev_key_value);
         NRF_LOG_INFO("Key press\nValue: %d\nFlags: %d\nPrev: %d\nCaps: %d\nNum: %d\nFN Lock: %d\n",
@@ -1980,9 +1980,10 @@ int main(void)
           nrf_gpio_pin_write(LED_LEFT, LOW);
           mode = 0;
         }
-        // SetLED_func(true);
+         SetLED_func(true);
          nrf_delay_ms(1000);
-        // SetLED_func(false);
+         SetLED_func(false);
+         nrf_delay_ms(1000);
          //Enroll1_func();
     }
 }
