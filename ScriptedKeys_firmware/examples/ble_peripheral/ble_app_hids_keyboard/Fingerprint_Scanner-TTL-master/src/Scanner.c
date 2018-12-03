@@ -1,6 +1,6 @@
 #include "Scanner.h"
 
-static unsigned command_packet[12];
+static unsigned char command_packet[12];
 static struct Command command_members;
 
 void getPacketBytes(unsigned char command) {
@@ -18,7 +18,7 @@ void getPacketBytes(unsigned char command) {
   command_packet[8] = command_members.command[0];
   command_packet[9] = command_members.command[1];
   command_packet[10] = (unsigned char)(checksum&0x00FF);
-  command_packet[11] = (unsigned char)(checksum&0xFF00);
+  command_packet[11] = (unsigned char)((checksum&0xFF00) >> 8);
 }
 
 short CalculateChecksum_Command() {
@@ -38,13 +38,13 @@ short CalculateChecksum_Command() {
 
 void SendCommand() {
     int i = 0;
+    uint32_t success;
     for (i = 0; i < 12; i++) {
-        uint32_t success = app_uart_put(command_packet[i]);
-        if (success == NRF_ERROR_NO_MEM) {
-            NRF_LOG_INFO("UART Transmission failed\n");
-            NRF_LOG_FLUSH();
-            break;
-        }
+        while(success = app_uart_put(command_packet[i]) != NRF_SUCCESS);
+          if (success == NRF_ERROR_NO_MEM) {
+            printf("UART Transmission failed\n");
+            //NRF_LOG_FLUSH();
+          }
     }
 }
 
@@ -53,11 +53,13 @@ void getResponse() {
   uint8_t first_byte = 0;
   unsigned char response_packet[12];
   NRF_LOG_INFO("Waiting for response.\n");
-  while (done == false) {
-      app_uart_get(&first_byte);
-      if (first_byte == 0x55)
-          done = true;
+  while (true){
+    while (app_uart_get(&first_byte) != NRF_SUCCESS);
+    if (first_byte == 0x55)
+    {
+      break;
       //NRF_LOG_INFO("The byte we got: %d.", first_byte);
+    }
   }
   NRF_LOG_INFO("Did get first byte.\n");
   unsigned char response[12];

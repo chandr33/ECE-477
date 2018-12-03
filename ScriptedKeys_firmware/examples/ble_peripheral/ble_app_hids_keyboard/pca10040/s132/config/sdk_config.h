@@ -6569,7 +6569,7 @@
 // <268435456=> 1000000 baud 
 
 #ifndef HCI_UART_BAUDRATE
-#define HCI_UART_BAUDRATE 30801920
+#define HCI_UART_BAUDRATE 2576384
 #endif
 
 // <o> HCI_UART_FLOW_CONTROL  - Hardware Flow Control
@@ -6582,14 +6582,14 @@
 #endif
 
 //// <o> HCI_UART_RX_PIN - UART RX pin 
-//#ifndef HCI_UART_RX_PIN
-//#define HCI_UART_RX_PIN 0 //Change it to 8
-//#endif
+#ifndef HCI_UART_RX_PIN
+#define HCI_UART_RX_PIN 11 //Change it to 8
+#endif
 //
 //// <o> HCI_UART_TX_PIN - UART TX pin 
-//#ifndef HCI_UART_TX_PIN
-//#define HCI_UART_TX_PIN 1 //Change it to 6
-//#endif
+#ifndef HCI_UART_TX_PIN
+#define HCI_UART_TX_PIN 12 //Change it to 6
+#endif
 
 // <o> HCI_UART_RTS_PIN - UART RTS pin 
 #ifndef HCI_UART_RTS_PIN

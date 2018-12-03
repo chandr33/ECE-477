@@ -141,6 +141,7 @@
       <file file_name="../../../../../../components/softdevice/common/nrf_sdh_soc.c" />
     </folder>
     <file file_name="../../../../../../components/ble/ble_services/ble_nus/ble_nus.c" />
+    <file file_name="../../../../../../components/libraries/uart/retarget.c" />
   </project>
   <configuration
     Name="Release"

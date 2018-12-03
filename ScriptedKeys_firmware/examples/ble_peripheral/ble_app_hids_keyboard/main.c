@@ -8,6 +8,8 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include "nordic_common.h"
 #include "Fingerprint_Scanner-TTL-master/src/Scanner.h"
 #include "nrf.h"
@@ -26,6 +28,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "ble_link_ctx_manager.h"
 #include "ble_conn_params.h"
 #include "sensorsim.h"
+#include "bsp.h"
 #include "bsp_btn_ble.h"
 #include "app_scheduler.h"
 #include "nrf_sdh.h"
@@ -1517,12 +1520,12 @@ static void uart_init(void)
       {
           RX_PIN_NUMBER,
           TX_PIN_NUMBER,
-          //RTS_PIN_NUMBER,
-          //CTS_PIN_NUMBER,
+          RTS_PIN_NUMBER,
+          CTS_PIN_NUMBER,
           UART_HWFC,
           false,
 #if defined (UART_PRESENT)
-          NRF_UART_BAUDRATE_115200
+          NRF_UART_BAUDRATE_9600
 #else
           NRF_UARTE_BAUDRATE_115200
 #endif
@@ -1904,14 +1907,15 @@ void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_fl
 int main(void)
 
   {
+
     bool erase_bonds;
 
     // Initialize.
     uart_init();
 
-    nrf_drv_uart_t uart_driver_instance = NRF_DRV_UART_INSTANCE(UART0_INSTANCE_INDEX);
+    /*nrf_drv_uart_t uart_driver_instance = NRF_DRV_UART_INSTANCE(UART0_INSTANCE_INDEX);
     config.use_easy_dma = false;
-    uint8_t ret_code = nrf_drv_uart_init(&uart_driver_instance, NULL, NULL);
+    uint8_t ret_code = nrf_drv_uart_init(&uart_driver_instance, NULL, NULL);*/
 
     log_init();
     timers_init();
@@ -1939,7 +1943,8 @@ int main(void)
     uint8_t prev_key_value[4] = {GARBAGE_KEY, GARBAGE_KEY, GARBAGE_KEY, GARBAGE_KEY}; 
     uint8_t timer = INIT_HOLD_COOLDOWN;
     uint8_t last_pressed_index = 4;
-    //Open_func();
+    uint8_t test_byte;
+    Open_func();
 
     bool switch_output;
 
