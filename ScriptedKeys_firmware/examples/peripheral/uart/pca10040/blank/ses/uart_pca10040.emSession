@@ -56,8 +56,9 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="22" y="141" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../main.c" selected="1" top="127" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="18" y="146" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../main.c" selected="1" top="71" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="80" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/uart/app_uart.h" selected="0" top="65" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="84" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/boards/pca10040.h" selected="0" top="73" codecName="Default"/>
  </Files>
  <ARMCrossStudioWindow activeProject="uart_pca10040" fileDialogDefaultFilter="*.h" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="" fileDialogInitialDirectory="/Users/qchang/Library/Mobile Documents/com~apple~CloudDocs/Dev/ECE-477/ScriptedKeys_firmware/components/boards" debugSearchPath="" autoConnectCapabilities="3711"/>
 </session>
