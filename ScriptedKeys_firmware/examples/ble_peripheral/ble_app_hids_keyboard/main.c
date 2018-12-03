@@ -131,7 +131,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #define COL4                                7
 #define COL5                                8
 #define COL6                                9
-#define COL7                                10
+#define COL7                                15
 uint8_t COLS[col_length] =  {COL0, COL1, COL2, COL3, COL4, COL5, COL6, COL7};
 
 #define ROW0                                25
@@ -173,6 +173,9 @@ uint16_t check_for_modifiers(uint8_t);
 uint8_t update_prev_key (uint8_t*, uint8_t, uint8_t, uint8_t*, uint8_t);
 void set_key_press(uint8_t, uint8_t);
 void set_modifiers(uint8_t, uint8_t, bool);
+
+void test_get_char();
+void process_next_char(char);
 
 
 /**Buffer queue access macros
@@ -1575,7 +1578,6 @@ static void buttons_leds_init(bool * p_erase_bonds)
     nrf_gpio_cfg_output(LED_LEFT);
     nrf_gpio_cfg_output(LED_RIGHT);
 
-    //nrf_gpio_range_cfg_output(3, 10);
     err_code = bsp_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS, bsp_event_handler);
     APP_ERROR_CHECK(err_code);
 
@@ -1820,11 +1822,11 @@ void process_next_char(char curr_char) {
   uint8_t curr_macro = 0;
   */
 
-  if(curr_char >= 48 && curr_char <= 57) { //The character is a number
+  if(curr_char >= '0' && curr_char <= '9') { //The character is a number
     value_ready = true;
 
     current_value *= 10;
-    current_value += curr_char - 48;
+    current_value += curr_char - '0';
   } else if (value_ready) { //The character is not a number and the value needs to be pushed onto the table
     value_ready = false;
     if(!processing_macro) { //Processing normal keybind (not macro)
@@ -1836,7 +1838,7 @@ void process_next_char(char curr_char) {
         processing_macro = true;
         load_table_index = 0;
       }
-    } else { //Processing macro op
+    } else { //Processing macros
       macros[curr_macro][load_table_index] = current_value;
       load_table_index++;
 
@@ -1859,9 +1861,9 @@ void process_next_char(char curr_char) {
 void test_get_char() {
   uint8_t load_str_index = 0;
   //Load the line for Mode 1 FN
-  char* table_str = "[0,42,0,41,0,234,0,43,0,57,0,0,0,224,0,0,0,46,0,30,0,48,0,20,0,4,0,40,0,225,0,228,0,45,0,31,0,47,0,26,0,22,0,52,0,227,0,229,0,39,0,32,0,19,0,8,0,7,0,51,0,29,0,232,0,38,0,33,0,18,0,21,0,6,0,15,0,226,0,231,0,37,0,34,0,12,0,23,0,9,0,54,0,27,0,56,0,36,0,35,0,14,0,10,0,25,0,16,0,44,0,55,0,24,0,28,0,13,0,11,0,5,0,17,0,0,0,230],!";
-  load_table_index = 8 * 64 * 2;
-  while(table_str[load_str_index] != '!') {
+  char* table_str = "[0,42,0,4,0,234,0,43,0,57,0,0,0,224,0,0,0,46,0,30,0,48,0,20,0,4,0,40,0,225,0,228,0,45,0,31,0,47,0,26,0,22,0,52,0,227,0,229,0,39,0,32,0,19,0,8,0,7,0,51,0,29,0,232,0,38,0,33,0,18,0,21,0,6,0,15,0,226,0,231,0,37,0,34,0,12,0,23,0,9,0,54,0,27,0,56,0,36,0,35,0,14,0,10,0,25,0,16,0,44,0,55,0,24,0,28,0,13,0,11,0,5,0,17,0,0,0,230],!";
+  load_table_index = 0;
+  for(uint16_t curr_loop_index = 0; curr_loop_index < 20; curr_loop_index++) {
     process_next_char(table_str[load_str_index]);
     load_str_index++;
   }
@@ -1869,9 +1871,11 @@ void test_get_char() {
   //Load Macros
   load_str_index = 0;
   load_table_index = 0;
+  current_value = 0;
+  value_ready = false;
   processing_macro = true;
   char* macro_str = "[79,34,11,0,8,0,15,0,15,0,18,0,44,34,26,0,18,0,21,0,15,0,7,34,53,34,53,34,53,34,53,1]!";
-  while(macro_str[load_str_index] != '!') {
+  for(uint16_t curr_loop_index = 0; curr_loop_index < 85; curr_loop_index++) {
     process_next_char(macro_str[load_str_index]);
     load_str_index++;
   }
@@ -1881,6 +1885,8 @@ int main(void)
 
 {
     bool erase_bonds;
+
+    test_get_char();
 
     // Initialize.
     log_init();
@@ -1920,12 +1926,11 @@ int main(void)
     uint8_t repeats_left = 0;
     bool macro_key_sent = false;
 
-    //test_get_char();
-
     // Enter main loop.
     for (;;)
     {
         idle_state_handle();
+
 
         if(macro_active == 0) {
           key_info = scanMatrix(prev_key_value);
