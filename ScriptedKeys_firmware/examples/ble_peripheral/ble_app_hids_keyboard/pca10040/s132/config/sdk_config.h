@@ -6525,6 +6525,19 @@
 #define HCI_RX_BUF_QUEUE_SIZE 4
 #endif
 
+#ifndef APP_UART_ENABLED
+#define APP_UART_ENABLED 1
+#endif
+
+#ifndef APP_UART_DRIVER_INSTANCE
+#define APP_UART_DRIVER_INSTANCE 0
+#endif
+
+#ifndef APP_FIFO_ENABLED
+#define APP_FIFO_ENABLED 1
+#endif
+
+
 // </e>
 
 // <e> HCI_SLIP_ENABLED - hci_slip - SLIP protocol implementation used by HCI
@@ -7376,7 +7389,7 @@
 // <e> NRF_LOG_BACKEND_UART_ENABLED - nrf_log_backend_uart - Log UART backend
 //==========================================================
 #ifndef NRF_LOG_BACKEND_UART_ENABLED
-#define NRF_LOG_BACKEND_UART_ENABLED 1
+#define NRF_LOG_BACKEND_UART_ENABLED 0
 #endif
 // <o> NRF_LOG_BACKEND_UART_TX_PIN - UART TX pin 
 #ifndef NRF_LOG_BACKEND_UART_TX_PIN

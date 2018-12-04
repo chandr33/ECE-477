@@ -526,10 +526,20 @@ __STATIC_INLINE void nrf_gpio_cfg_output(uint32_t pin_number)
         NRF_GPIO_PIN_DIR_OUTPUT,
         NRF_GPIO_PIN_INPUT_DISCONNECT,
         NRF_GPIO_PIN_NOPULL,
-        NRF_GPIO_PIN_S0H1,
+        NRF_GPIO_PIN_S0S1,
         NRF_GPIO_PIN_NOSENSE);
 }
 
+__STATIC_INLINE void nrf_gpio_cfg_output_high(uint32_t pin_number)
+{
+    nrf_gpio_cfg(
+        pin_number,
+        NRF_GPIO_PIN_DIR_OUTPUT,
+        NRF_GPIO_PIN_INPUT_DISCONNECT,
+        NRF_GPIO_PIN_NOPULL,
+        NRF_GPIO_PIN_S0H1,
+        NRF_GPIO_PIN_NOSENSE);
+}
 
 __STATIC_INLINE void nrf_gpio_cfg_input(uint32_t pin_number, nrf_gpio_pin_pull_t pull_config)
 {

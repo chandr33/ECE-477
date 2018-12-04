@@ -36,6 +36,16 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "nrf_ble_qwr.h"
 #include "nrf_pwr_mgmt.h"
 #include "peer_manager_handler.h"
+#include "app_uart.h"
+//#include "app_fifo.h"
+#include "nrf_delay.h"
+#include "bsp.h"
+#if defined (UART_PRESENT)
+#include "nrf_uart.h"
+#endif
+#if defined (UARTE_PRESENT)
+#include "nrf_uarte.h"
+#endif
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -130,7 +140,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #define COL3                                14
 #define COL4                                7
 #define COL5                                8
-#define COL6                                9
+#define COL6                                16
 #define COL7                                15
 uint8_t COLS[col_length] =  {COL0, COL1, COL2, COL3, COL4, COL5, COL6, COL7};
 
@@ -165,6 +175,12 @@ uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 #define TABLE_LENGTH                        64
 #define MAX_MACRO_ENTRY                     2*TABLE_LENGTH*NUM_TABLES
 #define MACRO_MAX_LENGTH                    256
+
+
+#define MAX_TEST_DATA_BYTES     (15U)                /**< max number of test bytes to be used for tx and rx. */
+#define UART_TX_BUF_SIZE 256                         /**< UART TX buffer size. */
+#define UART_RX_BUF_SIZE 256                         /**< UART RX buffer size. */
+#define UART_HWFC APP_UART_FLOW_CONTROL_DISABLED
 
 //Some functions
 void manage_send_keypress(uint8_t, uint16_t, uint8_t, bool);
@@ -269,6 +285,9 @@ bool value_ready = false;
 bool processing_macro = false;
 uint8_t curr_macro = 0;
 
+static uint8_t file_buffer[8];
+uint16_t file_buffer_length = 0;
+
 
 //-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -304,7 +323,46 @@ static uint8_t m_caps_off_key_scan_str[] = /**< Key pattern to be sent when the 
     0x09,       /* Key f */
 };
 
+void uart_error_handle(app_uart_evt_t * p_event)
+{
+    if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
+    {
+        APP_ERROR_HANDLER(p_event->data.error_communication);
+    }
+    else if (p_event->evt_type == APP_UART_FIFO_ERROR)
+    {
+        APP_ERROR_HANDLER(p_event->data.error_code);
+    }
+}
 
+void uart_init()
+{
+  uint32_t err_code;
+
+    bsp_board_init(BSP_INIT_LEDS);
+
+    const app_uart_comm_params_t comm_params =
+      {
+          RX_PIN_NUMBER,
+          TX_PIN_NUMBER,
+          RTS_PIN_NUMBER,
+          CTS_PIN_NUMBER,
+          UART_HWFC,
+          false,
+#if defined (UART_PRESENT)
+          NRF_UART_BAUDRATE_9600
+#endif
+      };
+
+    APP_UART_FIFO_INIT(&comm_params,
+                         UART_RX_BUF_SIZE,
+                         UART_TX_BUF_SIZE,
+                         uart_error_handle,
+                         APP_IRQ_PRIORITY_LOWEST,
+                         err_code);
+
+    APP_ERROR_CHECK(err_code);
+}
 
 static void on_hids_evt(ble_hids_t * p_hids, ble_hids_evt_t * p_evt);
 
@@ -1577,6 +1635,7 @@ static void buttons_leds_init(bool * p_erase_bonds)
     }
     nrf_gpio_cfg_output(LED_LEFT);
     nrf_gpio_cfg_output(LED_RIGHT);
+    nrf_gpio_cfg_output(TX_PIN_NUMBER);
 
     err_code = bsp_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS, bsp_event_handler);
     APP_ERROR_CHECK(err_code);
@@ -1889,6 +1948,7 @@ int main(void)
     test_get_char();
 
     // Initialize.
+    uart_init();
     log_init();
     timers_init();
     buttons_leds_init(&erase_bonds);
@@ -1925,17 +1985,36 @@ int main(void)
     uint8_t repeat_counter_start = 0;
     uint8_t repeats_left = 0;
     bool macro_key_sent = false;
+    uint8_t test;
+    test = 0x35;
+    while (app_uart_put(test) != NRF_SUCCESS);
 
     // Enter main loop.
     for (;;)
     {
-        idle_state_handle();
-
+        
+        while (true)
+        {
+          
+          while (app_uart_get(&(file_buffer[file_buffer_length])) != NRF_SUCCESS)
+          {
+            idle_state_handle();
+          }
+          file_buffer[file_buffer_length + 1] = 0;
+          app_uart_put(file_buffer[file_buffer_length]);
+          file_buffer_length++;
+          if (file_buffer_length == 8)
+          {
+            file_buffer_length = 0;
+          }
+          
+        }
+        
 
         if(macro_active == 0) {
           key_info = scanMatrix(prev_key_value);
-          NRF_LOG_INFO("Key press: Value: %d Flags: %d Prev: %d Caps: %d Num: %d FN Lock: %d\n",
-            key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
+          //NRF_LOG_INFO("Key press: Value: %d Flags: %d Prev: %d Caps: %d Num: %d FN Lock: %d\n",
+           // key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
           key_value = key_info & 0xFF;
           key_flags = (key_info >> 8) & 0x01FF;
           prev_flags = (key_info >> 24) & 0x0F;
