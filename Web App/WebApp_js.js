@@ -592,7 +592,7 @@ function validate_keybind_syntax(data) //give name of textfield object. returns 
 				{
 					return_data.data |= 0x4400;
 				}
-				else if (hid_codes.exists(token)) //not recognized. throw error
+				else if (token in hid_codes) //not recognized. throw error
 				{
 					return_data.data |= hid_codes[token];
 				}
