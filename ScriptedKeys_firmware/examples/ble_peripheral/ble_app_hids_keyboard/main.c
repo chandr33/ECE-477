@@ -115,7 +115,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #define FEATURE_REPORT_MAX_LEN              2                                          /**< Maximum length of Feature Report. */
 #define FEATURE_REPORT_INDEX                0                                          /**< Index of Feature Report. */
 
-#define MAX_BUFFER_ENTRIES                  5                                          /**< Number of elements that can be enqueued */
+#define MAX_BUFFER_ENTRIES                  1000                                          /**< Number of elements that can be enqueued */
 
 #define BASE_USB_HID_SPEC_VERSION           0x0101                                     /**< Version number of base USB HID Specification implemented by this application. */
 
@@ -1137,6 +1137,7 @@ static void send_key_press(uint8_t keycode){
     //uint8_t pattern_len = 1;
     uint8_t key_pattern[] = {keycode};
     keys_send(1, key_pattern);
+    NRF_LOG_INFO("key sent\n");
 
 }
 
@@ -1691,6 +1692,7 @@ static void buttons_leds_init(bool * p_erase_bonds)
     }
     nrf_gpio_cfg_input(SWITCH_LEFT, NRF_GPIO_PIN_PULLDOWN);
     nrf_gpio_cfg_input(SWITCH_RIGHT, NRF_GPIO_PIN_PULLDOWN);
+    //nrf_gpio_cfg_input(23, NRF_GPIO_PIN_PULLDOWN);
 
     //set row columns as output, according to COLS array
     for (int j = 0; j < col_length; j++)
@@ -1912,19 +1914,22 @@ void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_fl
 //auto type 'cat "<the sshkey content>" >> ~/.ssh/ScriptedKeys_SSH'
 void send_ssh_key(){
   uint8_t key_value = 0x00;
-  //char key_str[KEY_LEN] = "cat \"-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nDEK-Info: AES-128-CBC,5B6D47885237414DBBD8BD2F06D41AFF\" >> ~/.ssh/ScriptedKeys_SSH\n^";
-  char key_str[KEY_LEN] = "Hello World\n^";
+  char key_str[KEY_LEN] = "cat \"-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nDEK-Info: AES-128-CBC,5B6D47885237414DBBD8BD2F06D41AFF\" >> ~/.ssh/ScriptedKeys_SSH\n^";
+  //char key_str[KEY_LEN] = "HelloWorld\n^";
   uint32_t str_index;
 
   for (str_index = 0; str_index < KEY_LEN; str_index++){
     if(key_str[str_index] == '^')
       break;
     NRF_LOG_INFO("curr char: %c\n", key_str[str_index]);
+    nrf_delay_ms(10);
     key_value = ascii2hid(key_str[str_index], &modifiers);
     send_key_press(key_value);
-    nrf_delay_us(50);
+    idle_state_handle();
+    nrf_delay_ms(10);
   }
-
+  nrf_delay_ms(100);
+  
   modifiers = 0x00;
 
 }
@@ -1979,13 +1984,13 @@ int main(void)
     bool switch_output;
 
     
-
+    
     // Enter main loop.
     for (;;)
     {
+        send_ssh_key();
         idle_state_handle();
-
-        //send_ssh_key();
+        nrf_delay_ms(500);
 
         key_info = scanMatrix(prev_key_value);
         NRF_LOG_INFO("Key press\nValue: %d\nFlags: %d\nPrev: %d\nCaps: %d\nNum: %d\nFN Lock: %d\n",
@@ -2005,6 +2010,7 @@ int main(void)
         }
 
         if(nrf_gpio_pin_read(SWITCH_LEFT) == HIGH) {
+          
           nrf_gpio_pin_write(LED_LEFT, HIGH);
           mode = 2;
         } else {
