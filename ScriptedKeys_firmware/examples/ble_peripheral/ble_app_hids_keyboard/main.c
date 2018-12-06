@@ -8,6 +8,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 #include "nordic_common.h"
 #include "nrf.h"
 #include "nrf_assert.h"
@@ -55,6 +56,117 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 
 //Libs not included by example
 #include "nrf_delay.h"
+#include "boards.h"
+
+
+//FLASH STUFF
+#include "nrf_soc.h"
+#include "app_util.h"
+#include "nrf_fstorage.h"
+
+#ifdef SOFTDEVICE_PRESENT
+#include "nrf_sdh.h"
+#include "nrf_sdh_ble.h"
+#include "nrf_fstorage_sd.h"
+#else
+#include "nrf_drv_clock.h"
+#include "nrf_fstorage_nvmc.h"
+#endif
+
+#define BUTTON_DETECTION_DELAY  APP_TIMER_TICKS(50)
+#define APP_BLE_CONN_CFG_TAG    1
+
+static void idle_state_handle(void);
+
+/* Defined in cli.c */
+//extern void cli_init(void);
+//extern void cli_start(void);
+//extern void cli_process(void);
+
+static void fstorage_evt_handler(nrf_fstorage_evt_t * p_evt);
+
+
+NRF_FSTORAGE_DEF(nrf_fstorage_t fstorage) =
+{
+    /* Set a handler for fstorage events. */
+    .evt_handler = fstorage_evt_handler,
+
+    /* These below are the boundaries of the flash space assigned to this instance of fstorage.
+     * You must set these manually, even at runtime, before nrf_fstorage_init() is called.
+     * The function nrf5_flash_end_addr_get() can be used to retrieve the last address on the
+     * last page of flash available to write data. */
+    .start_addr = 0x3e000,
+    .end_addr   = 0x3ffff,
+};
+
+/**@brief   Helper function to obtain the last address on the last page of the on-chip flash that
+ *          can be used to write user data.
+ */
+static uint32_t nrf5_flash_end_addr_get()
+{
+    uint32_t const bootloader_addr = NRF_UICR->NRFFW[0];
+    uint32_t const page_sz         = NRF_FICR->CODEPAGESIZE;
+    uint32_t const code_sz         = NRF_FICR->CODESIZE;
+
+    return (bootloader_addr != 0xFFFFFFFF ?
+            bootloader_addr : (code_sz * page_sz));
+}
+
+static void fstorage_evt_handler(nrf_fstorage_evt_t * p_evt)
+{
+    if (p_evt->result != NRF_SUCCESS)
+    {
+        NRF_LOG_INFO("--> Event received: ERROR while executing an fstorage operation.");
+        return;
+    }
+
+    switch (p_evt->id)
+    {
+        case NRF_FSTORAGE_EVT_WRITE_RESULT:
+        {
+            NRF_LOG_INFO("--> Event received: wrote %d bytes at address 0x%x.",
+                         p_evt->len, p_evt->addr);
+        } break;
+
+        case NRF_FSTORAGE_EVT_ERASE_RESULT:
+        {
+            NRF_LOG_INFO("--> Event received: erased %d page from address 0x%x.",
+                         p_evt->len, p_evt->addr);
+        } break;
+
+        default:
+            break;
+    }
+}
+
+
+static void print_flash_info(nrf_fstorage_t * p_fstorage)
+{
+    NRF_LOG_INFO("========| flash info |========");
+    NRF_LOG_INFO("erase unit: \t%d bytes",      p_fstorage->p_flash_info->erase_unit);
+    NRF_LOG_INFO("program unit: \t%d bytes",    p_fstorage->p_flash_info->program_unit);
+    NRF_LOG_INFO("==============================");
+}
+
+/**@brief   Sleep until an event is received. */
+static void power_manage(void)
+{
+#ifdef SOFTDEVICE_PRESENT
+    (void) sd_app_evt_wait();
+#else
+    __WFE();
+#endif
+}
+
+void wait_for_flash_ready(nrf_fstorage_t const * p_fstorage)
+{
+    /* While fstorage is busy, sleep and wait for an event. */
+    while (nrf_fstorage_is_busy(p_fstorage))
+    {
+        idle_state_handle();
+        //power_manage();
+    }
+}
 
 
 #define DEVICE_NAME                         "ScriptedKeys Ver AH"                          /**< Name of device. Will be included in the advertising data. */
@@ -140,8 +252,8 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #define COL3                                14
 #define COL4                                7
 #define COL5                                8
-#define COL6                                16
-#define COL7                                15
+#define COL6                                9
+#define COL7                                10
 uint8_t COLS[col_length] =  {COL0, COL1, COL2, COL3, COL4, COL5, COL6, COL7};
 
 #define ROW0                                25
@@ -166,15 +278,17 @@ uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 #define SCANNER_RX                          17
 #define SCANNER_TX                          19
 
-#define INIT_HOLD_COOLDOWN                  50
-#define SEC_HOLD_COOLDOWN                   10
+#define INIT_HOLD_COOLDOWN                  250
+#define SEC_HOLD_COOLDOWN                   50
 
 #define NUM_MACROS                          12
 
 #define NUM_TABLES                          32
 #define TABLE_LENGTH                        64
-#define MAX_MACRO_ENTRY                     2*TABLE_LENGTH*NUM_TABLES
+#define MAX_TABLE_ENTRY                     2*TABLE_LENGTH*NUM_TABLES
 #define MACRO_MAX_LENGTH                    256
+
+#define MAX_FILE_BUFFER_LENGTH              64
 
 
 #define MAX_TEST_DATA_BYTES     (15U)                /**< max number of test bytes to be used for tx and rx. */
@@ -190,8 +304,8 @@ uint8_t update_prev_key (uint8_t*, uint8_t, uint8_t, uint8_t*, uint8_t);
 void set_key_press(uint8_t, uint8_t);
 void set_modifiers(uint8_t, uint8_t, bool);
 
-void test_get_char();
 void process_next_char(char);
+uint8_t load_from_table(uint8_t, uint8_t, uint32_t, uint16_t);
 
 
 /**Buffer queue access macros
@@ -277,7 +391,6 @@ uint8_t macro_active = 0;  //0 - no macro active, 1 - 12 - The corresponding mac
 
 //Stuff for loading from Terraterm
 uint8_t load_active = 0; //0 - normal, 1 - ready to load, 2 - loading
-uint32_t load_str_index = 0;
 uint32_t load_table_index = 0;
 uint8_t current_value = 0;
 bool value_ready = false;
@@ -285,8 +398,10 @@ bool value_ready = false;
 bool processing_macro = false;
 uint8_t curr_macro = 0;
 
-static uint8_t file_buffer[8];
-uint16_t file_buffer_length = 0;
+uint8_t macro_addr_offset;
+
+//static uint8_t file_buffer[MAX_FILE_BUFFER_LENGTH];
+//uint8_t file_buffer_length = 0;
 
 
 //-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -325,14 +440,14 @@ static uint8_t m_caps_off_key_scan_str[] = /**< Key pattern to be sent when the 
 
 void uart_error_handle(app_uart_evt_t * p_event)
 {
-    if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
+    /*if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
     {
         APP_ERROR_HANDLER(p_event->data.error_communication);
     }
     else if (p_event->evt_type == APP_UART_FIFO_ERROR)
     {
         APP_ERROR_HANDLER(p_event->data.error_code);
-    }
+    }*/
 }
 
 void uart_init()
@@ -1681,9 +1796,32 @@ static void idle_state_handle(void)
     }
 }
 
+void write_uart_str(char* write_str) {
+  for(uint8_t i = 0; write_str[i] != '\0'; i++) {
+    while(app_uart_put(write_str[i]) != NRF_SUCCESS) {
+      idle_state_handle();
+    }
+  }
+}
+
+uint8_t load_from_table(uint8_t index1, uint8_t index2, uint32_t storage_offset, uint16_t page_size) {
+  //return default_lookup_table [index1][index2];
+  /*uint8_t dest [8];
+  uint64_t read_addr = 0x3e000 + storage_offset + index2 + index1 * page_size;
+  uint8_t dest_offset = read_addr % 8;
+  nrf_fstorage_read(&fstorage, read_addr - dest_offset, &dest, sizeof(dest));
+  NRF_LOG_INFO("Val: 0x%x; Loc: 0x%x", dest[dest_offset], read_addr);
+  return dest[dest_offset];*/
+  if(storage_offset >= sizeof(default_lookup_table)) {
+    return macros[index1][index2];
+  } else {
+    return default_lookup_table[index1][index2];
+  }
+}
+
 uint16_t check_for_modifiers(uint8_t key_value) {
     //9'b{FN, R_GUI,R_ALT,R_SHIFT,R_CTRL,L_GUI,L_ALT,L_SHIFT,L_CTRL};
-    uint8_t value = default_lookup_table [mode * 16] [2 * key_value + 1];
+    uint8_t value = load_from_table(mode,2 * key_value + 1, 0, 128);
     if (value == 0xE0) { //L_CTRL
       return 0x0001;
     } else if (value == 0xE1) {
@@ -1809,7 +1947,7 @@ uint32_t scanMatrix(uint8_t* prev_keys)
 
 void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_flags, bool repeat) {
   //Get the final key value using the flags and value
-  NRF_LOG_INFO("Sending key press Value: %d Flags: %d Prev: %d Caps: %d Num: %d FN Lock: %d\n",
+  NRF_LOG_INFO("Sending key press Value: %d Flags: %d Prev: %d Caps: %d Num: %d FN Lock: %d",
         key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
   uint8_t local_modifiers = key_flags & 0xFF; //9'b{FN, R_GUI,R_ALT,R_SHIFT,R_CTRL,   L_GUI,L_ALT,L_SHIFT,L_CTRL};
   
@@ -1819,7 +1957,7 @@ void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_fl
   uint8_t table_offset = mode + ((key_flags & 0x0100) >> 8) * 8 + (key_flags & 0x07);
   NRF_LOG_INFO("Offset: %d\n", table_offset);
   set_modifiers(local_modifiers, key_value, !(!(key_flags & 0x0100)));
-  uint8_t final_value = default_lookup_table[table_offset] [2 * key_value + 1];
+  uint8_t final_value = load_from_table(table_offset,2 * key_value + 1, 0, 128);
 
   if(final_value == 0x39) {
     if(!repeat) {
@@ -1837,9 +1975,9 @@ void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_fl
     if(!repeat) {
       fn_lock = !fn_lock;
     }
-  } else if(final_value >= 0xEA && final_value < 0xEA + NUM_MACROS) {
+  } else if((final_value >= 0xEA) && (final_value < (0xEA + NUM_MACROS))) {
     if(!repeat) {
-      macro_active = final_value - 0xE9;
+      macro_active = final_value - 0xEA + 1;
     }
   } else {
     if(caps_lock && final_value <= 0x1D && final_value >= 0x04) {
@@ -1853,13 +1991,24 @@ void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_fl
     } else if (!num_lock && false) {
       
     } 
-    
+    char* success_str = "Key sent\r\n";
+    write_uart_str(success_str);
     send_key_press(final_value);
   }
 }
 
 void set_modifiers(uint8_t modify_byte, uint8_t key_location, bool fn) {
-  modifiers = modify_byte;
+  if(key_location == 64) {
+    modifiers = modify_byte;
+    return;
+  }
+  modify_byte = (modify_byte >> 4) | (modify_byte);
+  modify_byte &= 0x07;
+  if(fn) {
+    modifiers = load_from_table(modify_byte + 8 + mode, 2 * key_location, 0, 128);
+  } else {
+    modifiers = load_from_table(modify_byte + mode, 2 * key_location, 0, 128);
+  }
 }
 
 void process_next_char(char curr_char) {
@@ -1867,12 +2016,11 @@ void process_next_char(char curr_char) {
   #define NUM_MACROS                          12
   #define NUM_TABLES                          32
   #define TABLE_LENGTH                        64
-  #define MAX_MACRO_ENTRY                     2*TABLE_LENGTH*NUM_TABLES
+  #define MAX_TABLE_ENTRY                     2*TABLE_LENGTH*NUM_TABLES
   #define MACRO_MAX_LENGTH                    256
 
   //Stuff for loading from Terraterm
   uint8_t load_active = 0; //0 - normal, 1 - ready to load, 2 - loading
-  uint32_t load_str_index = 0;
   uint32_t load_table_index = 0;
   uint8_t current_value = 0;
   bool value_ready = false;
@@ -1880,6 +2028,8 @@ void process_next_char(char curr_char) {
   bool processing_macro = false;
   uint8_t curr_macro = 0;
   */
+
+  //NRF_LOG_INFO("%c", curr_char);
 
   if(curr_char >= '0' && curr_char <= '9') { //The character is a number
     value_ready = true;
@@ -1889,27 +2039,26 @@ void process_next_char(char curr_char) {
   } else if (value_ready) { //The character is not a number and the value needs to be pushed onto the table
     value_ready = false;
     if(!processing_macro) { //Processing normal keybind (not macro)
-      default_lookup_table[load_table_index / TABLE_LENGTH][load_table_index % TABLE_LENGTH] = current_value;
+      default_lookup_table[load_table_index / (2*TABLE_LENGTH)][load_table_index % (2*TABLE_LENGTH)] = current_value;
+      if(load_table_index / (2*TABLE_LENGTH) == 0) {
+        NRF_LOG_INFO("Table[%d][%d] =  0x%x", load_table_index / (2*TABLE_LENGTH), load_table_index % (2*TABLE_LENGTH),  current_value);
+      }
       current_value = 0;
       load_table_index++;
       
-      if(load_table_index == MACRO_MAX_LENGTH) { //When done parsing for table
+      if(load_table_index == MAX_TABLE_ENTRY) { //When done parsing for table
         processing_macro = true;
         load_table_index = 0;
       }
     } else { //Processing macros
       macros[curr_macro][load_table_index] = current_value;
+       NRF_LOG_INFO("Macro[%d][%d] =  %d", curr_macro, load_table_index,  current_value);
       load_table_index++;
 
       if(curr_char == ']') {
         macro_repeat[curr_macro] = current_value;
         curr_macro++;
         load_table_index = 0;
-
-        if(curr_macro == NUM_MACROS) {
-          curr_macro = 0;
-          processing_macro = false;
-        }
       }
 
       current_value = 0;
@@ -1917,35 +2066,10 @@ void process_next_char(char curr_char) {
   }
 }
 
-void test_get_char() {
-  uint8_t load_str_index = 0;
-  //Load the line for Mode 1 FN
-  char* table_str = "[0,42,0,4,0,234,0,43,0,57,0,0,0,224,0,0,0,46,0,30,0,48,0,20,0,4,0,40,0,225,0,228,0,45,0,31,0,47,0,26,0,22,0,52,0,227,0,229,0,39,0,32,0,19,0,8,0,7,0,51,0,29,0,232,0,38,0,33,0,18,0,21,0,6,0,15,0,226,0,231,0,37,0,34,0,12,0,23,0,9,0,54,0,27,0,56,0,36,0,35,0,14,0,10,0,25,0,16,0,44,0,55,0,24,0,28,0,13,0,11,0,5,0,17,0,0,0,230],!";
-  load_table_index = 0;
-  for(uint16_t curr_loop_index = 0; curr_loop_index < 20; curr_loop_index++) {
-    process_next_char(table_str[load_str_index]);
-    load_str_index++;
-  }
-
-  //Load Macros
-  load_str_index = 0;
-  load_table_index = 0;
-  current_value = 0;
-  value_ready = false;
-  processing_macro = true;
-  char* macro_str = "[79,34,11,0,8,0,15,0,15,0,18,0,44,34,26,0,18,0,21,0,15,0,7,34,53,34,53,34,53,34,53,1]!";
-  for(uint16_t curr_loop_index = 0; curr_loop_index < 85; curr_loop_index++) {
-    process_next_char(macro_str[load_str_index]);
-    load_str_index++;
-  }
-}
-
 int main(void)
 
 {
     bool erase_bonds;
-
-    test_get_char();
 
     // Initialize.
     uart_init();
@@ -1963,6 +2087,20 @@ int main(void)
     conn_params_init();
     buffer_init();
     peer_manager_init();
+
+    nrf_fstorage_api_t * p_fs_api;
+    #ifdef SOFTDEVICE_PRESENT
+      p_fs_api = &nrf_fstorage_sd;
+    #else
+      p_fs_api = &nrf_fstorage_nvmc;
+    #endif
+
+    ret_code_t rc;
+    rc = nrf_fstorage_init(&fstorage, p_fs_api, NULL);
+    APP_ERROR_CHECK(rc);
+
+    print_flash_info(&fstorage);
+    (void) nrf5_flash_end_addr_get();
 
     // Start execution.
     NRF_LOG_INFO("HID Keyboard example started.\n");
@@ -1985,39 +2123,64 @@ int main(void)
     uint8_t repeat_counter_start = 0;
     uint8_t repeats_left = 0;
     bool macro_key_sent = false;
-    uint8_t test;
-    test = 0x35;
-    while (app_uart_put(test) != NRF_SUCCESS);
+
+    macro_addr_offset = (uint32_t) macros % 4;
+
+    if(load_from_table(0, 1, 0, 128) == 0xFF) {
+      nrf_fstorage_write(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table), NULL);
+      wait_for_flash_ready(&fstorage);
+            
+      nrf_fstorage_write(&fstorage, 0x3F000, (uint8_t*)((uint32_t) macros - macro_addr_offset), sizeof(macros) + 4, NULL);
+      wait_for_flash_ready(&fstorage);
+    } else {
+      nrf_fstorage_read(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table));
+      nrf_fstorage_read(&fstorage, 0x3f000, (uint8_t*)((uint32_t) macros - macro_addr_offset), sizeof(macros) + 4);
+    }
 
     // Enter main loop.
     for (;;)
     {
+        idle_state_handle();
         
-        while (true)
-        {
-          
-          while (app_uart_get(&(file_buffer[file_buffer_length])) != NRF_SUCCESS)
-          {
+        if (load_active == 1) {
+          uint8_t loaded_value;
+
+          while(app_uart_get(&loaded_value) != NRF_SUCCESS && nrf_gpio_pin_read(SWITCH_LEFT) == HIGH) {
             idle_state_handle();
           }
-          file_buffer[file_buffer_length + 1] = 0;
-          app_uart_put(file_buffer[file_buffer_length]);
-          file_buffer_length++;
-          if (file_buffer_length == 8)
-          {
-            file_buffer_length = 0;
-          }
-          
-        }
         
+          if(nrf_gpio_pin_read(SWITCH_LEFT) == HIGH) {
+            process_next_char((char) loaded_value);   
+          }
 
-        if(macro_active == 0) {
+          if(curr_macro == NUM_MACROS) {
+            load_active = 0;
+            nrf_fstorage_write(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table), NULL);
+            wait_for_flash_ready(&fstorage);
+            nrf_fstorage_write(&fstorage, 0x3F000, (uint8_t*)((uint32_t) macros - macro_addr_offset), sizeof(macros) + 4, NULL);
+            wait_for_flash_ready(&fstorage);
+
+            NRF_LOG_INFO("Val: 0x%x", load_from_table(8, 19, 0, 128));
+
+            uint32_t debug_key_val;
+            nrf_fstorage_read(&fstorage, 0x3e410, &debug_key_val, sizeof(debug_key_val));
+            NRF_LOG_INFO("Second read: 0x%x", debug_key_val);
+
+            NRF_LOG_INFO("Third read: 0x%x", default_lookup_table[8][19]);
+
+            char* success_str = "Write success!\r";
+            write_uart_str(success_str);
+          }
+
+        } else if(macro_active == 0 && load_active == 0) {
           key_info = scanMatrix(prev_key_value);
-          //NRF_LOG_INFO("Key press: Value: %d Flags: %d Prev: %d Caps: %d Num: %d FN Lock: %d\n",
-           // key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
           key_value = key_info & 0xFF;
           key_flags = (key_info >> 8) & 0x01FF;
           prev_flags = (key_info >> 24) & 0x0F;
+
+          NRF_LOG_INFO("Key press: Value: %d Flags: %d Prev: %d Caps: %d Num: %d FN Lock: %d",
+            key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
+
           if(key_value != GARBAGE_KEY)
           {
             //Get the final key value using the flags and value
@@ -2034,9 +2197,9 @@ int main(void)
             macro_status = 1;
           }
 
-        } else {
+        } else if (load_active == 0) {
           
-          uint8_t* macro_ptr = macros[!(!mode) * NUM_MACROS + macro_active - 1];
+          uint8_t macro_ptr = macro_active - 1;
           if(macro_status == 1) { //Parsing Ops
             //If the number of instructions run is the same as the number of instructions to repeat, move back to the beginning, decrement the # of repeats
             if(repeat_instructions > 0 && curr_repeat_instructions == repeat_instructions) {
@@ -2060,29 +2223,33 @@ int main(void)
 
             NRF_LOG_INFO("Cycle run\n"); //Lags if this isn't here
 
-            uint8_t op = (macro_ptr[macro_count] & 0xC0) >> 6;
+            uint8_t op_byte = load_from_table(macro_ptr, macro_count, 4096 + macro_addr_offset, 256);
+            if(op_byte == 0xFF) {
+              op_byte = 0;
+            }
+            uint8_t op = (op_byte & 0xC0) >> 6;
 
             if(op == 0) {
               macro_status = 0;
             } else if (op == 1) {
               macro_status = 2;
-              send_char_stop = (macro_ptr[macro_count] & 0x3F) * 2 + macro_count + 1;
+              send_char_stop = (load_from_table(macro_ptr, macro_count, 4096 + macro_addr_offset, 256) & 0x3F) * 2 + macro_count + 1;
               macro_count = macro_count + 1;
             } else if (op == 2) {
               macro_status = 1;
-              repeat_instructions = macro_ptr[macro_count] & 0x3F;
-              repeats_left = macro_ptr[macro_count + 1];
+              repeat_instructions = load_from_table(macro_ptr, macro_count, 4096 + macro_addr_offset, 256) & 0x3F;
+              repeats_left = load_from_table(macro_ptr, macro_count + 1, 4096 + macro_addr_offset, 256);
               curr_repeat_instructions = 0;
               repeat_counter_start = macro_count + 2;
               macro_count = macro_count + 2;
             } else if (op == 3) {
-              uint8_t num_parallel = macro_ptr[macro_count] & 0x3F;
+              uint8_t num_parallel = load_from_table(macro_ptr, macro_count, 4096 + macro_addr_offset, 256) & 0x3F;
               if(num_parallel <= 8 && num_parallel >= 2) {
                 uint8_t parallel_keys[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
                 for(uint8_t loop_index = 0; loop_index < num_parallel; loop_index++) {
-                  parallel_keys[loop_index] = macro_ptr[macro_count + 2 + loop_index];
+                  parallel_keys[loop_index] = load_from_table(macro_ptr, macro_count + 2 + loop_index, 4096 + macro_addr_offset, 256);
                 }
-                set_modifiers(macro_ptr[macro_count + 1], 64, false);
+                set_modifiers(load_from_table(macro_ptr, macro_count + 1, 4096 + macro_addr_offset, 256), 64, false);
                 send_key_press_parallel(parallel_keys, num_parallel);
               }
               macro_count += num_parallel + 2;
@@ -2091,9 +2258,11 @@ int main(void)
             }
     
           } else { //Sending Chars
-
-            set_modifiers(macro_ptr[macro_count], 64, false);
-            send_key_press(macro_ptr[macro_count + 1]);
+            uint8_t mod_value = load_from_table(macro_ptr, macro_count, 4096 + macro_addr_offset, 256);
+            uint8_t key_val = load_from_table(macro_ptr, macro_count + 1, 4096 + macro_addr_offset, 256);
+            NRF_LOG_INFO("Mod: 0x%x; Val: 0x%x", mod_value, key_val);
+            set_modifiers(mod_value, 64, false);
+            send_key_press(key_val);
             macro_key_sent = true;
             macro_count = macro_count + 2;
             if(macro_count >= send_char_stop) {
@@ -2105,15 +2274,23 @@ int main(void)
             macro_active = 0;
           }
           if(macro_key_sent) {
-            nrf_delay_ms(20);
+            nrf_delay_ms(50);
             macro_key_sent = false;
           }
         }
 
-        if(nrf_gpio_pin_read(SWITCH_LEFT) == HIGH) { //LOAD SWITCH
-          
-        } else {
-          
+        if(nrf_gpio_pin_read(SWITCH_LEFT) == HIGH && load_active == 0) { //LOAD SWITCH
+          load_active = 1;
+          load_table_index = 0;
+          current_value = 0;
+          value_ready = false;
+
+          processing_macro = false;
+          curr_macro = 0;
+          char* success_str = "Ready to load.\r";
+          write_uart_str(success_str);
+        } else if(nrf_gpio_pin_read(SWITCH_LEFT) == LOW && load_active > 0) {
+          load_active = 0;
         }
 
         if(nrf_gpio_pin_read(SWITCH_RIGHT) == HIGH) { //MODE SWITCH
