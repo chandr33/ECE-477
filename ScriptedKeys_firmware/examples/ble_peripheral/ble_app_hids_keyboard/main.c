@@ -2043,6 +2043,10 @@ void process_next_char(char curr_char) {
       //if(load_table_index / (2*TABLE_LENGTH) == 0) {
         NRF_LOG_INFO("Table[%d][%d] =  0x%x", load_table_index / (2*TABLE_LENGTH), load_table_index % (2*TABLE_LENGTH),  current_value);
       //}
+      if(load_table_index == 0) {
+        char* success_str = "Writing table\r";
+        write_uart_str(success_str);
+      }
       current_value = 0;
       load_table_index++;
       
@@ -2052,8 +2056,13 @@ void process_next_char(char curr_char) {
       }
     } else { //Processing macros
       macros[curr_macro][load_table_index] = current_value;
-       NRF_LOG_INFO("Macro[%d][%d] =  %d", curr_macro, load_table_index,  current_value);
+      NRF_LOG_INFO("Macro[%d][%d] =  %d", curr_macro, load_table_index,  current_value);
+      if(load_table_index == 0 && curr_macro == 0) {
+        char* success_str = "Writing table\r";
+        write_uart_str(success_str);
+      }
       load_table_index++;
+
 
       if(curr_char == ']') {
         macro_repeat[curr_macro] = current_value;
@@ -2126,26 +2135,27 @@ int main(void)
 
     macro_addr_offset = (uint32_t) macros % 4;
 
-    //if(load_from_table(0, 1, 0, 128) == 0xFF) {
-    //  nrf_fstorage_write(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table), NULL);
-    //  wait_for_flash_ready(&fstorage);
-            
-    //  nrf_fstorage_write(&fstorage, 0x3F000, (uint8_t*)((uint32_t) macros - macro_addr_offset), sizeof(macros) + 4, NULL);
-    //  wait_for_flash_ready(&fstorage);
-    //} else {
-      //nrf_fstorage_read(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table));
-      //nrf_fstorage_read(&fstorage, 0x3f000, (uint8_t*)((uint32_t) macros - macro_addr_offset), sizeof(macros) + 4);
-    //}
+    uint32_t test_val;
+    nrf_fstorage_read(&fstorage, 0x3e000, &test_val, sizeof(test_val));
 
-    nrf_fstorage_read(&fstorage, 0x3f000, default_lookup_table, sizeof(default_lookup_table));
-    uint16_t default_lookup_table_index = macro_addr_offset;
-    for(uint16_t macro_num_index = 0; macro_num_index < NUM_MACROS; macro_num_index++) {
-      for(uint16_t macro_location_index = 0; macro_location_index < 256; macro_location_index++) {
-        macros[macro_num_index][macro_location_index] = default_lookup_table[default_lookup_table_index / 128][default_lookup_table_index % 128];
-        default_lookup_table_index++;
+    if(test_val == 0xFFFFFFFF) {
+      nrf_fstorage_write(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table), NULL);
+      wait_for_flash_ready(&fstorage);
+            
+      nrf_fstorage_write(&fstorage, 0x3F000, (uint8_t*)((uint32_t) macros - macro_addr_offset), sizeof(macros) + 4, NULL);
+      wait_for_flash_ready(&fstorage);
+    } else {
+      nrf_fstorage_read(&fstorage, 0x3f000, default_lookup_table, sizeof(default_lookup_table));
+      uint16_t default_lookup_table_index = macro_addr_offset;
+      for(uint16_t macro_num_index = 0; macro_num_index < NUM_MACROS; macro_num_index++) {
+        for(uint16_t macro_location_index = 0; macro_location_index < 256; macro_location_index++) {
+          macros[macro_num_index][macro_location_index] = default_lookup_table[default_lookup_table_index / 128][default_lookup_table_index % 128];
+          default_lookup_table_index++;
+        }
       }
+      nrf_fstorage_read(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table));
+    
     }
-    nrf_fstorage_read(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table));
 
     // Enter main loop.
     for (;;)
@@ -2173,14 +2183,6 @@ int main(void)
          
             nrf_fstorage_write(&fstorage, 0x3F000, (uint8_t*)((uint32_t) macros - macro_addr_offset), sizeof(macros) + 4, NULL);
             wait_for_flash_ready(&fstorage);
-
-            NRF_LOG_INFO("Val: 0x%x", load_from_table(8, 19, 0, 128));
-
-            uint32_t debug_key_val;
-            nrf_fstorage_read(&fstorage, 0x3e410, &debug_key_val, sizeof(debug_key_val));
-            NRF_LOG_INFO("Second read: 0x%x", debug_key_val);
-
-            NRF_LOG_INFO("Third read: 0x%x", default_lookup_table[8][19]);
 
             char* success_str = "Write success!\r";
             write_uart_str(success_str);
