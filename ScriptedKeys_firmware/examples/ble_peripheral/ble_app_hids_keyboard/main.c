@@ -1991,8 +1991,8 @@ void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_fl
     } else if (!num_lock && false) {
       
     } 
-    char* success_str = "Key sent\r\n";
-    write_uart_str(success_str);
+    //char* success_str = "Key sent\r\n";
+    //write_uart_str(success_str);
     send_key_press(final_value);
   }
 }
@@ -2040,9 +2040,9 @@ void process_next_char(char curr_char) {
     value_ready = false;
     if(!processing_macro) { //Processing normal keybind (not macro)
       default_lookup_table[load_table_index / (2*TABLE_LENGTH)][load_table_index % (2*TABLE_LENGTH)] = current_value;
-      if(load_table_index / (2*TABLE_LENGTH) == 0) {
+      //if(load_table_index / (2*TABLE_LENGTH) == 0) {
         NRF_LOG_INFO("Table[%d][%d] =  0x%x", load_table_index / (2*TABLE_LENGTH), load_table_index % (2*TABLE_LENGTH),  current_value);
-      }
+      //}
       current_value = 0;
       load_table_index++;
       
@@ -2126,16 +2126,26 @@ int main(void)
 
     macro_addr_offset = (uint32_t) macros % 4;
 
-    if(load_from_table(0, 1, 0, 128) == 0xFF) {
-      nrf_fstorage_write(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table), NULL);
-      wait_for_flash_ready(&fstorage);
+    //if(load_from_table(0, 1, 0, 128) == 0xFF) {
+    //  nrf_fstorage_write(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table), NULL);
+    //  wait_for_flash_ready(&fstorage);
             
-      nrf_fstorage_write(&fstorage, 0x3F000, (uint8_t*)((uint32_t) macros - macro_addr_offset), sizeof(macros) + 4, NULL);
-      wait_for_flash_ready(&fstorage);
-    } else {
-      nrf_fstorage_read(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table));
-      nrf_fstorage_read(&fstorage, 0x3f000, (uint8_t*)((uint32_t) macros - macro_addr_offset), sizeof(macros) + 4);
+    //  nrf_fstorage_write(&fstorage, 0x3F000, (uint8_t*)((uint32_t) macros - macro_addr_offset), sizeof(macros) + 4, NULL);
+    //  wait_for_flash_ready(&fstorage);
+    //} else {
+      //nrf_fstorage_read(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table));
+      //nrf_fstorage_read(&fstorage, 0x3f000, (uint8_t*)((uint32_t) macros - macro_addr_offset), sizeof(macros) + 4);
+    //}
+
+    nrf_fstorage_read(&fstorage, 0x3f000, default_lookup_table, sizeof(default_lookup_table));
+    uint16_t default_lookup_table_index = macro_addr_offset;
+    for(uint16_t macro_num_index = 0; macro_num_index < NUM_MACROS; macro_num_index++) {
+      for(uint16_t macro_location_index = 0; macro_location_index < 256; macro_location_index++) {
+        macros[macro_num_index][macro_location_index] = default_lookup_table[default_lookup_table_index / 128][default_lookup_table_index % 128];
+        default_lookup_table_index++;
+      }
     }
+    nrf_fstorage_read(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table));
 
     // Enter main loop.
     for (;;)
@@ -2155,8 +2165,12 @@ int main(void)
 
           if(curr_macro == NUM_MACROS) {
             load_active = 0;
+            nrf_fstorage_erase(&fstorage, 0x3e000, 2, NULL);
+            //nrf_fstorage_erase(&fstorage, 0x3F000, sizeof(macros) + 4, NULL);
+
             nrf_fstorage_write(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table), NULL);
             wait_for_flash_ready(&fstorage);
+         
             nrf_fstorage_write(&fstorage, 0x3F000, (uint8_t*)((uint32_t) macros - macro_addr_offset), sizeof(macros) + 4, NULL);
             wait_for_flash_ready(&fstorage);
 
