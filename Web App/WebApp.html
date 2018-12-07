@@ -15,14 +15,17 @@
 	<img id="keyboard_image" src="img/keyboard-layout.png" align="left"></img>
 	<p>Keybinds: Use modifier keys in conjunction with keys given in table below. Use '+' to indicate keys are pressed simultaneously. (e.g. CTRL + v)</p>
 	<p>Macros: Three possible structures: 1) string structure, which types the indicated text. Use "" to use. 2) parallel structure, which presses keys simultaneously. Use '&' to use. 3) repeat structure, which repeats macro structures a given number of times. Use 'repeat(number){ statements }' to use. </p>
+	<p>Special Keys: TILDE, PNT_SCRN, SCROLL_LOCK, PAUSE, INSERT, HOME, PAGE_UP, DELETE, END, PAGE_DOWN, RIGHT_ARROW, LEFT_ARROW, DOWN_ARROW, UP_ARROW, CUT, COPY, PASTE, MUTE, VOLUME_UP, VOLUME_DOWN, FN_LOCK, F1 - F12, and MACROx, where x is the number of the macro.
 </div>
 
 <div id="rebind_center" style="clear:both;"> <!--This style apparently forces entries below previous components. Not entirely sure why...-->
-	<input type="checkbox" id="Mode_box" value="MODE" onclick="update_placeholders();update_values();validatePage();"> MODE<br>
+<br>
+	<input type="checkbox" id="Mode_box" value="MODE" onclick="update_placeholders();update_values();validatePage();"> MODE
 	<input type="checkbox" id="FN_box" value="FN" onclick="update_placeholders();update_values();validatePage();"> FN
 	<input type="checkbox" id="ALT_box" value="ALT" onclick="update_placeholders();update_values();validatePage();"> ALT
 	<input type="checkbox" id="SHIFT_box" value="SHIFT" onclick="update_placeholders();update_values();validatePage();"> SHIFT
 	<input type="checkbox" id="CTRL_box" value="CTRL" onclick="update_placeholders();update_values();validatePage();"> CTRL
+	<br>
 	<button id="Reset_All" onclick="reset_all()">Reset All Bindings</button>
 	<button id="Reset_Page" onclick="reset_page()">Reset Current Listing</button>
 	<button id="Reset_Macros" onclick="reset_macros()">Reset Macros</button>

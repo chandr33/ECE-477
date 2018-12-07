@@ -93,6 +93,9 @@ var hid_codes = {
 	"LEFT_ARROW": 0x50,
 	"DOWN_ARROW": 0x51,
 	"UP_ARROW": 0x52,
+	"CUT": 0x7B,
+	"COPY": 0x7C,
+	"PASTE": 0x7D,
 	"MUTE": 0x7F,
 	"VOLUME_UP": 0x80,
 	"VOLUME_DOWN": 0x81,
@@ -119,7 +122,7 @@ var hid_codes = {
 	"MACRO10": 0xF3,
 	"MACRO11": 0xF4,
 	"MACRO12": 0xF5,
-	"SEND_KEY" 0xF6
+	"SEND_KEY": 0xF6
 };
 
 var default_other = [
