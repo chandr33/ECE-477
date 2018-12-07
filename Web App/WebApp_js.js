@@ -119,6 +119,7 @@ var hid_codes = {
 	"MACRO10": 0xF3,
 	"MACRO11": 0xF4,
 	"MACRO12": 0xF5,
+	"SEND_KEY" 0xF6
 };
 
 var default_other = [
