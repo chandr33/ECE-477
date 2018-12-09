@@ -57,12 +57,13 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "nrf_log_default_backends.h"
 
 #include "keyboard_lookup_table.h"
+#include "ascii2hid.h"
 
 //Libs not included by example
 #include "nrf_delay.h"
 
 
-#define DEVICE_NAME                         "ScriptedKeys Ver.1.2"                          /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                         "ScriptedKeys Ver.1.4"                          /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                   "PurdueECE477Team4"                      /**< Manufacturer. Will be passed to Device Information Service. */
 
 #define APP_BLE_OBSERVER_PRIO               3                                          /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -114,7 +115,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #define FEATURE_REPORT_MAX_LEN              2                                          /**< Maximum length of Feature Report. */
 #define FEATURE_REPORT_INDEX                0                                          /**< Index of Feature Report. */
 
-#define MAX_BUFFER_ENTRIES                  5                                          /**< Number of elements that can be enqueued */
+#define MAX_BUFFER_ENTRIES                  1000                                          /**< Number of elements that can be enqueued */
 
 #define BASE_USB_HID_SPEC_VERSION           0x0101                                     /**< Version number of base USB HID Specification implemented by this application. */
 
@@ -176,6 +177,8 @@ uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 
 #define UART_TX_BUF_SIZE 256
 #define UART_RX_BUF_SIZE 256
+
+#define KEY_LEN 300
 
 BLE_NUS_DEF(m_nus, NRF_SDH_BLE_TOTAL_LINK_COUNT);                                   /**< BLE NUS service instance. */
 static uint16_t m_ble_nus_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3;     /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
@@ -1134,6 +1137,7 @@ static void send_key_press(uint8_t keycode){
     //uint8_t pattern_len = 1;
     uint8_t key_pattern[] = {keycode};
     keys_send(1, key_pattern);
+    NRF_LOG_INFO("key sent\n");
 
 }
 
@@ -1688,6 +1692,7 @@ static void buttons_leds_init(bool * p_erase_bonds)
     }
     nrf_gpio_cfg_input(SWITCH_LEFT, NRF_GPIO_PIN_PULLDOWN);
     nrf_gpio_cfg_input(SWITCH_RIGHT, NRF_GPIO_PIN_PULLDOWN);
+    //nrf_gpio_cfg_input(23, NRF_GPIO_PIN_PULLDOWN);
 
     //set row columns as output, according to COLS array
     for (int j = 0; j < col_length; j++)
@@ -1960,6 +1965,31 @@ void identify() {
   else printf("Failed to capture finger\n");
 }
 
+//functions for ssh key transfer
+//auto type 'cat "<the sshkey content>" >> ~/.ssh/ScriptedKeys_SSH'
+void send_ssh_key(){
+  uint8_t key_value = 0x00;
+  char key_str[KEY_LEN] = "cat \"-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nDEK-Info: AES-128-CBC,5B6D47885237414DBBD8BD2F06D41AFF\" >> ~/.ssh/ScriptedKeys_SSH\n^";
+  //char key_str[KEY_LEN] = "HelloWorld\n^";
+  uint32_t str_index;
+
+  for (str_index = 0; str_index < KEY_LEN; str_index++){
+    if(key_str[str_index] == '^')
+      break;
+    NRF_LOG_INFO("curr char: %c\n", key_str[str_index]);
+    nrf_delay_ms(10);
+    key_value = ascii2hid(key_str[str_index], &modifiers);
+    send_key_press(key_value);
+    idle_state_handle();
+    nrf_delay_ms(10);
+  }
+  nrf_delay_ms(100);
+  
+  modifiers = 0x00;
+
+}
+
+
 int main(void)
 
   {
@@ -2001,15 +2031,17 @@ int main(void)
     uint8_t last_pressed_index = 4;
     uint8_t test_byte;
     Open_func();
+
     bool switch_output;
 
+    
+    
     // Enter main loop.
     for (;;)
     {
+        send_ssh_key();
         idle_state_handle();
-
-        //while (app_uart_put(0x55) != NRF_SUCCESS);
-        //while (app_uart_put(0x85) != NRF_SUCCESS);
+        nrf_delay_ms(500);
 
         key_info = scanMatrix(prev_key_value);
         //NRF_LOG_INFO("Key press\nValue: %d\nFlags: %d\nPrev: %d\nCaps: %d\nNum: %d\nFN Lock: %d\n",
@@ -2029,18 +2061,13 @@ int main(void)
         }
 
         if(nrf_gpio_pin_read(SWITCH_LEFT) == HIGH) {
+          
           nrf_gpio_pin_write(LED_LEFT, HIGH);
           mode = 2;
         } else {
           nrf_gpio_pin_write(LED_LEFT, LOW);
           mode = 0;
         }
-       
-         /*SetLED_func(true);
-         nrf_delay_ms(1000);
-         SetLED_func(false);
-         nrf_delay_ms(1000);*/
-         //Enroll1_func();
     }
 }
 
