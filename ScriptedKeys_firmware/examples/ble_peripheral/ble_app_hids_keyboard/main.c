@@ -2031,7 +2031,7 @@ int main(void)
     uint8_t last_pressed_index = 4;
     uint8_t test_byte;
     Open_func();
-
+    //Enroll();
     bool switch_output;
 
     
@@ -2039,7 +2039,7 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-        send_ssh_key();
+        //send_ssh_key();
         idle_state_handle();
         nrf_delay_ms(500);
 
