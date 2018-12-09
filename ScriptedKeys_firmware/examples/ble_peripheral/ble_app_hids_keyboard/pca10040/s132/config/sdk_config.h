@@ -452,7 +452,7 @@
 // <e> BLE_NUS_ENABLED - ble_nus - Nordic UART Service
 //==========================================================
 #ifndef BLE_NUS_ENABLED
-#define BLE_NUS_ENABLED 0
+#define BLE_NUS_ENABLED 1
 #endif
 // <e> BLE_NUS_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
@@ -4309,6 +4309,10 @@
 
 // </e>
 
+#define UART0_USE_EASY_DMA        false
+#define UART_EASY_DMA_SUPPORT     1
+#define UART_LEGACY_SUPPORT       1
+
 // <e> NRFX_UART_ENABLED - nrfx_uart - UART peripheral driver
 //==========================================================
 #ifndef NRFX_UART_ENABLED
@@ -5842,6 +5846,9 @@
 #define WDT_CONFIG_IRQ_PRIORITY 6
 #endif
 
+#ifndef APP_FIFO_ENABLED
+#define APP_FIFO_ENABLED 1
+#endif
 // </e>
 
 // <h> nrfx_qspi - QSPI peripheral driver
@@ -6022,6 +6029,16 @@
 #define APP_TIMER_SAFE_WINDOW_MS 300000
 #endif
 
+#ifndef APP_UART_ENABLED
+#define APP_UART_ENABLED 1
+#endif
+// <o> APP_UART_DRIVER_INSTANCE  - UART instance used
+ 
+// <0=> 0 
+
+#ifndef APP_UART_DRIVER_INSTANCE
+#define APP_UART_DRIVER_INSTANCE 0
+#endif
 // <h> App Timer Legacy configuration - Legacy configuration.
 
 //==========================================================
@@ -6565,7 +6582,7 @@
 // <268435456=> 1000000 baud 
 
 #ifndef HCI_UART_BAUDRATE
-#define HCI_UART_BAUDRATE 30801920
+#define HCI_UART_BAUDRATE 2576384
 #endif
 
 // <o> HCI_UART_FLOW_CONTROL  - Hardware Flow Control
@@ -6577,14 +6594,14 @@
 #define HCI_UART_FLOW_CONTROL 0
 #endif
 
-// <o> HCI_UART_RX_PIN - UART RX pin 
+//// <o> HCI_UART_RX_PIN - UART RX pin 
 #ifndef HCI_UART_RX_PIN
-#define HCI_UART_RX_PIN 8
+#define HCI_UART_RX_PIN 11 //Change it to 8
 #endif
-
-// <o> HCI_UART_TX_PIN - UART TX pin 
+//
+//// <o> HCI_UART_TX_PIN - UART TX pin 
 #ifndef HCI_UART_TX_PIN
-#define HCI_UART_TX_PIN 6
+#define HCI_UART_TX_PIN 12 //Change it to 6
 #endif
 
 // <o> HCI_UART_RTS_PIN - UART RTS pin 
@@ -12014,7 +12031,7 @@
 
 // <o> NRF_SDH_BLE_GATT_MAX_MTU_SIZE - Static maximum MTU size. 
 #ifndef NRF_SDH_BLE_GATT_MAX_MTU_SIZE
-#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 23
+#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 247
 #endif
 
 // <o> NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE - Attribute Table size in bytes. The size must be a multiple of 4. 
@@ -12024,7 +12041,7 @@
 
 // <o> NRF_SDH_BLE_VS_UUID_COUNT - The number of vendor-specific UUIDs. 
 #ifndef NRF_SDH_BLE_VS_UUID_COUNT
-#define NRF_SDH_BLE_VS_UUID_COUNT 0
+#define NRF_SDH_BLE_VS_UUID_COUNT 1
 #endif
 
 // <q> NRF_SDH_BLE_SERVICE_CHANGED  - Include the Service Changed characteristic in the Attribute Table.

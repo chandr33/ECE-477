@@ -88,6 +88,9 @@ extern "C" {
 #define RTS_PIN_NUMBER 38
 #define HWFC           true
 
+#define RX_PIN_NUMBER_FINGERPRINT  17
+#define TX_PIN_NUMBER_FINGERPRINT  19
+
 // #define SPIS_MISO_PIN   28  // SPI MISO signal.
 // #define SPIS_CSN_PIN    12  // SPI CSN signal.
 // #define SPIS_MOSI_PIN   25  // SPI MOSI signal.
@@ -122,8 +125,8 @@ extern "C" {
 // #define SER_APP_SPIM0_REQ_PIN       24     // SPI REQUEST GPIO pin number
 
 // serialization CONNECTIVITY board
-// #define SER_CON_RX_PIN              24    // UART RX pin number.
-// #define SER_CON_TX_PIN              23    // UART TX pin number.
+#define SER_CON_RX_PIN              0    // UART RX pin number.
+#define SER_CON_TX_PIN              1    // UART TX pin number.
 // #define SER_CON_CTS_PIN             25    // UART Clear To Send pin number. Not used if HWFC is set to false.
 // #define SER_CON_RTS_PIN             2     // UART Request To Send pin number. Not used if HWFC is set to false.
 

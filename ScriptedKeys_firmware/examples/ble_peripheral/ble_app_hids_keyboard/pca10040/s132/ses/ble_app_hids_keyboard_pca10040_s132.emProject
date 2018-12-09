@@ -27,7 +27,7 @@
       linker_printf_fmt_level="long"
       linker_printf_width_precision_supported="Yes"
       linker_section_placement_file="flash_placement.xml"
-      linker_section_placement_macros="FLASH_PH_START=0x0;FLASH_PH_SIZE=0x80000;RAM_PH_START=0x20000000;RAM_PH_SIZE=0x10000;FLASH_START=0x26000;FLASH_SIZE=0x5a000;RAM_START=0x20002218;RAM_SIZE=0xdde8"
+      linker_section_placement_macros="FLASH_PH_START=0x0;FLASH_PH_SIZE=0x80000;RAM_PH_START=0x20000000;RAM_PH_SIZE=0x10000;FLASH_START=0x26000;FLASH_SIZE=0x5a000;RAM_START=0x20002A98;SRAM_START=0x20002000;RAM_SIZE=0xdde8"
       linker_section_placements_segments="FLASH RX 0x0 0x80000;RAM RWX 0x20000000 0x10000"
       macros="CMSIS_CONFIG_TOOL=../../../../../../external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar"
       project_directory=""
@@ -69,6 +69,9 @@
       <file file_name="../../../../../../components/libraries/experimental_section_vars/nrf_section_iter.c" />
       <file file_name="../../../../../../components/libraries/strerror/nrf_strerror.c" />
       <file file_name="../../../../../../components/libraries/sensorsim/sensorsim.c" />
+      <file file_name="../../../../../../components/libraries/uart/app_uart_fifo.c" />
+      <file file_name="../../../../../../components/libraries/fifo/app_fifo.c" />
+      <file file_name="../../../Fingerprint_Scanner-TTL-master/src/Scanner.c" />
     </folder>
     <folder Name="None">
       <file file_name="../../../../../../modules/nrfx/mdk/ses_startup_nrf52.s" />
@@ -96,6 +99,8 @@
       <file file_name="../../../main.c" />
       <file file_name="../config/sdk_config.h" />
       <file file_name="../../../keyboard_lookup_table.h" />
+      <file file_name="ascii2hid.h" />
+      <file file_name="ascii2hid.c" />
     </folder>
     <folder Name="nRF_Segger_RTT">
       <file file_name="../../../../../../external/segger_rtt/SEGGER_RTT.c" />
@@ -140,11 +145,12 @@
     <file file_name="../../../../../../components/libraries/uart/app_uart_fifo.c" />
     <file file_name="../../../../../../components/libraries/uart/retarget.c" />
     <file file_name="../../../../../../components/libraries/fifo/app_fifo.c" />
+    <file file_name="../../../../../../components/ble/ble_services/ble_nus/ble_nus.c" />
   </project>
   <configuration
     Name="Release"
     c_preprocessor_definitions="NDEBUG;CONFIG_NFCT_PINS_AS_GPIOS"
-    c_user_include_directories=".;../../../../../../components/libraries/uart;../../../../../../components/libraries/fifo"
+    c_user_include_directories=".;../../../../../../components/libraries/uart;../../../../../../intergration/nrfx/legacy;../../../../../../components/libraries/fifo;../../../Fingerprint_Scanner-TTL-master/src"
     gcc_optimization_level="Optimize For Size" />
   <configuration
     Name="Debug"
