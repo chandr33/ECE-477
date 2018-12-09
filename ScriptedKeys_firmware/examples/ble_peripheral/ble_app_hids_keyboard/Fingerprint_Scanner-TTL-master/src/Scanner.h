@@ -105,7 +105,7 @@ void Close_func();
 bool SetLED_func(bool);
 bool ChangeBaudRate(unsigned long baud);
 int GetEnrollCount_func();
-bool CheckEnrolled_func(int id);
+bool CheckEnrolled_func(uint8_t id);
 int EnrollStart_func(int id);
 int Enroll1_func();
 int Enroll2_func();

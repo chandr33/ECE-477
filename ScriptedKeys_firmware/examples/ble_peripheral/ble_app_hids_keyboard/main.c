@@ -264,14 +264,14 @@ bool fn_lock = false;  //0xE9
 
 void uart_error_handle(app_uart_evt_t * p_event)
 {
-    if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
+    /*if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
     {
         APP_ERROR_HANDLER(p_event->data.error_communication);
     }
     else if (p_event->evt_type == APP_UART_FIFO_ERROR)
     {
         APP_ERROR_HANDLER(p_event->data.error_code);
-    }
+    }*/
 }
 
 
@@ -1904,6 +1904,62 @@ void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_fl
   }
 }
 
+void Enroll() {
+    SetLED_func(true);
+    uint8_t enrollId = 0;
+    bool useId = true;
+    int enroll_successfull;
+    while (useId == true) {
+        useId = CheckEnrolled_func(enrollId);
+        if (useId == true) enrollId++;
+    }
+    EnrollStart_func(enrollId);
+    while (IsPressFinger_func() == false) {idle_state_handle(); nrf_delay_ms(100); }
+    bool bret = CaptureFinger_func(true);
+    if (bret != false) {
+        Enroll1_func();
+        while (IsPressFinger_func() == false) {idle_state_handle(); nrf_delay_ms(100); }
+        while (IsPressFinger_func() == false) {idle_state_handle(); nrf_delay_ms(100); }
+        bret = CaptureFinger_func(true);
+        if (bret != false) {
+            Enroll2_func();
+            while (IsPressFinger_func() == false) {idle_state_handle(); nrf_delay_ms(100); }
+            while (IsPressFinger_func() == false) {idle_state_handle(); nrf_delay_ms(100); }
+            bret = CaptureFinger_func(true);
+            if (bret != false) {
+                enroll_successfull = Enroll3_func();
+                if (enroll_successfull == 0)
+                  printf("Successfully enrolled\n");
+                else
+                  printf("Enrolling failed with error code\n",enroll_successfull);
+            }
+            else
+              printf("Failed to capture third finger\n");
+        }
+        else
+          printf("Failed to capture second finger\n");
+    }
+    else
+      printf("Failed to capture first finger\n");
+    printf("Enroll %d\n",enroll_successfull);
+    SetLED_func(false);
+}
+
+void identify() {
+  SetLED_func(true);
+  while (IsPressFinger_func() == false) {idle_state_handle(); nrf_delay_ms(100); }
+  bool bret = CaptureFinger_func(false);
+  if (bret == true) {
+    int id = Identify1_N_func();
+    if (id < 3000) {
+      printf("Verified Id %d\n",id);
+    }
+    else
+      printf("Finger not found\n");
+  }
+  else printf("Failed to capture finger\n");
+}
+
 int main(void)
 
   {
@@ -1945,7 +2001,6 @@ int main(void)
     uint8_t last_pressed_index = 4;
     uint8_t test_byte;
     Open_func();
-
     bool switch_output;
 
     // Enter main loop.
@@ -1957,8 +2012,8 @@ int main(void)
         //while (app_uart_put(0x85) != NRF_SUCCESS);
 
         key_info = scanMatrix(prev_key_value);
-        NRF_LOG_INFO("Key press\nValue: %d\nFlags: %d\nPrev: %d\nCaps: %d\nNum: %d\nFN Lock: %d\n",
-          key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
+        //NRF_LOG_INFO("Key press\nValue: %d\nFlags: %d\nPrev: %d\nCaps: %d\nNum: %d\nFN Lock: %d\n",
+        //  key_value, key_flags, prev_flags, caps_lock, num_lock, fn_lock);
         key_value = key_info & 0xFF;
         key_flags = (key_info >> 8) & 0x01FF;
         prev_flags = (key_info >> 24) & 0x0F;
@@ -1980,10 +2035,11 @@ int main(void)
           nrf_gpio_pin_write(LED_LEFT, LOW);
           mode = 0;
         }
-         SetLED_func(true);
+       
+         /*SetLED_func(true);
          nrf_delay_ms(1000);
          SetLED_func(false);
-         nrf_delay_ms(1000);
+         nrf_delay_ms(1000);*/
          //Enroll1_func();
     }
 }
