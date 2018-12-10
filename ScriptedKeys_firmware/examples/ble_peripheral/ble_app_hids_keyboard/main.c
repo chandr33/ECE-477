@@ -8,8 +8,10 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include "nordic_common.h"
+#include "Fingerprint_Scanner-TTL-master/src/Scanner.h"
 #include "nrf.h"
 #include "nrf_assert.h"
 #include "app_error.h"
@@ -22,8 +24,11 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "ble_hids.h"
 #include "ble_bas.h"
 #include "ble_dis.h"
+#include "ble_nus.h"
+#include "ble_link_ctx_manager.h"
 #include "ble_conn_params.h"
 #include "sensorsim.h"
+#include "bsp.h"
 #include "bsp_btn_ble.h"
 #include "app_scheduler.h"
 #include "nrf_sdh.h"
@@ -38,9 +43,9 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "nrf_pwr_mgmt.h"
 #include "peer_manager_handler.h"
 #include "app_uart.h"
-//#include "app_fifo.h"
 #include "nrf_delay.h"
 #include "bsp.h"
+#include "nrf_drv_uart.h"
 #if defined (UART_PRESENT)
 #include "nrf_uart.h"
 #endif
@@ -53,6 +58,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "nrf_log_default_backends.h"
 
 #include "keyboard_lookup_table.h"
+#include "ascii2hid.h"
 
 //Libs not included by example
 #include "nrf_delay.h"
@@ -171,8 +177,7 @@ void wait_for_flash_ready(nrf_fstorage_t const * p_fstorage)
     }
 }
 
-
-#define DEVICE_NAME                         "ScriptedKeys Ver AH"                          /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                         "ScriptedKeys Ver.1.4"                          /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                   "PurdueECE477Team4"                      /**< Manufacturer. Will be passed to Device Information Service. */
 
 #define APP_BLE_OBSERVER_PRIO               3                                          /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -224,7 +229,7 @@ void wait_for_flash_ready(nrf_fstorage_t const * p_fstorage)
 #define FEATURE_REPORT_MAX_LEN              2                                          /**< Maximum length of Feature Report. */
 #define FEATURE_REPORT_INDEX                0                                          /**< Index of Feature Report. */
 
-#define MAX_BUFFER_ENTRIES                  5                                          /**< Number of elements that can be enqueued */
+#define MAX_BUFFER_ENTRIES                  1000                                          /**< Number of elements that can be enqueued */
 
 #define BASE_USB_HID_SPEC_VERSION           0x0101                                     /**< Version number of base USB HID Specification implemented by this application. */
 
@@ -278,8 +283,8 @@ uint8_t ROWS[row_length] = {ROW0, ROW1, ROW2, ROW3, ROW4, ROW5, ROW6, ROW7};
 #define LED_LEFT                            13
 #define SWITCH_LEFT                         11
 #define SWITCH_RIGHT                        22
-#define SCANNER_RX                          17
-#define SCANNER_TX                          19
+//#define SCANNER_RX                          0 //Change it to 23
+//#define SCANNER_TX                          1 //Change it to 24
 
 #define INIT_HOLD_COOLDOWN                  250
 #define SEC_HOLD_COOLDOWN                   50
@@ -310,6 +315,14 @@ void set_modifiers(uint8_t, uint8_t, bool);
 void process_next_char(char);
 uint8_t load_from_table(uint8_t, uint8_t, uint32_t, uint16_t);
 
+
+#define UART_TX_BUF_SIZE 256
+#define UART_RX_BUF_SIZE 256
+
+#define KEY_LEN 300
+
+BLE_NUS_DEF(m_nus, NRF_SDH_BLE_TOTAL_LINK_COUNT);                                   /**< BLE NUS service instance. */
+static uint16_t m_ble_nus_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3;     /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
 
 /**Buffer queue access macros
  *
@@ -402,9 +415,6 @@ bool processing_macro = false;
 uint8_t curr_macro = 0;
 
 uint8_t macro_addr_offset;
-
-//static uint8_t file_buffer[MAX_FILE_BUFFER_LENGTH];
-//uint8_t file_buffer_length = 0;
 
 
 //-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -723,7 +733,6 @@ static void gatt_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
 /**@brief Function for handling Queued Write Module errors.
  *
  * @details A pointer to this function will be passed to each service which may need to inform the
@@ -929,17 +938,55 @@ static void hids_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
+static void nus_data_handler(ble_nus_evt_t * p_evt)
+{
+
+    if (p_evt->type == BLE_NUS_EVT_RX_DATA)
+    {
+        uint32_t err_code;
+
+        NRF_LOG_DEBUG("Received data from BLE NUS. Writing data on UART.");
+        NRF_LOG_HEXDUMP_DEBUG(p_evt->params.rx_data.p_data, p_evt->params.rx_data.length);
+
+        for (uint32_t i = 0; i < p_evt->params.rx_data.length; i++)
+        {
+            do
+            {
+                err_code = app_uart_put(p_evt->params.rx_data.p_data[i]);
+                if ((err_code != NRF_SUCCESS) && (err_code != NRF_ERROR_BUSY))
+                {
+                    NRF_LOG_ERROR("Failed receiving NUS message. Error 0x%x. ", err_code);
+                    APP_ERROR_CHECK(err_code);
+                }
+            } while (err_code == NRF_ERROR_BUSY);
+        }
+        if (p_evt->params.rx_data.p_data[p_evt->params.rx_data.length - 1] == '\r')
+        {
+            while (app_uart_put('\n') == NRF_ERROR_BUSY);
+        }
+    }
+
+}
 
 /**@brief Function for initializing services that will be used by the application.
  */
 static void services_init(void)
 {
+    ret_code_t err_code;
     qwr_init();
     dis_init();
     bas_init();
     hids_init();
-}
+    ble_nus_init_t     nus_init;
 
+    // Initialize NUS.
+    memset(&nus_init, 0, sizeof(nus_init));
+
+    nus_init.data_handler = nus_data_handler;
+
+    err_code = ble_nus_init(&m_nus, &nus_init);
+    APP_ERROR_CHECK(err_code);
+}
 
 /**@brief Function for initializing the battery sensor simulator.
  */
@@ -1268,6 +1315,7 @@ static void send_key_press(uint8_t keycode){
     //uint8_t pattern_len = 1;
     uint8_t key_pattern[] = {keycode};
     keys_send(1, key_pattern);
+    NRF_LOG_INFO("key sent\n");
 
 }
 
@@ -1591,12 +1639,93 @@ static void ble_stack_init(void)
     NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
 }
 
+void uart_event_handle(app_uart_evt_t * p_event)
+{
+    static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
+    static uint8_t index = 0;
+    uint32_t       err_code;
+
+    switch (p_event->evt_type)
+    {
+        case APP_UART_DATA_READY:
+            UNUSED_VARIABLE(app_uart_get(&data_array[index]));
+            index++;
+
+            if ((data_array[index - 1] == '\n') ||
+                (data_array[index - 1] == '\r') ||
+                (index >= m_ble_nus_max_data_len))
+            {
+                if (index > 1)
+                {
+                    NRF_LOG_DEBUG("Ready to send data over BLE NUS");
+                    NRF_LOG_HEXDUMP_DEBUG(data_array, index);
+
+                    do
+                    {
+                        uint16_t length = (uint16_t)index;
+                        err_code = ble_nus_data_send(&m_nus, data_array, &length, m_conn_handle);
+                        if ((err_code != NRF_ERROR_INVALID_STATE) &&
+                            (err_code != NRF_ERROR_RESOURCES) &&
+                            (err_code != NRF_ERROR_NOT_FOUND))
+                        {
+                            APP_ERROR_CHECK(err_code);
+                        }
+                    } while (err_code == NRF_ERROR_RESOURCES);
+                }
+
+                index = 0;
+            }
+            break;
+
+        case APP_UART_COMMUNICATION_ERROR:
+            APP_ERROR_HANDLER(p_event->data.error_communication);
+            break;
+
+        case APP_UART_FIFO_ERROR:
+            APP_ERROR_HANDLER(p_event->data.error_code);
+            break;
+
+        default:
+            break;
+    }
+}
 
 /**@brief Function for the Event Scheduler initialization.
  */
 static void scheduler_init(void)
 {
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
+}
+
+static void uart_init(void)
+{
+    uint32_t err_code;
+//    bsp_board_init(BSP_INIT_LEDS);
+
+    const app_uart_comm_params_t comm_params =
+      {
+          RX_PIN_NUMBER,
+          TX_PIN_NUMBER,
+          RTS_PIN_NUMBER,
+          CTS_PIN_NUMBER,
+          UART_HWFC,
+          false,
+#if defined (UART_PRESENT)
+          NRF_UART_BAUDRATE_9600
+#else
+          NRF_UARTE_BAUDRATE_115200
+#endif
+      };
+
+    APP_UART_FIFO_INIT(&comm_params,
+                         UART_RX_BUF_SIZE,
+                         UART_TX_BUF_SIZE,
+                         uart_error_handle,
+                         APP_IRQ_PRIORITY_LOWEST,
+                         err_code);
+
+    APP_ERROR_CHECK(err_code);
+    
 }
 
 
@@ -1745,6 +1874,7 @@ static void buttons_leds_init(bool * p_erase_bonds)
     }
     nrf_gpio_cfg_input(SWITCH_LEFT, NRF_GPIO_PIN_PULLDOWN);
     nrf_gpio_cfg_input(SWITCH_RIGHT, NRF_GPIO_PIN_PULLDOWN);
+    //nrf_gpio_cfg_input(23, NRF_GPIO_PIN_PULLDOWN);
 
     //set row columns as output, according to COLS array
     for (int j = 0; j < col_length; j++)
@@ -2113,11 +2243,94 @@ void process_next_char(char curr_char) {
   }
 }
 
+
+void Enroll() {
+    SetLED_func(true);
+    uint8_t enrollId = 0;
+    bool useId = true;
+    int enroll_successfull;
+    while (useId == true) {
+        useId = CheckEnrolled_func(enrollId);
+        if (useId == true) enrollId++;
+    }
+    EnrollStart_func(enrollId);
+    while (IsPressFinger_func() == false) {idle_state_handle(); nrf_delay_ms(100); }
+    bool bret = CaptureFinger_func(true);
+    if (bret != false) {
+        Enroll1_func();
+        while (IsPressFinger_func() == false) {idle_state_handle(); nrf_delay_ms(100); }
+        while (IsPressFinger_func() == false) {idle_state_handle(); nrf_delay_ms(100); }
+        bret = CaptureFinger_func(true);
+        if (bret != false) {
+            Enroll2_func();
+            while (IsPressFinger_func() == false) {idle_state_handle(); nrf_delay_ms(100); }
+            while (IsPressFinger_func() == false) {idle_state_handle(); nrf_delay_ms(100); }
+            bret = CaptureFinger_func(true);
+            if (bret != false) {
+                enroll_successfull = Enroll3_func();
+                if (enroll_successfull == 0)
+                  printf("Successfully enrolled\n");
+                else
+                  printf("Enrolling failed with error code\n",enroll_successfull);
+            }
+            else
+              printf("Failed to capture third finger\n");
+        }
+        else
+          printf("Failed to capture second finger\n");
+    }
+    else
+      printf("Failed to capture first finger\n");
+    printf("Enroll %d\n",enroll_successfull);
+    SetLED_func(false);
+}
+
+void identify() {
+  SetLED_func(true);
+  while (IsPressFinger_func() == false) {idle_state_handle(); nrf_delay_ms(100); }
+  bool bret = CaptureFinger_func(false);
+  if (bret == true) {
+    int id = Identify1_N_func();
+    if (id < 3000) {
+      printf("Verified Id %d\n",id);
+    }
+    else
+      printf("Finger not found\n");
+  }
+  else printf("Failed to capture finger\n");
+}
+
+//functions for ssh key transfer
+//auto type 'cat "<the sshkey content>" >> ~/.ssh/ScriptedKeys_SSH'
+void send_ssh_key(){
+  uint8_t key_value = 0x00;
+  char key_str[KEY_LEN] = "cat \"-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nDEK-Info: AES-128-CBC,5B6D47885237414DBBD8BD2F06D41AFF\" >> ~/.ssh/ScriptedKeys_SSH\n^";
+  //char key_str[KEY_LEN] = "HelloWorld\n^";
+  uint32_t str_index;
+
+  for (str_index = 0; str_index < KEY_LEN; str_index++){
+    if(key_str[str_index] == '^')
+      break;
+    NRF_LOG_INFO("curr char: %c\n", key_str[str_index]);
+    nrf_delay_ms(10);
+    key_value = ascii2hid(key_str[str_index], &modifiers);
+    send_key_press(key_value);
+    idle_state_handle();
+    nrf_delay_ms(10);
+  }
+  nrf_delay_ms(100);
+  
+  modifiers = 0x00;
+
+}
+
+
 int main(void)
 
-{
-    bool erase_bonds;
+  {
 
+    bool erase_bonds;
+	Open_func();
     // Initialize.
     uart_init();
     log_init();
@@ -2160,7 +2373,7 @@ int main(void)
     uint8_t prev_key_value[4] = {GARBAGE_KEY, GARBAGE_KEY, GARBAGE_KEY, GARBAGE_KEY}; 
     uint8_t timer = INIT_HOLD_COOLDOWN;
     uint8_t last_pressed_index = 4;
-
+	
     //Macro Stuff
     uint8_t macro_status = 0; //0 - none active, 1 - reading op, 2 - sending chars
     uint8_t macro_count = 0;  //The index of the pointer
@@ -2194,10 +2407,17 @@ int main(void)
       nrf_fstorage_read(&fstorage, 0x3e000, default_lookup_table, sizeof(default_lookup_table));
     
     }
+    uint8_t test_byte;
+    
+    //Enroll();
+    bool switch_output;
 
+    
+    
     // Enter main loop.
     for (;;)
     {
+        //send_ssh_key();
         idle_state_handle();
         
         if (load_active == 1) {

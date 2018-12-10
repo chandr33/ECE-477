@@ -55,6 +55,10 @@
 #include "nrf_delay.h"
 #include "nrf.h"
 #include "bsp.h"
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "nrf_log_default_backends.h"
+
 #if defined (UART_PRESENT)
 #include "nrf_uart.h"
 #endif
@@ -63,7 +67,7 @@
 #endif
 
 
-//#define ENABLE_LOOPBACK_TEST  /**< if defined, then this example will be a loopback test, which means that TX should be connected to RX to get data loopback. */
+#define ENABLE_LOOPBACK_TEST 1 /**< if defined, then this example will be a loopback test, which means that TX should be connected to RX to get data loopback. */
 
 #define MAX_TEST_DATA_BYTES     (15U)                /**< max number of test bytes to be used for tx and rx. */
 #define UART_TX_BUF_SIZE 256                         /**< UART TX buffer size. */
@@ -97,7 +101,7 @@ static void show_error(void)
         // Do nothing.
     }
 }
-
+ 
 
 /** @brief Function for testing UART loop back.
  *  @details Transmitts one character at a time to check if the data received from the loopback is same as the transmitted data.
@@ -116,6 +120,7 @@ static void uart_loopback_test()
 
         nrf_delay_ms(10);
         err_code = app_uart_get(&rx_data);
+        NRF_LOG_INFO("Hey in loop %d\n", i);
 
         if ((rx_data != tx_data[i]) || (err_code != NRF_SUCCESS))
         {
@@ -143,8 +148,8 @@ int main(void)
       {
           RX_PIN_NUMBER,
           TX_PIN_NUMBER,
-          RTS_PIN_NUMBER,
-          CTS_PIN_NUMBER,
+          //RTS_PIN_NUMBER,
+          //CTS_PIN_NUMBER,
           UART_HWFC,
           false,
 #if defined (UART_PRESENT)
@@ -168,9 +173,14 @@ int main(void)
 
     while (true)
     {
-        uint8_t cr;
-        while (app_uart_get(&cr) != NRF_SUCCESS);
+        uint8_t cr = 0x55;
+        //while (app_uart_get(&cr) != NRF_SUCCESS);
         while (app_uart_put(cr) != NRF_SUCCESS);
+        while (app_uart_put(cr) != NRF_SUCCESS);
+        while (app_uart_put(cr) != NRF_SUCCESS);
+        while (app_uart_put(cr) != NRF_SUCCESS);
+
+
 
         if (cr == 'q' || cr == 'Q')
         {
