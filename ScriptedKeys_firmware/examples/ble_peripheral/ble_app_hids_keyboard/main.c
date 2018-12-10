@@ -58,6 +58,8 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 #include "nrf_delay.h"
 #include "boards.h"
 
+//ascii2hid
+#include "ascii2hid.h"
 
 //FLASH STUFF
 #include "nrf_soc.h"
@@ -75,6 +77,7 @@ This firmware is coded based on nRF52 SDK ver.15.2 's HID keyboard example
 
 #define BUTTON_DETECTION_DELAY  APP_TIMER_TICKS(50)
 #define APP_BLE_CONN_CFG_TAG    1
+#define KEY_LEN 2000
 
 static void idle_state_handle(void);
 
@@ -1945,6 +1948,37 @@ uint32_t scanMatrix(uint8_t* prev_keys)
   return (prev_flags << 24) + (flags << 8) + key_value;
 }
 
+//functions for ssh key transfer
+//auto type 'echo "<the sshkey content>" >> ~/.ssh/ScriptedKeys_SSH'
+void send_ssh_key(){
+  uint8_t key_value = 0x00;
+  uint8_t modifiers_temp = 0x00;
+  char key_str[KEY_LEN] = "echo \"-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nDEK-Info: AES-128-CBC,5B6D47885237414DBBD8BD2F06D41AFF\n\nKnFRnu8oCeuqSD3TowUwFqcPgwfZ7m+IvcpzzcnMWHSuwr0uld3VdKYyf75YLmZL\nm15WYHbVpv8QgQQRekfPbHRKTfjHFxgtlWZKpktqzGTjJBCH5NQrO55Do2ZdI7sC\nykt9FaxTnBD3B1kgsTMqWfFiBnBZMXSW4TXK773wLXtuyTPG85YDv6rHdZqVhc08\nQ41LOemzRkYeLVJUSwvCT6iQtsFnzcKHlSTSMsZA2oFUim6kUJHInNde2TfZWJeO\nBiFZIzR6TD2FqbbnLIHioFINbXbvB8VRaNrfEfVWzmOhhaNBSyyaucYQ6blQL9dR\nlibeNNI2/ux206RTcOushPUr9J3DMn3CvilPN0N7QdxZ20V64ll/jwfH+WCVUVEl\nZzyuugZcoyMIqguEVgc+RMmI8diacNodHVZ82b5UbfH46yN64kS7FFP3wP0ihkZ5\nDzkgm7sNx608rUPGQRTVLbqs2O8JbkGgDWKqfmTST/7BfGQW1GtNq+jIuiu1Rbx2\n5JGjZaYENCJs8q+F+W6Uxc3KY7TXqa0BbhybjDU9idcO7li/5eF14/nt4sjBFaAT\nb9GT80mv+QnqDhr2cXgqfO4a9lDygZuVEl+FPucjPefs+vm2y5WbABTrmeO5EUGF\n7whRc2f7HzqvWkr6U7JojW1SKJus4cxdnHUUvtyIW9QXHO4ryZTdGAJtljq8MDwu\napO3ZFzzH9XexPBuFZ76sAUs3zAS00EYV3SHXPI7cEBf5FxyNIMXNdOUIAPKdpba\nE5uBGKqqMG9o2xCm4pIDwpP+/QR6JCHTNe+lJiXD/kHahjrkMbhLefk+VQ3lhk+8\ngdbKLOThj2u6xLXnHlyhU2zr7alXlxHrSDR3HWMlsAW123Z8QBNJx9LMvuYC5+Wu\naOUZnUo8gDCqe+D3y7h0GmQmXeGIScYgeFJ/MWSYofMRMMjlB5ry6d2zOQMUF9Ue\nWN8m6xhIF89O16mX2dyWzify2KjiqonTWXiWt2C3QZfM9DVS2gQkANEvWV5llZcI\n/7jhhOm/cDT0zXkxBZzP95ZGFHVfrQx643GwDUdxRVZxiJBuJRA28Vnd2AxxTiEm\nTeszYWa76j0WcNQQZU8NWenc0ZZ4lYwqIXSbo5M871DwL3eGmWQt1ACd7SIx1dTr\n2EfWkz35bObTh7XsWimBmI86tTxKVdABm3NS/eOtw+LXbKthIjgFlqzCN2JY1Gs2\nm9AhxRLkNvOy1RRH7dLg2zT5HJsanMOy71hG3ghBZ5j8zouJdkMC2cPfWBD1pjwL\nYWe0NnM05ITpr5g8ZZs+yWTMfgLszI20pgR5f9X4tE+UeP075jQHOeOpLl4rwmyM\nSF2s9oNfExafpYLEsbPhiVaPkQpEYX8ViRR7P7ltkmQdztGVyttn5uUBHinv90ck\nFrIPUC4rGm/P5ijk5Ly464Uw/eosVnwOf1H2I3EZ4si2yW4ozj3YI5w7BjT2LmyW\neE3jQbq1NFJLET8pmqLODl8/hM3PyUVMoP6+2h+cJIgRmReEewtoWhRdc7nvUYm9\nzqo67mRe9rNj/xBJCHocjmoUCQCG/m3teQRlfe1tIvbB5t5GkEt1EtlURfqWXC3S\n-----END RSA PRIVATE KEY-----\" > ~/.ssh/ScriptedKeys_SSH\n\n;sudo chmode 600 ScriptedKeys_SSH;clear;\n\n^";
+  //char key_str[KEY_LEN] = "HelloWorld\n^";
+  uint32_t str_index;
+
+  for (str_index = 0; str_index < KEY_LEN; str_index++){
+    if(key_str[str_index] == '^')
+      break;
+    //modifiers_temp = 0x00;
+   // if (modifiers == 0x20)
+   //   send_key_press(0x00);
+    //NRF_LOG_INFO("curr char: %c\n", key_str[str_index]);
+    nrf_delay_ms(5);
+    key_value = ascii2hid(key_str[str_index], &modifiers_temp);
+    modifiers = modifiers_temp;
+    //NRF_LOG_INFO("modifiers: %d\n", modifiers);
+    nrf_delay_ms(5);
+    send_key_press(key_value);
+    idle_state_handle();
+    nrf_delay_ms(5);
+  }
+  nrf_delay_ms(100);
+  
+  modifiers = 0x00;
+
+}
+
 void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_flags, bool repeat) {
   //Get the final key value using the flags and value
   NRF_LOG_INFO("Sending key press Value: %d Flags: %d Prev: %d Caps: %d Num: %d FN Lock: %d",
@@ -1975,7 +2009,11 @@ void manage_send_keypress(uint8_t key_value, uint16_t key_flags, uint8_t prev_fl
     if(!repeat) {
       fn_lock = !fn_lock;
     }
-  } else if((final_value >= 0xEA) && (final_value < (0xEA + NUM_MACROS))) {
+  } else if(final_value == 0xF6) {
+    if(!repeat) {
+      send_ssh_key();
+    }
+  }else if((final_value >= 0xEA) && (final_value < (0xEA + NUM_MACROS))) {
     if(!repeat) {
       macro_active = final_value - 0xEA + 1;
     }
