@@ -1751,6 +1751,7 @@ static void buttons_leds_init(bool * p_erase_bonds)
     nrf_gpio_cfg_output(LED_LEFT);
     nrf_gpio_cfg_output(LED_RIGHT);
     nrf_gpio_cfg_output(TX_PIN_NUMBER);
+    nrf_gpio_cfg_output(19);
 
     err_code = bsp_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS, bsp_event_handler);
     APP_ERROR_CHECK(err_code);
@@ -2161,6 +2162,11 @@ int main(void)
     for (;;)
     {
         idle_state_handle();
+        nrf_gpio_pin_write(19, 0);
+        nrf_delay_us(100);
+        nrf_gpio_pin_write(19, 1);
+
+        
         
         if (load_active == 1) {
           uint8_t loaded_value;

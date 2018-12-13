@@ -82,7 +82,7 @@ extern "C" {
 // #define BSP_BUTTON_2   BUTTON_3
 // #define BSP_BUTTON_3   BUTTON_4
 
-#define RX_PIN_NUMBER  16
+#define RX_PIN_NUMBER  20
 #define TX_PIN_NUMBER  18
 #define CTS_PIN_NUMBER 37
 #define RTS_PIN_NUMBER 38
